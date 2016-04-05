@@ -1,0 +1,8 @@
+/*Estilos plantilla*/
+.alert{
+	display: none;
+}
+
+#login{
+	padding: 8em 3em;
+}
