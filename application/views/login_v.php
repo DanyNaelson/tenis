@@ -12,6 +12,8 @@
 					</div>
 					<div class="form-group">
 						<input type="password" class="form-control" id="password" name="password" disabled="disabled" placeholder="Contraseña">
+						<label class="alert alert-success"></label>
+						<div class="alert alert-danger" role="alert"></div>
 					</div>
 					<button type="button" class="btn btn-primary btn-lg">Entrar</button>
 				</form>

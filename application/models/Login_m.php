@@ -5,15 +5,22 @@ class Login_m extends CI_Model{
 		parent::__construct();
 	}
 
-	function obtener_usuarios($usuario = NULL, $inicio = NULL, $fin = NULL){
+	function obtener_usuarios($usuario = null, $pass = null, $fin = null, $inicio = null){
 		$sql = "SELECT * FROM usuarios ";
 		
-		if($usuario != NULL){
+		if($usuario != null){
         	$sql .= "where usuario = '" . $usuario . "'";
         }
 
-        if($inicio != NULL && $fin != NULL){
-        	$sql .= " LIMIT " . $fin . " OFFSET " . $inicio;
+        if($pass != null){
+        	$sql .= " and password = '" . $pass . "'";
+        }
+
+        if($fin != null){
+        	$sql .= " LIMIT " . $fin;
+        	if($inicio != null){
+        		$sql .= " OFFSET " . $inicio;
+        	}
         }
 
         $sql .= ";";
@@ -27,7 +34,7 @@ class Login_m extends CI_Model{
 		{
 		    return $rows;
 		}else{
-      		return 0;
+      		return null;
       	}
 	}
 

@@ -13,4 +13,8 @@
 	<script src="/inventarios/assets/js/inventarios.js"></script>
 </head>
 <body>
-	<header></header>
+	<header>
+		<?php if(!$login){ ?>
+			<h1>HEADER</h1>
+		<?php }?>
+	</header>
