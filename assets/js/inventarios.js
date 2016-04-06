@@ -13,6 +13,9 @@ $(document).ready(function(){
 			    // especifica si será una petición POST o GET
 			    type : 'POST',
 
+			    //especifica el tipo de dato que espera recibir
+			    dataType: 'json',
+
 			    // código a ejecutar si la petición es satisfactoria;
 			    // la respuesta es pasada como argumento a la función
 			    success : function(usuarios) {
@@ -30,17 +33,20 @@ $(document).ready(function(){
 	});
 
 	/*Funcion que valida la existencia de un usuario y contraseña*/
-	$('#password').change(function(){
-		if($(this).val() == ''){
+	$('#entrar').click(function(){
+		if($("#password").val() == ''){
 			alerta = 'Favor de ingresar contraseña.';
-			$(this).next(".alert-danger").html(alerta).slideDown('fast');
+			$("#password").next(".alert-danger").html(alerta).slideDown('fast');
 		}else{
 			$.ajax({
 			    // la URL para la petición
-			    url : '/inventarios/login/valida_usuario/' + $("#usuario").val() + '/' + $(this).val(),
+			    url : '/inventarios/login/valida_usuario/' + $("#usuario").val() + '/' + $("#password").val(),
 			 
 			    // especifica si será una petición POST o GET
 			    type : 'POST',
+
+			    //especifica el tipo de dato que espera recibir
+			    dataType: 'json',
 
 			    // código a ejecutar si la petición es satisfactoria;
 			    // la respuesta es pasada como argumento a la función
@@ -57,10 +63,19 @@ $(document).ready(function(){
 			});
 		}
 	});
+
+	/*Funcion para cerrar sesion*/
+	$("#cerrar_s").click(function(){
+		bootbox.confirm("Seguro que desea cerrar sesión?", function(result) {
+			if(result){
+				location.href = "/inventarios/login/";
+			}
+		}); 
+	});
 });
 
 function validar_usuario(usuarios){
-	if(usuarios != 'null'){
+	if(usuarios != null){
 		$("#usuario").parent().children(".alert-danger").html("").hide();
 		$("#usuario").parent().children(".alert-success").html("Perfecto! Ahora ingresa tu contraseña.").slideDown('fast');
 		$("#password").prop("disabled", false).focus();
@@ -72,13 +87,17 @@ function validar_usuario(usuarios){
 }
 
 function validar_contraseña(usuarios){
-	if(usuarios != 'null'){
+	if(usuarios != null){
 		$("#password").parent().children(".alert-danger").html("").hide();
 		$("#password").parent().children(".alert-success").html("Perfecto!").slideDown('fast');
-		location.href = "/inventarios/inicio/";
+		location.href = "/inventarios/inicio/index/" + usuarios[0].id_usuario;
 	}else{
 		$("#usuario").parent().children(".alert-success").html("").hide();
 		$("#password").parent().children(".alert-success").html("").hide();
 		$("#password").focus().parent().children(".alert-danger").html("Contraseña incorrecta, favor de ingresarla nuevamente.").slideDown('fast');
 	}
+}
+
+function cerrar_sesion(){
+
 }

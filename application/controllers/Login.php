@@ -5,6 +5,7 @@ class Login extends CI_Controller {
 
 	public function index()
 	{
+		$this->session->sess_destroy();
 		$data["titulo"] = "Sistema de inventarios";
 		$data["login"] = true;
 		$this->load->view('plantillas/header',$data);
@@ -16,10 +17,10 @@ class Login extends CI_Controller {
 	{
 		$this->load->model('login_m');
 		$usuarios = $this->login_m->obtener_usuarios($usuario, $pass);
-		if(count($usuarios) != null){
-			echo $html_response;
+		if($usuarios != null){
+			echo json_encode($usuarios);
 		}else{
-			echo 'null';
+			echo json_encode(null);
 		}
 	}
 }

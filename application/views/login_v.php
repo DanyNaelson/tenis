@@ -15,7 +15,7 @@
 						<label class="alert alert-success"></label>
 						<div class="alert alert-danger" role="alert"></div>
 					</div>
-					<button type="button" class="btn btn-primary btn-lg">Entrar</button>
+					<button type="button" class="btn btn-primary btn-lg" id="entrar">Entrar</button>
 				</form>
 			</div>
 			<div class="col-sm-4" id="respuesta">

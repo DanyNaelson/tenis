@@ -28,8 +28,6 @@ class Login_m extends CI_Model{
         $query = $this->db->query($sql);
         $rows = $query->result();
 
-        $det_usuario = array();
-
 		if (isset($rows))
 		{
 		    return $rows;
