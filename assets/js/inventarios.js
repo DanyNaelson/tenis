@@ -36,7 +36,7 @@ $(document).ready(function(){
 	$('#entrar').click(function(){
 		if($("#password").val() == ''){
 			alerta = 'Favor de ingresar contraseña.';
-			$("#password").next(".alert-danger").html(alerta).slideDown('fast');
+			$("#password").next(".label-danger").html(alerta).slideDown('fast');
 		}else{
 			$.ajax({
 			    // la URL para la petición
@@ -48,9 +48,15 @@ $(document).ready(function(){
 			    //especifica el tipo de dato que espera recibir
 			    dataType: 'json',
 
+			    //antes de enviar los datos
+			    beforeSend :  function() {
+			    	$("#loading").html("Iniciando Sesión").slideDown('fast');
+			    },
+
 			    // código a ejecutar si la petición es satisfactoria;
 			    // la respuesta es pasada como argumento a la función
 			    success : function(usuarios) {
+			    	$("#loading").html("").slideUp('fast');
 			    	validar_contraseña(usuarios);
 			    },
 			 
@@ -77,24 +83,23 @@ $(document).ready(function(){
 function validar_usuario(usuarios){
 	if(usuarios != null){
 		$("#usuario").parent().removeClass("has-error").addClass("has-success").children(".glyphicon").removeClass("glyphicon-remove").addClass("glyphicon-ok");
-		$("#usuario").parent().children(".alert-danger").html("").hide();
+		$("#usuario").parent().children(".label-danger").html("").hide();
 		$("#password").prop("disabled", false).focus();
 	}else{
 		$("#usuario").parent().removeClass("has-success").addClass("has-error").children(".glyphicon").removeClass("glyphicon-ok").addClass("glyphicon-remove");
-		$("#password").prop("disabled", true).val("").parent().children(".alert-danger").hide();
-		$("#usuario").focus().parent().children(".alert-danger").html("El usuario no existe, favor de ingresarlo nuevamente.").slideDown('fast');
+		$("#password").prop("disabled", true).val("").parent().children(".label-danger").hide();
+		$("#usuario").focus().parent().children(".label-danger").html("El usuario no existe, favor de ingresarlo nuevamente.").slideDown('fast');
 	}
 }
 
 function validar_contraseña(usuarios){
 	if(usuarios != null){
-		$("#password").parent().children(".alert-danger").html("").hide();
+		$("#password").parent().children(".label-danger").html("").hide();
 		$("#password").parent().removeClass("has-error").addClass("has-success").children(".glyphicon").removeClass("glyphicon-remove").addClass("glyphicon-ok");
 		location.href = "/inventarios/inicio/index/" + usuarios[0].id_usuario;
 	}else{
 		$("#password").parent().removeClass("has-success").addClass("has-error").children(".glyphicon").removeClass("glyphicon-ok").addClass("glyphicon-remove");
-		$("#password").parent().children(".alert-success").html("").hide();
-		$("#password").focus().parent().children(".alert-danger").html("Contraseña incorrecta, favor de ingresarla nuevamente.").slideDown('fast');
+		$("#password").focus().parent().children(".label-danger").html("Contraseña incorrecta, favor de ingresarla nuevamente.").slideDown('fast');
 	}
 }
 
