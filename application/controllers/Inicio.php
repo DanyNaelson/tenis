@@ -19,6 +19,7 @@ class Inicio extends CI_Controller {
 		$data["nombre"] = $_SESSION["nombre"];
 		$data["titulo"] = "Sistema de inventarios | Inicio";
 		$data["login"] = false;
+		$data["archivo_js"] = "inicio.js";
 		$this->load->view('plantillas/header',$data);
 		$this->load->view('inicio_v');
 		$this->load->view('plantillas/footer',$data);

@@ -11,7 +11,7 @@
 	<script src="/inventarios/assets/js/jquery-2.2.3.min.js"></script>
 	<script src="/inventarios/assets/js/bootstrap.min.js"></script>
 	<script src="/inventarios/assets/js/bootbox.min.js"></script>
-	<script src="/inventarios/assets/js/inventarios.js"></script>
+	<script src="/inventarios/assets/js/<?= $archivo_js ?>"></script>
 </head>
 <body>
 	<header>
@@ -31,19 +31,6 @@
 
 			    <!-- Collect the nav links, forms, and other content for toggling -->
 			    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			      	<ul class="nav navbar-nav">
-				        <li class="dropdown">
-				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Productos <span class="caret"></span></a>
-			          		<ul class="dropdown-menu">
-					            <li>
-					            	<a href="/inventarios/productos/agregar">Agregar Producto</a>
-					            </li>
-					            <li>
-					            	<a href="/inventarios/productos/consultar">Consultar productos</a>
-					            </li>
-					        </ul>
-			        	</li>
-			      	</ul>
 			      	<ul class="nav navbar-nav navbar-right">
 			        	<li class="dropdown">
 			          		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?= $nombre ?> <span class="caret"></span></a>
