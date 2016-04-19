@@ -3,6 +3,10 @@
 	display: none;
 }
 
+.btn_menu{
+	padding: 20px 10px;
+}
+
 #login{
 	padding: 8em 3em;
 }

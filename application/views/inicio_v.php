@@ -1,1 +1,50 @@
-<h2>INICIO</h2>
+<div class="container">
+<? if(isset($permisos[0]->permiso)): ?>
+  	<div class="row">
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[0]->permiso ?>/" role="button"><?= ucfirst($permisos[0]->permiso) ?></a>
+  		</div>
+  	<? if(isset($permisos[1]->permiso)): ?>
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[1]->permiso ?>/" role="button"><?= ucfirst($permisos[1]->permiso) ?></a>
+  		</div>
+  	<? endif ?>
+	</div>
+<? endif ?>
+<? if(isset($permisos[2]->permiso)): ?>
+	<div class="row">
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[2]->permiso ?>/" role="button"><?= ucfirst($permisos[2]->permiso) ?></a>
+  		</div>
+  	<? if(isset($permisos[3]->permiso)): ?>
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[3]->permiso ?>/" role="button"><?= ucfirst($permisos[3]->permiso) ?></a>
+  		</div>
+  	<? endif ?>
+	</div>
+<? endif ?>
+<? if(isset($permisos[4]->permiso)): ?>
+	<div class="row">
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[4]->permiso ?>/" role="button"><?= ucfirst($permisos[4]->permiso) ?></a>
+  		</div>
+  	<? if(isset($permisos[5]->permiso)): ?>
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[5]->permiso ?>/" role="button"><?= ucfirst($permisos[5]->permiso) ?></a>
+  		</div>
+  	<? endif ?>
+	</div>
+<? endif ?>
+<? if(isset($permisos[6]->permiso)): ?>
+	<div class="row">
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[6]->permiso ?>/" role="button"><?= ucfirst($permisos[6]->permiso) ?></a>
+  		</div>
+  	<? if(isset($permisos[7]->permiso)): ?>
+  		<div class="col-sm-6 btn_menu text-center">
+  			<a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[7]->permiso ?>/" role="button"><?= ucfirst($permisos[7]->permiso) ?></a>
+  		</div>
+  	<? endif ?>
+	</div>
+<? endif ?>
+</div>

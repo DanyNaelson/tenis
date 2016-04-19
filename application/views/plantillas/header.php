@@ -11,6 +11,7 @@
 	<script src="/inventarios/assets/js/jquery-2.2.3.min.js"></script>
 	<script src="/inventarios/assets/js/bootstrap.min.js"></script>
 	<script src="/inventarios/assets/js/bootbox.min.js"></script>
+	<script src="/inventarios/assets/js/funciones.js"></script>
 	<script src="/inventarios/assets/js/<?= $archivo_js ?>"></script>
 </head>
 <body>
@@ -26,7 +27,7 @@
 			        <span class="icon-bar"></span>
 			        <span class="icon-bar"></span>
 			      	</button>
-			      	<a class="navbar-brand" href="/inventarios/inicio/">Sistema de Inventarios (Tenis)</a>
+			      	<a class="navbar-brand" href="/inventarios/inicio/index/<?= $id_usuario ?>">Sistema de Inventarios (Tenis)</a>
 			    </div>
 
 			    <!-- Collect the nav links, forms, and other content for toggling -->
