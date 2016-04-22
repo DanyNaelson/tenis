@@ -16,11 +16,42 @@ class Administracion extends CI_Controller {
 		$data["permisos"] = $this->administracion_m->obtener_modulos();
 		$data["usuarios"] = $this->administracion_m->obtener_usuarios();
 		$contador_permisos = $this->administracion_m->contador_permisos();
-		$data["u_permisos"] = $this->administracion_m->obtener_u_permisos();
 		$data["cont_permisos"] = $contador_permisos[0]->c_permisos;
+		$u_permisos = $this->administracion_m->obtener_u_permisos();
+		$data["u_permisos"] = $this->crear_arreglo_permisos($u_permisos, count($data["usuarios"]), $data["cont_permisos"]);
 
 		$this->load->view('plantillas/header',$data);
 		$this->load->view('administracion_v');
 		$this->load->view('plantillas/footer',$data);
+	}
+
+	function crear_arreglo_permisos($u_permisos, $cont_usuarios, $cont_permisos){
+		$arreglo_permisos = array();
+		$arreglo_tmp = array();
+		$ini = 1;
+
+		for ($i = $ini ; $i <= $cont_usuarios ; $i++) {
+			$ini_j = 0;
+			for($j = $ini ; $j <= count($u_permisos) ; $j++){
+				if($u_permisos[$j-1]["id_usuario"] == $i){
+					$arreglo_tmp[$i-1][$ini_j] = $u_permisos[$j-1]["id_permiso"];
+					$ini_j++;
+				}
+			}
+		}
+
+		for ($i = $ini ; $i <= $cont_usuarios ; $i++) {
+			$ini_j = 0;
+			for ($j = $ini ; $j <= $cont_permisos ; $j++) { 
+				if($arreglo_tmp[$i-1][$ini_j] == $j){
+					$arreglo_permisos[$i-1][$j-1] = '1';
+					$ini_j++;
+				}else{
+					$arreglo_permisos[$i-1][$j-1] = '0';
+				}
+			}
+		}
+
+		return $arreglo_permisos;
 	}
 }

@@ -7,6 +7,23 @@
 	padding: 20px 10px;
 }
 
+.check{
+	background-color: #dff0d8;
+}
+
+.no-check{
+	background-color: #f2dede;
+}
+
+.no-item{
+	background-color: #ebebeb;
+}
+
+.th-blue{
+	background-color: #337ab7;
+	color: #FFF;
+}
+
 #login{
 	padding: 8em 3em;
 }

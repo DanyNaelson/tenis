@@ -1,5 +1,5 @@
-<table class="table table-bordered table-hover table-condensed">
-	<tr>
+<table class="table table-bordered table-condensed">
+	<tr class="th-blue">
 		<th>#</th>
 		<th>Usuario</th>
 		<th>Contraseña</th>
@@ -9,18 +9,16 @@
 		<th>Editar</th>
 		<th>Borrar</th>
 	</tr>
-<? for ($i = 0 ; $i < count($usuarios) ; $i++): ?>
-	<tr id="usuario_<?= $i ?>">
-		<td class="text-center"><?= $usuarios[$i]->id_usuario ?></td>
+<?  for ($i = 0 ; $i < count($usuarios) ; $i++): ?>
+	<tr id="usuario_<?= $usuarios[$i]->id_usuario ?>">
+		<td class="text-center no-item"><?= $i+1 ?></td>
 		<td class="text-center"><?= $usuarios[$i]->usuario ?></td>
 		<td class="text-center"><?= $usuarios[$i]->password ?></td>
-	<? for ($j = 0 ; $j < 8 ; $j++): ?>
-		<? if(isset($u_permisos[$j]->id_permiso)): ?>
-			<? if($u_permisos[$j]->id_usuario == $usuarios[$i]->id_usuario): ?>
-			<td class="text-center"><?= $u_permisos[$j]->id_permiso ?></td>
-			<? elseif($u_permisos[$j]->id_permiso == $j+1): ?>
-			<td class="text-center">0</td>
-			<? endif; ?>
+	<? for ($j = 0 ; $j < $cont_permisos ; $j++): ?>
+		<? if($u_permisos[$i][$j] == 1): ?>
+			<td class="text-center check"><input type="checkbox" disabled checked></td>
+		<? else: ?>
+			<td class="text-center no-check"><input type="checkbox" disabled></td>
 		<? endif; ?>
 	<? endfor; ?>
 		<td class="text-center">

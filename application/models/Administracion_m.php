@@ -6,7 +6,7 @@ class Administracion_m extends CI_Model{
 	}
 
 	function obtener_modulos(){
-		$sql = "SELECT permiso FROM permisos";
+		$sql = "SELECT permiso FROM permisos ORDER BY id_permiso";
 
 		$query = $this->db->query($sql);
         $rows = $query->result();
@@ -20,7 +20,7 @@ class Administracion_m extends CI_Model{
 	}
 
 	function obtener_usuarios(){
-		$sql = "SELECT id_usuario, usuario, password FROM usuarios";
+		$sql = "SELECT id_usuario, usuario, password FROM usuarios ORDER BY id_usuario";
 
 		$query = $this->db->query($sql);
         $rows = $query->result();
@@ -50,10 +50,11 @@ class Administracion_m extends CI_Model{
 	function obtener_u_permisos(){
 		$sql = "SELECT u_p.id_usuario, u_p.id_permiso
 				FROM usuario_permisos u_p
-				INNER JOIN permisos p ON (p.id_permiso = u_p.id_permiso)";
+				INNER JOIN permisos p ON (p.id_permiso = u_p.id_permiso)
+				ORDER BY u_p.id_usuario, u_p.id_permiso";
 
 		$query = $this->db->query($sql);
-        $rows = $query->result();
+        $rows = $query->result_array();
 
 		if (isset($rows))
 		{
