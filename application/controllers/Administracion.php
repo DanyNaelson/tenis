@@ -42,15 +42,21 @@ class Administracion extends CI_Controller {
 
 		for ($i = $ini ; $i <= $cont_usuarios ; $i++) {
 			$ini_j = 0;
-			for ($j = $ini ; $j <= $cont_permisos ; $j++) { 
-				if($arreglo_tmp[$i-1][$ini_j] == $j){
-					$arreglo_permisos[$i-1][$j-1] = '1';
-					$ini_j++;
+			for ($j = $ini ; $j <= $cont_permisos ; $j++) {
+				if(isset($arreglo_tmp[$i-1][$ini_j])){
+					if($arreglo_tmp[$i-1][$ini_j] == $j){
+						$arreglo_permisos[$i-1][$j-1] = '1';
+						$ini_j++;
+					}else{
+						$arreglo_permisos[$i-1][$j-1] = '0';
+					}
 				}else{
 					$arreglo_permisos[$i-1][$j-1] = '0';
 				}
 			}
 		}
+
+		unset($arreglo_tmp);
 
 		return $arreglo_permisos;
 	}
