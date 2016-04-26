@@ -19,14 +19,14 @@ $(document).ready(function(){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_agregar) {
-		    	alert(respuesta_agregar);
+		    	bootbox.alert(respuesta_agregar);
 		    },
 		 
 		    // código a ejecutar si la petición falla;
 		    // son pasados como argumentos a la función
 		    // el objeto de la petición en crudo y código de estatus de la petición
 		    error : function(xhr, status) {
-		        alert('Disculpe, existió un problema');
+		        bootbox.alert('Disculpe, existió un problema');
 		    }
 		});
 	});

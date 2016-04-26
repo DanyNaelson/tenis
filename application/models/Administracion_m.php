@@ -64,4 +64,61 @@ class Administracion_m extends CI_Model{
       	}
 	}
 
+	function actualizar_usuario($datos_usuario){
+		$d_usuario = explode("-", $datos_usuario);
+		$insert = "";
+
+		$this->db->set('usuario', $d_usuario[1]);
+		$this->db->set('password', $d_usuario[2]);
+		$this->db->where('id_usuario', $d_usuario[0]);
+		$str = $this->db->update('usuarios');
+
+		if ($str == 1)
+		{
+			$this->db->where('id_usuario', $d_usuario[0]);
+			$str = $this->db->delete('usuario_permisos');
+
+			if ($str == 1)
+			{
+				for($i = 3; $i < count($d_usuario) ; $i++){
+					if($d_usuario[$i] == 1){
+						$data = array(
+					        'id_usuario' => $d_usuario[0],
+					        'id_permiso' => $i - 2
+						);
+
+						$str = $this->db->insert('usuario_permisos', $data);
+
+						if ($str == 1)
+						{
+							$insert .= "-1";
+						}
+						else
+						{
+							$insert = "0";
+						}
+					}
+
+					$tipo_m = explode("-", $insert);
+
+					if ($tipo_m[0] != '0') {
+						$mensaje = "Se actualizaron los datos del usuario correctamente.";
+					} else {
+						$mensaje = "Error al insertar permisos del usuario.";
+					}
+				}
+			}
+			else
+			{
+				$mensaje = "Error al borrar permisos del usuario.";
+			}
+		}
+		else
+		{
+			$mensaje = "Error al actualizar los datos de usuario.";
+		}
+
+		return $mensaje;
+	}
+
 }

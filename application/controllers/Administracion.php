@@ -25,7 +25,8 @@ class Administracion extends CI_Controller {
 		$this->load->view('plantillas/footer',$data);
 	}
 
-	function crear_arreglo_permisos($u_permisos, $cont_usuarios, $cont_permisos){
+	public function crear_arreglo_permisos($u_permisos, $cont_usuarios, $cont_permisos)
+	{
 		$arreglo_permisos = array();
 		$arreglo_tmp = array();
 		$ini = 1;
@@ -59,5 +60,12 @@ class Administracion extends CI_Controller {
 		unset($arreglo_tmp);
 
 		return $arreglo_permisos;
+	}
+
+	public function actualizar_usuario()
+	{
+		$this->load->model('administracion_m');
+		$respuesta = $this->administracion_m->actualizar_usuario($_POST["datos_u"]);
+		echo $respuesta;
 	}
 }
