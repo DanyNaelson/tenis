@@ -8,4 +8,13 @@ $(document).ready(function(){
 			}
 		}); 
 	});
+
+	/*Funcion para regresar a la pagina anterior*/
+	$("#cerrar_s").click(function(){
+		bootbox.confirm("Seguro que desea cerrar sesión?", function(result) {
+			if(result){
+				location.href = "/inventarios/login/";
+			}
+		}); 
+	});
 });

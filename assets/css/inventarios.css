@@ -1,4 +1,7 @@
 /*Estilos plantilla*/
+.agregar_u{
+	border-radius: 10%;
+}
 .alert{
 	display: none;
 }

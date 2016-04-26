@@ -11,6 +11,7 @@ class Administracion extends CI_Controller {
 		$data["nombre"] = $_SESSION["nombre"];
 		$data["titulo"] = "Sistema de inventarios | Administrador";
 		$data["login"] = false;
+		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "administracion.js";
 
 		$data["permisos"] = $this->administracion_m->obtener_modulos();
@@ -72,6 +73,12 @@ class Administracion extends CI_Controller {
 	public function borrar_usuario(){
 		$this->load->model('administracion_m');
 		$respuesta = $this->administracion_m->borrar_usuario($_POST["datos_u"]);
+		echo $respuesta;
+	}
+
+	public function insertar_usuario(){
+		$this->load->model('administracion_m');
+		$respuesta = $this->administracion_m->insertar_usuario($_POST["datos_u"]);
 		echo $respuesta;
 	}
 }
