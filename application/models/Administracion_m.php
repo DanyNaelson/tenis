@@ -121,4 +121,32 @@ class Administracion_m extends CI_Model{
 		return $mensaje;
 	}
 
+	function borrar_usuario($datos_usuario){
+		$id_usuario = $datos_usuario;
+
+		$this->db->where('id_usuario', $id_usuario);
+		$str = $this->db->delete('usuarios');
+
+		if ($str == 1)
+		{
+			$this->db->where('id_usuario', $id_usuario);
+			$str = $this->db->delete('usuario_permisos');
+
+			if ($str == 1)
+			{
+				$mensaje = "Se borraron los permisos del usuario correctamente.";
+			}
+			else
+			{
+				$mensaje = "Error al borrar permisos del usuario.";
+			}
+		}
+		else
+		{
+			$mensaje = "Error al borrar los datos de usuario.";
+		}
+
+		return $mensaje;
+	}
+
 }
