@@ -74,7 +74,7 @@ $(document).ready(function(){
 	});
 
 	$("#agregar_u").click(function(){
-		tr_html = "<tr id='usuario_2'>";
+		tr_html = "<tr id='usuario'>";
 		tr_html +=	"<td class='text-center no-item'></td>";
 		tr_html +=	"<td class='text-center'>";
 		tr_html +=	"	<input class='input_req' value='' type='text'>";
@@ -82,37 +82,18 @@ $(document).ready(function(){
 		tr_html +=	"<td class='text-center'>";
 		tr_html +=	"	<input class='input_req' value='' type='text'>";
 		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
-		tr_html +=	"<td class='text-center no-check'>";
-		tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
-		tr_html +=	"</td>";
+		for(i = 1; i <= 8; i++){
+			tr_html +=	"<td class='text-center no-check'>";
+			tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
+			tr_html +=	"</td>";
+		}
 		tr_html +=	"<td class='text-center'>";
 		tr_html +=		"<button type='button' class='btn btn-success btn-sm insertar_u' onclick='insertar_usuario(this)'>";
 		tr_html +=			"<span class='glyphicon glyphicon-ok' aria-hidden='true'></span>";
 		tr_html +=		"</button>";
 		tr_html +=	"</td>";
 		tr_html +=	"<td class='text-center'>";
-		tr_html +=		"<button type='button' class='btn btn-danger btn-sm borrar_u'>";
+		tr_html +=		"<button type='button' onclick='cancelar(this)' class='btn btn-danger btn-sm cancelar_u'>";
 		tr_html +=			"<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>";
 		tr_html +=		"</button>";
 		tr_html +=	"</td>";
@@ -202,8 +183,9 @@ function insertar_usuario(obj_boton){
 		}else if(tipo == "text"){
 			if(td_table.find("input").val() == "" || td_table.find("input").val() == " "){
 				td_table.find("input").focus();
-				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
 				actualizar = false;
+				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
+				return false;
 			}else{
 				valor_input = td_table.find("input").val();
 				datos_usuario += "-" + valor_input;
@@ -240,6 +222,14 @@ function insertar_usuario(obj_boton){
 		    }
 		});
 	}
+}
+
+function cancelar(obj_button){
+	bootbox.confirm("Seguro que desea borrar el usuario?", function(result) {
+		if(result){
+			$(obj_button).parent().parent().remove();
+		}
+	});
 }
 
 function presionar(obj_check){
