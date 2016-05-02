@@ -124,8 +124,9 @@ function actualizar_usuario(obj_boton){
 		}else if(tipo == "text"){
 			if(td_table.find("input").val() == "" || td_table.find("input").val() == " "){
 				td_table.find("input").focus();
-				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
 				actualizar = false;
+				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
+				return false;
 			}else{
 				valor_input = td_table.find("input").val();
 				datos_usuario += "-" + valor_input;

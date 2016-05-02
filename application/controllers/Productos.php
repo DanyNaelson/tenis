@@ -39,19 +39,24 @@ class Productos extends CI_Controller {
 			for($j = $ini ; $j <= count($tallas) ; $j++){
 				if(isset($producto_talla[$j-1]->id_producto)){
 					if($producto_talla[$j-1]->id_producto == $productos[$i-1]->id_producto){
-						$arreglo_tmp[$i-1][$ini_j] = $producto_talla[$j-1]->id_talla;
+						$arreglo_tmp[$i-1][$ini_j] = $producto_talla[$j-1]->id_talla . "-" . $producto_talla[$j-1]->codigo_barras;
 						$ini_j++;
 					}
 				}
 			}
 		}
+		/*echo "<pre>";
+		print_r($arreglo_tmp); 
+		echo "</pre>";
+		exit;*/
 
 		for ($i = $ini ; $i <= count($productos) ; $i++) {
 			$ini_j = 0;
 			for ($j = $ini ; $j <= count($tallas) ; $j++) {
 				if(isset($arreglo_tmp[$i-1][$ini_j])){
 					if($arreglo_tmp[$i-1][$ini_j] == $j){
-						$arreglo_tallas[$i-1][$j-1] = $producto_talla[$ini_j]->codigo_barras;
+						$valores_tmp = explode("-", $arreglo_tmp[$i-1][$ini_j]);
+						$arreglo_tallas[$i-1][$j-1] = $valores_tmp[1];
 						$ini_j++;
 					}else{
 						$arreglo_tallas[$i-1][$j-1] = '';
@@ -67,22 +72,28 @@ class Productos extends CI_Controller {
 		return $arreglo_tallas;
 	}
 
+	public function obtener_marcas(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->obtener_marcas();
+		echo json_encode($respuesta);
+	}
+
 	public function actualizar_usuario()
 	{
-		$this->load->model('administracion_m');
-		$respuesta = $this->administracion_m->actualizar_usuario($_POST["datos_u"]);
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->actualizar_producto($_POST["datos_p"]);
 		echo $respuesta;
 	}
 
 	public function borrar_usuario(){
-		$this->load->model('administracion_m');
-		$respuesta = $this->administracion_m->borrar_usuario($_POST["datos_u"]);
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->borrar_producto($_POST["datos_p"]);
 		echo $respuesta;
 	}
 
-	public function insertar_usuario(){
-		$this->load->model('administracion_m');
-		$respuesta = $this->administracion_m->insertar_usuario($_POST["datos_u"]);
+	public function insertar_producto(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->insertar_producto($_POST["datos_p"]);
 		echo $respuesta;
 	}
 }
