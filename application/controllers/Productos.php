@@ -36,7 +36,7 @@ class Productos extends CI_Controller {
 
 		for ($i = $ini ; $i <= count($productos) ; $i++) {
 			$ini_j = 0;
-			for($j = $ini ; $j <= count($tallas) ; $j++){
+			for($j = $ini ; $j <= count($producto_talla) + 2 ; $j++){
 				if(isset($producto_talla[$j-1]->id_producto)){
 					if($producto_talla[$j-1]->id_producto == $productos[$i-1]->id_producto){
 						$arreglo_tmp[$i-1][$ini_j] = $producto_talla[$j-1]->id_talla . "-" . $producto_talla[$j-1]->codigo_barras;
@@ -46,16 +46,16 @@ class Productos extends CI_Controller {
 			}
 		}
 		/*echo "<pre>";
-		print_r($arreglo_tmp); 
+		print_r($arreglo_tmp);
 		echo "</pre>";
 		exit;*/
 
 		for ($i = $ini ; $i <= count($productos) ; $i++) {
 			$ini_j = 0;
-			for ($j = $ini ; $j <= count($tallas) ; $j++) {
+			for ($j = $ini ; $j <= count($tallas) + 2 ; $j++) {
 				if(isset($arreglo_tmp[$i-1][$ini_j])){
-					if($arreglo_tmp[$i-1][$ini_j] == $j){
-						$valores_tmp = explode("-", $arreglo_tmp[$i-1][$ini_j]);
+					$valores_tmp = explode("-", $arreglo_tmp[$i-1][$ini_j]);
+					if($valores_tmp[0] == $j){
 						$arreglo_tallas[$i-1][$j-1] = $valores_tmp[1];
 						$ini_j++;
 					}else{
@@ -78,14 +78,14 @@ class Productos extends CI_Controller {
 		echo json_encode($respuesta);
 	}
 
-	public function actualizar_usuario()
+	public function actualizar_producto()
 	{
 		$this->load->model('productos_m');
 		$respuesta = $this->productos_m->actualizar_producto($_POST["datos_p"]);
 		echo $respuesta;
 	}
 
-	public function borrar_usuario(){
+	public function borrar_producto(){
 		$this->load->model('productos_m');
 		$respuesta = $this->productos_m->borrar_producto($_POST["datos_p"]);
 		echo $respuesta;
