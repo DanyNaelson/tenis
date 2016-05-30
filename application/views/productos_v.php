@@ -1,6 +1,6 @@
 <div class="container">
 	<div class="row">
-		<div class="col-sm-12">
+		<div class="col-sm-12 table-responsive">
 			<table class="table table-bordered table-condensed" id="tabla_productos">
 				<tr class="th-blue">
 					<th class="text-center">#</th>

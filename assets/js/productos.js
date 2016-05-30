@@ -150,7 +150,7 @@ function actualizar_producto(obj_boton){
 		etiqueta = td_table.children().prop("tagName").toLowerCase();
 		
 		if(etiqueta == "select"){
-			datos_producto += td_table.find("select").val() + 'select';
+			datos_producto += "-" + td_table.find("select").val() + 'select';
 		}else if(etiqueta == "input"){
 			if(td_table.find("input.marca").val() == "" || td_table.find("input.modelo").val() == "" || td_table.find("input.descripcion").val() == "" || td_table.find("input.precio").val() == ""){
 				td_table.find("input").focus();
@@ -181,7 +181,7 @@ function actualizar_producto(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	bootbox.alert(respuesta_actualizar);
+		    	/*bootbox.*/alert(respuesta_actualizar);
 		    	location.href = "index";
 		    },
 		 
@@ -222,7 +222,7 @@ function insertar_producto(obj_boton){
 				}
 			}
 		}
-	}
+	}alert(datos_producto);
 
 	if(insertar){
 		$.ajax({
@@ -241,7 +241,7 @@ function insertar_producto(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	bootbox.alert(respuesta_actualizar);
+		    	alert(respuesta_actualizar);
 		    	location.href = "index";
 		    },
 		 

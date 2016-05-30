@@ -70,7 +70,7 @@ class Productos_m extends CI_Model{
 
 	function actualizar_producto($datos_producto){
 		$d_producto = explode("-", $datos_producto);
-		$id_producto = str_replace("producto_", "", $d_producto[0]);
+		$id_producto = str_replace("producto_", "", trim($d_producto[0]));
 		$posicion = strpos($d_producto[1], "select");
 		$insert = "";
 
@@ -90,9 +90,9 @@ class Productos_m extends CI_Model{
 		}
 
 		$this->db->set('id_marca', $id_ultimo_m);
-		$this->db->set('modelo', $d_producto[2]);
+		$this->db->set('modelo', trim($d_producto[2]));
 		$this->db->set('descripcion', $d_producto[3]);
-		$this->db->set('precio', $d_producto[count($d_producto) - 1]);
+		$this->db->set('precio', trim($d_producto[count($d_producto) - 1]));
 		$this->db->where('id_producto', $id_producto);
 		$str = $this->db->update('productos');
 
@@ -104,12 +104,12 @@ class Productos_m extends CI_Model{
 			if ($str == 1)
 			{
 				for($i = 4; $i < count($d_producto) - 1 ; $i++){
-					if($d_producto[$i] != "" || $d_producto[$i] != " ")
+					if(trim($d_producto[$i]) != "")
 					{
 						$data = array(
-					        'id_producto' => $id_producto,
+					        'id_producto' => trim($id_producto),
 					        'id_talla' => $i - 3,
-					        'codigo_barras' => $d_producto[$i],
+					        'codigo_barras' => trim($d_producto[$i]),
 					        'id_almacen' => NULL,
 					        'cantidad' => NULL
 						);
@@ -183,7 +183,7 @@ class Productos_m extends CI_Model{
 
 		if($posicion === false){
 			$data = array(
-		        'marca' => $d_producto[0]
+		        'marca' => trim($d_producto[0])
 			);
 
 			$str = $this->db->insert('marca', $data);
@@ -199,10 +199,10 @@ class Productos_m extends CI_Model{
 		if ($str == 1)
 		{
 			$data = array(
-		        'modelo' => $d_producto[1],
-		        'descripcion' => $d_producto[2],
-		        'precio' => $d_producto[count($d_producto) - 1],
-		        'id_marca' => $id_ultimo_m
+		        'modelo' => trim($d_producto[1]),
+		        'descripcion' => trim($d_producto[2]),
+		        'precio' => trim($d_producto[count($d_producto) - 1]),
+		        'id_marca' => trim($id_ultimo_m)
 			);
 
 			$str = $this->db->insert('productos', $data);
@@ -210,13 +210,13 @@ class Productos_m extends CI_Model{
 
 			if ($str == 1)
 			{
-				for($i = 4; $i < count($d_producto) - 1 ; $i++){
-					if($d_producto[$i] != "" || $d_producto[$i] != " ")
+				for($i = 3; $i < count($d_producto) - 1 ; $i++){
+					if(trim($d_producto[$i]) != "")
 					{
 						$data = array(
 					        'id_producto' => $id_ultimo_p,
 					        'id_talla' => $i - 2,
-					        'codigo_barras' => $d_producto[$i],
+					        'codigo_barras' => trim($d_producto[$i]),
 					        'id_almacen' => NULL,
 					        'cantidad' => NULL
 						);
