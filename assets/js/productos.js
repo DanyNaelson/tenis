@@ -129,6 +129,40 @@ $(document).ready(function(){
 		    }
 		});
 	});
+
+	$(".i-codigo").on("change", function(){
+		input_codigo = $(this).find("input");
+		codigo = input_codigo.val();
+		$.ajax({
+		    // la URL para la petición
+		    url : "obtener_codigo",
+		 
+		    // especifica si será una petición POST o GET
+		    type : "POST",
+
+		    //especifica el tipo de dato que espera recibir
+		    dataType: 'json',
+
+		    //datos pasados por metodo post
+		    data: { d_codigo : codigo },
+
+		    // código a ejecutar si la petición es satisfactoria;
+		    // la respuesta es pasada como argumento a la función
+		    success : function(respuesta) {
+		    	if(respuesta != null){
+		    		alert(respuesta[0].marca + "-" + respuesta[0].modelo);
+		    		input_codigo.val("").focus();
+		    	}
+		    },
+		 
+		    // código a ejecutar si la petición falla;
+		    // son pasados como argumentos a la función
+		    // el objeto de la petición en crudo y código de estatus de la petición
+		    error : function(xhr, status) {
+		        bootbox.alert('Disculpe, existió un problema');
+		    }
+		});
+	});
 });
 
 function valida_opcion(obj_select){
@@ -181,7 +215,9 @@ function actualizar_producto(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	/*bootbox.*/alert(respuesta_actualizar);
+		    	$(".modal-title").html("INFO");
+		    	$(".modal-body").find("p").html(respuesta_actualizar);
+		    	$('#info').modal();
 		    	location.href = "index";
 		    },
 		 

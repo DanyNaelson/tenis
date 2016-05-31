@@ -96,4 +96,10 @@ class Productos extends CI_Controller {
 		$respuesta = $this->productos_m->insertar_producto($_POST["datos_p"]);
 		echo $respuesta;
 	}
+
+	public function obtener_codigo(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->obtener_codigo($_POST["d_codigo"]);
+		echo json_encode($respuesta);
+	}
 }

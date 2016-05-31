@@ -73,6 +73,7 @@ class Productos_m extends CI_Model{
 		$id_producto = str_replace("producto_", "", trim($d_producto[0]));
 		$posicion = strpos($d_producto[1], "select");
 		$insert = "";
+		$mensaje = "No se ingresaron datos para actualizar el producto.";
 
 		if($posicion === false){
 			$data = array(
@@ -253,6 +254,25 @@ class Productos_m extends CI_Model{
 		}
 
 		return $mensaje;
+	}
+
+	function obtener_codigo($codigo){
+		$sql = "SELECT m.marca, p.modelo, p.descripcion, pt.codigo_barras
+				FROM marca m
+				INNER JOIN productos p ON (p.id_marca = m.id_marca)
+				INNER JOIN producto_talla pt ON (pt.id_producto = p.id_producto)
+				WHERE codigo_barras = '" . trim($codigo) . "'";
+
+		$query = $this->db->query($sql);
+        $rows = $query->result();
+
+		if (!empty($rows))
+		{
+		    return $rows;
+		}else
+		{
+      		return null;
+      	}
 	}
 
 }

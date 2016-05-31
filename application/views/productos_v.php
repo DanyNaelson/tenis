@@ -22,9 +22,9 @@
 					<td class="text-center"><?= $productos[$i]->descripcion ?></td>
 				<? for ($j = 0 ; $j < count($tallas) ; $j++): ?>
 					<? if($productos_tallas[$i][$j] != ''): ?>
-						<td class="text-center check"><?= $productos_tallas[$i][$j] ?></td>
+						<td class="text-center i-codigo check"><?= $productos_tallas[$i][$j] ?></td>
 					<? else: ?>
-						<td class="text-center no-check"></td>
+						<td class="text-center i-codigo no-check"></td>
 					<? endif; ?>
 				<? endfor; ?>
 					<td class="text-center"><?= $productos[$i]->precio ?></td>
@@ -42,6 +42,22 @@
 			<? endfor; ?>
 			</table>
 		</div>
+		<div id="info" class="modal fade" tabindex="-1" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title"></h4>
+					</div>
+					<div class="modal-body">
+						<p></p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
 	</div>
 	<div class="row">
 		<div class="col-sm-4">
