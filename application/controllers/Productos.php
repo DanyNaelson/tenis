@@ -102,4 +102,16 @@ class Productos extends CI_Controller {
 		$respuesta = $this->productos_m->obtener_codigo($_POST["d_codigo"]);
 		echo json_encode($respuesta);
 	}
+
+	public function validar_marca(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->validar_marca($_POST["p_marca"]);
+		echo json_encode($respuesta);
+	}
+
+	public function validar_modelo(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->validar_modelo($_POST["p_modelo"]);
+		echo json_encode($respuesta);
+	}
 }

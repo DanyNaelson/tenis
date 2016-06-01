@@ -22,7 +22,7 @@ class Productos_m extends CI_Model{
 	}
 
 	function obtener_productos(){
-		$sql = "SELECT p.id_producto, m.marca, p.modelo, p.descripcion, p.precio
+		$sql = "SELECT p.id_producto, m.id_marca, m.marca, p.modelo, p.descripcion, p.precio
 				FROM productos p 
 				INNER JOIN marca m ON(m.id_marca = p.id_marca)";
 
@@ -262,6 +262,41 @@ class Productos_m extends CI_Model{
 				INNER JOIN productos p ON (p.id_marca = m.id_marca)
 				INNER JOIN producto_talla pt ON (pt.id_producto = p.id_producto)
 				WHERE codigo_barras = '" . trim($codigo) . "'";
+
+		$query = $this->db->query($sql);
+        $rows = $query->result();
+
+		if (!empty($rows))
+		{
+		    return $rows;
+		}else
+		{
+      		return null;
+      	}
+	}
+
+	function validar_marca($marca){
+		$sql = "SELECT id_marca, marca
+				FROM marca
+				WHERE UPPER(marca) = UPPER('" . trim($marca) . "')";
+
+		$query = $this->db->query($sql);
+        $rows = $query->result();
+
+		if (!empty($rows))
+		{
+		    return $rows;
+		}else
+		{
+      		return null;
+      	}
+	}
+
+	function validar_modelo($modelo){
+		$sql = "SELECT p.id_producto, m.marca, p.modelo, p.descripcion
+				FROM marca m
+				INNER JOIN productos p ON (p.id_marca = m.id_marca)
+				WHERE UPPER(p.modelo) = UPPER('" . trim($modelo) . "')";
 
 		$query = $this->db->query($sql);
         $rows = $query->result();

@@ -17,9 +17,9 @@
 			<?  for ($i = 0 ; $i < count($productos) ; $i++): ?>
 				<tr id="producto_<?= $productos[$i]->id_producto ?>">
 					<td class="text-center no-item"><?= $i+1 ?></td>
-					<td class="text-center"><?= $productos[$i]->marca ?></td>
-					<td class="text-center"><?= $productos[$i]->modelo ?></td>
-					<td class="text-center"><?= $productos[$i]->descripcion ?></td>
+					<td class="text-center marca" id="marca_<?= $productos[$i]->id_marca ?>"><?= $productos[$i]->marca ?></td>
+					<td class="text-center modelo" onchange="validar_modelo(this)"><?= $productos[$i]->modelo ?></td>
+					<td class="text-center descripcion"><?= $productos[$i]->descripcion ?></td>
 				<? for ($j = 0 ; $j < count($tallas) ; $j++): ?>
 					<? if($productos_tallas[$i][$j] != ''): ?>
 						<td class="text-center i-codigo check"><?= $productos_tallas[$i][$j] ?></td>
@@ -27,7 +27,7 @@
 						<td class="text-center i-codigo no-check"></td>
 					<? endif; ?>
 				<? endfor; ?>
-					<td class="text-center"><?= $productos[$i]->precio ?></td>
+					<td class="text-center precio"><?= $productos[$i]->precio ?></td>
 					<td class="text-center">
 						<button type="button" class="btn btn-info btn-sm editar_p">
 							<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
