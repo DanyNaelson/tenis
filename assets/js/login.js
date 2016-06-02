@@ -64,7 +64,7 @@ $(document).ready(function(){
 			    // son pasados como argumentos a la función
 			    // el objeto de la petición en crudo y código de estatus de la petición
 			    error : function(xhr, status) {
-			        bootbox.alert('Disculpe, existió un problema');
+			        alert('Disculpe, existió un problema');
 			    }
 			});
 		}

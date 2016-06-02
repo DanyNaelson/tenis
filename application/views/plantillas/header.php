@@ -35,21 +35,20 @@
 			      	<ul class="nav navbar-nav navbar-right">
 			        	<li class="dropdown">
 			          		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?= $nombre ?> <span class="caret"></span></a>
-			          	<ul class="dropdown-menu">
-			            	<li>
-			            		<a href="#">Action</a>
-			            	</li>
-			            	</li>
-			            	<li role="separator" class="divider">
-			            	</li>
-			            	<li>
-			            		<a id="cerrar_s" href="#">Cerrar Sesión</a>
-			            	</li>
-			          	</ul>
-			        </li>
-			    </ul>
-			</div><!-- /.navbar-collapse -->
-		</div><!-- /.container-fluid -->
-	</nav>
+				          	<ul class="dropdown-menu">
+				            	<li>
+				            		<a href="#">Action</a>
+				            	</li>
+				            	<li role="separator" class="divider">
+				            	</li>
+				            	<li>
+				            		<a id="cerrar_s" href="#">Cerrar Sesión</a>
+				            	</li>
+				          	</ul>
+			        	</li>
+			    	</ul>
+				</div><!-- /.navbar-collapse -->
+			</div><!-- /.container-fluid -->
+		</nav>
 		<?php }?>
 	</header>

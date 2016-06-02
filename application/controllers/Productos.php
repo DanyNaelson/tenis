@@ -72,10 +72,21 @@ class Productos extends CI_Controller {
 		return $arreglo_tallas;
 	}
 
-	public function obtener_marcas(){
+	public function obtener_marcas($select = null){
 		$this->load->model('productos_m');
 		$respuesta = $this->productos_m->obtener_marcas();
-		echo json_encode($respuesta);
+		if($select == null){
+			echo json_encode($respuesta);
+		}else{
+			$html_marcas = "<select name='marcas_select' class='form-control'>";
+			$html_marcas .= 	"<option value='0'>Seleccionar...</option>";
+			foreach ($respuesta as $option) {
+				$html_marcas .= "<option value='" . $option->id_marca . "'>" . $option->marca . "</option>";
+			}
+			$html_marcas .= "</select>";
+			echo $html_marcas;
+		}
+		
 	}
 
 	public function actualizar_producto()
@@ -113,5 +124,145 @@ class Productos extends CI_Controller {
 		$this->load->model('productos_m');
 		$respuesta = $this->productos_m->validar_modelo($_POST["p_modelo"]);
 		echo json_encode($respuesta);
+	}
+
+	public function busqueda_producto(){
+		$marca = trim($_POST["marcas_select"]);
+		$modelo = trim($_POST["modelo"]);
+		$codigo_barras = trim($_POST["codigo_barras"]);
+		$orden_busqueda = 'f';
+		$tallas = array();
+		$productos = array();
+		$productos_tallas = array();
+
+		if ($marca == "0") {
+			$marca = null;
+		}else{
+			$orden_busqueda = 't';
+		}
+
+		if ($modelo == "") {
+			$modelo = null;
+		}else{
+			$orden_busqueda = 't';
+		}
+
+		if ($codigo_barras == "") {
+			$codigo_barras = null;
+		}
+
+		$this->load->model('productos_m');
+
+		if($marca == null && $modelo == null && $codigo_barras == null){
+			$tallas = $this->productos_m->obtener_tallas();
+			$productos = $this->productos_m->obtener_productos();
+			$producto_talla = $this->productos_m->obtener_producto_talla();
+			$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+		}else{
+			$tallas = $this->productos_m->obtener_tallas();
+
+			if($orden_busqueda == 't'){
+				$productos = $this->productos_m->obtener_productos($marca, $modelo);
+
+				if(!empty($productos)){
+					$cadena_p = $this->cadena_productos($productos);
+					$producto_talla = $this->productos_m->obtener_producto_talla($codigo_barras, $cadena_p);
+					$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+				}
+			}else{
+				$producto_talla = $this->productos_m->obtener_producto_talla($codigo_barras);
+
+				if(!empty($producto_talla)){
+					$productos = $this->productos_m->obtener_productos($producto_talla[0]->id_marca, $producto_talla[0]->modelo);
+					$cadena_p = $this->cadena_productos($productos);
+					$producto_talla = $this->productos_m->obtener_producto_talla(null, $cadena_p);
+					$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+				}
+			}
+		}
+
+		$data["tallas"] = $tallas;
+		$data["productos"] = $productos;
+		$data["productos_tallas"] = $productos_tallas;
+
+		$respuesta = $this->create_table_html($tallas, $productos, $productos_tallas);
+		
+		echo $respuesta;
+	}
+
+	public function cadena_productos($arreglo_productos){
+		$productos = array();
+
+		foreach ($arreglo_productos as $id_producto) {
+			$productos[] = $id_producto->id_producto;
+		}
+
+		$cadena_p = implode(",", $productos);
+		return $cadena_p;
+	}
+
+	public function create_table_html($tallas, $productos, $productos_tallas){
+		$html = '<thead>
+				<tr class="th-blue">
+					<th class="text-center">#</th>
+					<th class="text-center" class="marca">Marca</th>
+					<th class="text-center" class="modelo">Modelo</th>
+					<th class="text-center" class="descripcion">Descripcion</th>';
+		
+		foreach ($tallas as $talla){
+			$html .= '<th class="text-center">' . ucfirst($talla->talla) . '</th>';
+		}
+
+				$html .= '<th class="text-center" class="precio">Precio</th>
+					<th class="text-center">Editar</th>
+					<th class="text-center">Borrar</th>
+				</tr>
+			</thead>
+			<tbody>';
+		for ($i = 0 ; $i < count($productos) ; $i++){
+			$html .= '<tr id="producto_' . $productos[$i]->id_producto . '">
+					<td class="text-center no-item">' . ($i+1) . '</td>
+					<td class="text-center marca" id="marca_' . $productos[$i]->id_marca . '">' . $productos[$i]->marca . '</td>
+					<td class="text-center modelo" onchange="validar_modelo(this)">' . $productos[$i]->modelo . '</td>
+					<td class="text-center descripcion">' . $productos[$i]->descripcion . '</td>';
+			for ($j = 0 ; $j < count($tallas) ; $j++){
+				if($productos_tallas[$i][$j] != ''){
+					$html .= '<td class="text-center i-codigo check">' . $productos_tallas[$i][$j] . '</td>';
+				}else{
+					$html .= '<td class="text-center i-codigo no-check"></td>';
+				}
+			}
+			$html .= '<td class="text-center precio">' . $productos[$i]->precio . '</td>
+					<td class="text-center">
+						<button type="button" class="btn btn-info btn-sm editar_p">
+							<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+						</button>
+					</td>
+					<td class="text-center">
+						<button type="button" class="btn btn-danger btn-sm borrar_p">
+							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+						</button>
+					</td>
+				</tr>';
+		}
+		$html .= "</tbody>";
+		$html .= '<tfoot>
+				<tr class="th-blue">
+					<th class="text-center">#</th>
+					<th class="text-center" class="marca">Marca</th>
+					<th class="text-center" class="modelo">Modelo</th>
+					<th class="text-center" class="descripcion">Descripcion</th>';
+		
+		foreach ($tallas as $talla){
+			$html .= '<th class="text-center">' . ucfirst($talla->talla) . '</th>';
+		}
+
+				$html .= '<th class="text-center" class="precio">Precio</th>
+					<th class="text-center">Editar</th>
+					<th class="text-center">Borrar</th>
+				</tr>
+			</tfoot>';
+
+		return $html;
 	}
 }

@@ -40,7 +40,7 @@ $(document).ready(function(){
 		tr_parent = $(this).parent().parent();
 		valor_tr = tr_parent.attr('id');;
 		usuario = valor_tr.split("_");
-		bootbox.confirm("Seguro que desea borrar el usuario?", function(result) {
+		confirm("Seguro que desea borrar el usuario?", function(result) {
 			if(result){
 				$.ajax({
 				    // la URL para la petición
@@ -58,8 +58,9 @@ $(document).ready(function(){
 				    // código a ejecutar si la petición es satisfactoria;
 				    // la respuesta es pasada como argumento a la función
 				    success : function(respuesta_borrar) {
-				    	bootbox.alert(respuesta_borrar);
-				    	location.href = "index";
+				    	bootbox.alert(respuesta_borrar, function() {
+						  location.href = "index";
+						});
 				    },
 				 
 				    // código a ejecutar si la petición falla;
@@ -125,7 +126,7 @@ function actualizar_usuario(obj_boton){
 			if(td_table.find("input").val() == "" || td_table.find("input").val() == " "){
 				td_table.find("input").focus();
 				actualizar = false;
-				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
+				alert("El campo Usuario y Contraseña no pueden estar vacíos.");
 				return false;
 			}else{
 				valor_input = td_table.find("input").val();
@@ -151,8 +152,9 @@ function actualizar_usuario(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	bootbox.alert(respuesta_actualizar);
-		    	location.href = "index";
+		    	bootbox.alert(respuesta_actualizar, function() {
+				  location.href = "index";
+				});
 		    },
 		 
 		    // código a ejecutar si la petición falla;
@@ -185,7 +187,7 @@ function insertar_usuario(obj_boton){
 			if(td_table.find("input").val() == "" || td_table.find("input").val() == " "){
 				td_table.find("input").focus();
 				actualizar = false;
-				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
+				alert("El campo Usuario y Contraseña no pueden estar vacíos.");
 				return false;
 			}else{
 				valor_input = td_table.find("input").val();
@@ -211,8 +213,9 @@ function insertar_usuario(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	bootbox.alert(respuesta_actualizar);
-		    	location.href = "index";
+		    	bootbox.alert(respuesta_actualizar, function() {
+				  location.href = "index";
+				});
 		    },
 		 
 		    // código a ejecutar si la petición falla;

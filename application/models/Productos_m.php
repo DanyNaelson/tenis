@@ -21,10 +21,24 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_productos(){
+	function obtener_productos($id_marca = null, $modelo = null){
 		$sql = "SELECT p.id_producto, m.id_marca, m.marca, p.modelo, p.descripcion, p.precio
 				FROM productos p 
-				INNER JOIN marca m ON(m.id_marca = p.id_marca)";
+				INNER JOIN marca m ON(m.id_marca = p.id_marca) ";
+		
+		if ($id_marca != null) {
+			$sql .= "WHERE m.id_marca = " . $id_marca . " ";
+
+			if ($modelo != null) {
+				$sql .= "AND p.modelo = '" . $modelo . "' ";
+			}
+		}else{
+			if ($modelo != null) {
+				$sql .= "WHERE p.modelo = '" . $modelo . "' ";
+			}
+		}
+
+		$sql .= "ORDER BY p.id_producto";
 
 		$query = $this->db->query($sql);
         $rows = $query->result();
@@ -37,10 +51,23 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_producto_talla(){
+	function obtener_producto_talla($codigo_barras = null, $id_producto = null){
 		$sql = "SELECT *
 				FROM producto_talla pt
-				ORDER BY id_producto, id_talla";
+				INNER JOIN productos p ON (p.id_producto = pt.id_producto)";
+
+		if($id_producto != null){
+			$sql .= "WHERE pt.id_producto IN (" . $id_producto . ") ";
+			if ($codigo_barras != null) {
+				$sql .= "AND pt.codigo_barras = '" . $codigo_barras . "' ";
+			}
+		}else{
+			if ($codigo_barras != null) {
+				$sql .= "WHERE pt.codigo_barras = '" . $codigo_barras . "' ";
+			}
+		}
+
+		$sql .= "ORDER BY p.id_producto, id_talla";
 
 		$query = $this->db->query($sql);
         $rows = $query->result();
@@ -53,9 +80,15 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_marcas(){
+	function obtener_marcas($id_marca = null){
 		$sql = "SELECT *
-				FROM marca";
+				FROM marca ";
+
+		if ($id_marca != null) {
+			$sql .= "WHERE id_marca = " . $id_marca . " ";
+		}
+
+		$sql .= "ORDER BY id_marca";
 
 		$query = $this->db->query($sql);
         $rows = $query->result();
@@ -69,7 +102,7 @@ class Productos_m extends CI_Model{
 	}
 
 	function actualizar_producto($datos_producto){
-		$d_producto = explode("-", $datos_producto);
+		$d_producto = explode("|", $datos_producto);
 		$id_producto = str_replace("producto_", "", trim($d_producto[0]));
 		$posicion = strpos($d_producto[1], "select");
 		$insert = "";
@@ -178,7 +211,7 @@ class Productos_m extends CI_Model{
 	}
 
 	function insertar_producto($datos_producto){
-		$d_producto = explode("-", $datos_producto);
+		$d_producto = explode("|", $datos_producto);
 		$posicion = strpos($d_producto[0], "select");
 		$insert = "";
 

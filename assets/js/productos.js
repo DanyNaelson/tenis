@@ -1,5 +1,72 @@
 /* Funciones de producto */
 $(document).ready(function(){
+
+	$.ajax({
+	    // la URL para la petición
+	    url : "obtener_marcas/t",
+	 
+	    // especifica si será una petición POST o GET
+	    type : "POST",
+
+	    //especifica el tipo de dato que espera recibir
+	    dataType: 'html',
+
+	    // código a ejecutar si la petición es satisfactoria;
+	    // la respuesta es pasada como argumento a la función
+	    success : function(respuesta_marcas) {
+	    	$("#marca_select").append(respuesta_marcas);
+	    },
+	 
+	    // código a ejecutar si la petición falla;
+	    // son pasados como argumentos a la función
+	    // el objeto de la petición en crudo y código de estatus de la petición
+	    error : function(xhr, status) {
+	        bootbox.alert('Disculpe, existió un problema');
+	    }
+	});
+
+	$("#buscar").on("submit", function(e){
+		e.preventDefault();
+		form_productos = $(this);
+		if($("#codigo_barras").val() != ""){
+			$("#marca_select option").each(function(index){
+				if(index == '0'){
+					$(this).prop("selected", true);
+				}else{
+					$(this).prop("selected", false);
+				}
+			});
+			$("#modelo").val("");
+		}
+
+		$.ajax({
+		    // la URL para la petición
+		    url : "busqueda_producto",
+		 
+		    // especifica si será una petición POST o GET
+		    type : "POST",
+
+		    // envia los valores del form
+		    data : form_productos.serialize(),
+
+		    //especifica el tipo de dato que espera recibir
+		    dataType: 'html',
+
+		    // código a ejecutar si la petición es satisfactoria;
+		    // la respuesta es pasada como argumento a la función
+		    success : function(respuesta_busqueda) {
+		    	$("#tabla_productos").html(respuesta_busqueda);
+		    },
+		 
+		    // código a ejecutar si la petición falla;
+		    // son pasados como argumentos a la función
+		    // el objeto de la petición en crudo y código de estatus de la petición
+		    error : function(xhr, status) {
+		        bootbox.alert('Disculpe, existió un problema');
+		    }
+		});
+	});
+
 	$(".editar_p").click(function(){
 		if($(this).attr('class') == 'btn btn-info btn-sm editar_p'){
 			tr_parent = $(this).parent().parent();
@@ -54,8 +121,9 @@ $(document).ready(function(){
 				    // código a ejecutar si la petición es satisfactoria;
 				    // la respuesta es pasada como argumento a la función
 				    success : function(respuesta_borrar) {
-				    	bootbox.alert(respuesta_borrar);
-				    	location.href = "index";
+				    	bootbox.alert(respuesta_borrar, function() {
+						  location.href = "index";
+						});
 				    },
 				 
 				    // código a ejecutar si la petición falla;
@@ -111,7 +179,7 @@ $(document).ready(function(){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta) {
-		    	html_marcas = "<select class='select_marcas' onchange='valida_opcion(this)'>";
+		    	html_marcas = "<select class='select_marcas form-control' onchange='valida_opcion(this)'>";
 		    	for (i = 0 ; i < respuesta.length ; i++) {
 		    		html_marcas += "<option value='" + respuesta[i].id_marca + "'>" + respuesta[i].marca + "</option>";
 		    	}
@@ -132,35 +200,37 @@ $(document).ready(function(){
 	$(".i-codigo").on("change", function(){
 		input_codigo = $(this).find("input");
 		codigo = input_codigo.val();
-		$.ajax({
-		    // la URL para la petición
-		    url : "obtener_codigo",
-		 
-		    // especifica si será una petición POST o GET
-		    type : "POST",
+		if(codigo != ""){
+			$.ajax({
+			    // la URL para la petición
+			    url : "obtener_codigo",
+			 
+			    // especifica si será una petición POST o GET
+			    type : "POST",
 
-		    //especifica el tipo de dato que espera recibir
-		    dataType: 'json',
+			    //especifica el tipo de dato que espera recibir
+			    dataType: 'json',
 
-		    //datos pasados por metodo post
-		    data: { d_codigo : codigo },
+			    //datos pasados por metodo post
+			    data: { d_codigo : codigo },
 
-		    // código a ejecutar si la petición es satisfactoria;
-		    // la respuesta es pasada como argumento a la función
-		    success : function(respuesta) {
-		    	if(respuesta != null){
-		    		alert(respuesta[0].marca + "-" + respuesta[0].modelo);
-		    		input_codigo.val("").focus();
-		    	}
-		    },
-		 
-		    // código a ejecutar si la petición falla;
-		    // son pasados como argumentos a la función
-		    // el objeto de la petición en crudo y código de estatus de la petición
-		    error : function(xhr, status) {
-		        bootbox.alert('Disculpe, existió un problema');
-		    }
-		});
+			    // código a ejecutar si la petición es satisfactoria;
+			    // la respuesta es pasada como argumento a la función
+			    success : function(respuesta) {
+			    	if(respuesta != null){
+			    		$(input_codigo).tooltip({title: "<ul>YA EXISTE EL CODIGO DE BARRAS EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li><li>Codigo de barras: " + respuesta[0].codigo_barras + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
+			    		input_codigo.val("").focus();
+			    	}
+			    },
+			 
+			    // código a ejecutar si la petición falla;
+			    // son pasados como argumentos a la función
+			    // el objeto de la petición en crudo y código de estatus de la petición
+			    error : function(xhr, status) {
+			        bootbox.alert('Disculpe, existió un problema');
+			    }
+			});
+		}
 	});
 });
 
@@ -192,7 +262,7 @@ function validar_marca(object_input){
 		    success : function(respuesta) {
 		    	if(respuesta != null){
 		    		obtener_m("marca_" + respuesta[0].id_marca, $(object_input).parent());
-		    		alert('La marca ya existe elige del catalogo.');
+		    		bootbox.alert('La marca ya existe.');
 		    	}
 		    },
 		 
@@ -228,8 +298,8 @@ function validar_modelo(object_td){
 	    // la respuesta es pasada como argumento a la función
 	    success : function(respuesta) {
 	    	if(respuesta != null){
-	    		alert(respuesta[0].marca + "-" + respuesta[0].modelo + "-" + respuesta[0].descripcion);
-	    		input_modelo.val("").focus();
+	    		$(input_modelo).tooltip({title: "<ul>YA EXISTE EL MODELO EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
+	    		input_modelo.val(input_modelo.val()).focus();
 	    	}
 	    },
 	 
@@ -254,7 +324,7 @@ function actualizar_producto(obj_boton){
 		etiqueta = td_table.children().prop("tagName").toLowerCase();
 		
 		if(etiqueta == "select"){
-			datos_producto += "-" + td_table.find("select").val() + 'select';
+			datos_producto += "|" + td_table.find("select").val() + 'select';
 		}else if(etiqueta == "input"){
 			if(tr_parent.children("td").eq(1).find("input").val() == "" || tr_parent.children("td").eq(2).find("input").val() == "" || tr_parent.children("td").eq(3).find("input").val() == "" /*|| tr_parent.children("td").eq(29).find("input").val() == ""*/){
 				td_table.find("input").focus();
@@ -263,7 +333,7 @@ function actualizar_producto(obj_boton){
 				return false;
 			}else{
 				valor_input = td_table.find("input").val();
-				datos_producto += "-" + valor_input;
+				datos_producto += "|" + valor_input;
 			}
 		}
 	}
@@ -285,17 +355,16 @@ function actualizar_producto(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	location.href = "index";
-		    	$(".modal-title").html("INFO");
-		    	$(".modal-body").find("p").html(respuesta_actualizar);
-		    	$('#info').modal();
+		    	bootbox.alert(respuesta_actualizar, function() {
+				  location.href = "index";
+				});
 		    },
 		 
 		    // código a ejecutar si la petición falla;
 		    // son pasados como argumentos a la función
 		    // el objeto de la petición en crudo y código de estatus de la petición
 		    error : function(xhr, status) {
-		        bootbox.alert('Disculpe, existió un problema');
+		        alert('Disculpe, existió un problema');
 		    }
 		});
 	}
@@ -324,7 +393,7 @@ function insertar_producto(obj_boton){
 				if (i == 1) {
 					datos_producto += valor_input;
 				}else{
-					datos_producto += "-" + valor_input;
+					datos_producto += "|" + valor_input;
 				}
 			}
 		}
@@ -346,9 +415,10 @@ function insertar_producto(obj_boton){
 
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
-		    success : function(respuesta_actualizar) {
-		    	alert(respuesta_actualizar);
-		    	location.href = "index";
+		    success : function(respuesta_insertar) {
+		    	bootbox.alert(respuesta_insertar, function() {
+				  location.href = "index";
+				});
 		    },
 		 
 		    // código a ejecutar si la petición falla;
@@ -377,7 +447,7 @@ function obtener_m(object_id, object_td){
 	    // código a ejecutar si la petición es satisfactoria;
 	    // la respuesta es pasada como argumento a la función
 	    success : function(respuesta) {
-	    	html_marcas = "<select class='select_marcas' onchange='valida_opcion(this)' name='s_marcas'>";
+	    	html_marcas = "<select class='form-control select_marcas' onchange='valida_opcion(this)' name='s_marcas'>";
 	    	for (i = 0 ; i < respuesta.length ; i++) {
 	    		if (respuesta[i].id_marca == id_marca[1]) {
 	    			selected_s = "selected";
@@ -401,7 +471,7 @@ function obtener_m(object_id, object_td){
 }
 
 function cancelar(obj_button){
-	bootbox.confirm("Seguro que desea borrar el producto?", function(result) {
+	bootbox.confirm("Seguro que desea borrar el producto?", function(result) {alert(result);
 		if(result){
 			$(obj_button).parent().parent().remove();
 		}
