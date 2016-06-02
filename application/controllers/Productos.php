@@ -227,19 +227,19 @@ class Productos extends CI_Controller {
 					<td class="text-center descripcion">' . $productos[$i]->descripcion . '</td>';
 			for ($j = 0 ; $j < count($tallas) ; $j++){
 				if($productos_tallas[$i][$j] != ''){
-					$html .= '<td class="text-center i-codigo check">' . $productos_tallas[$i][$j] . '</td>';
+					$html .= '<td class="text-center i-codigo check" onchange="validar_codigo(this)">' . $productos_tallas[$i][$j] . '</td>';
 				}else{
-					$html .= '<td class="text-center i-codigo no-check"></td>';
+					$html .= '<td class="text-center i-codigo no-check" onchange="validar_codigo(this)"></td>';
 				}
 			}
 			$html .= '<td class="text-center precio">' . $productos[$i]->precio . '</td>
 					<td class="text-center">
-						<button type="button" class="btn btn-info btn-sm editar_p">
+						<button type="button" class="btn btn-info btn-sm editar_p" onclick="editar_p(this)">
 							<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
 						</button>
 					</td>
 					<td class="text-center">
-						<button type="button" class="btn btn-danger btn-sm borrar_p">
+						<button type="button" class="btn btn-danger btn-sm borrar_p" onclick="borrar_p(this)">
 							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 						</button>
 					</td>

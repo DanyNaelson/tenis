@@ -68,27 +68,7 @@ $(document).ready(function(){
 	});
 
 	$(".editar_p").click(function(){
-		if($(this).attr('class') == 'btn btn-info btn-sm editar_p'){
-			tr_parent = $(this).parent().parent();
-			num_td = tr_parent.find("td").length - 2;
-			marca_sel = tr_parent.find("td").eq(1).attr("id");
-			
-			for (var i = 1; i < num_td; i++) {
-				td_table = tr_parent.children("td").eq(i);
-				if(i == 1){
-					html_marcas = obtener_m(marca_sel, td_table);
-				}else{
-					td_valor = td_table.html();
-					html_input = "<input type='text' size='10' class='input_req' onchange='validar(this)' value='" + td_valor + "' />";
-					td_table.html(html_input);
-				}
-			}
-
-			$(this).removeClass("btn-info editar_p").addClass("btn-success actualizar_p");
-			$(this).find("span").removeClass("glyphicon-edit").addClass("glyphicon-ok");
-		}else{
-			actualizar_producto($(this));
-		}
+		editar_p($(this));
 	});
 
 	$(".input_req").click(function(){
@@ -100,41 +80,7 @@ $(document).ready(function(){
 	});
 
 	$(".borrar_p").click(function(){
-		tr_parent = $(this).parent().parent();
-		valor_tr = tr_parent.attr('id');;
-		producto = valor_tr.split("_");
-		bootbox.confirm("Seguro que desea borrar el producto?", function(result) {
-			if(result){
-				$.ajax({
-				    // la URL para la petición
-				    url : "borrar_producto",
-				 
-				    // especifica si será una petición POST o GET
-				    type : "POST",
-
-				    // envia los valores del form
-				    data : { datos_p : producto[1] },
-
-				    //especifica el tipo de dato que espera recibir
-				    dataType: 'html',
-
-				    // código a ejecutar si la petición es satisfactoria;
-				    // la respuesta es pasada como argumento a la función
-				    success : function(respuesta_borrar) {
-				    	bootbox.alert(respuesta_borrar, function() {
-						  location.href = "index";
-						});
-				    },
-				 
-				    // código a ejecutar si la petición falla;
-				    // son pasados como argumentos a la función
-				    // el objeto de la petición en crudo y código de estatus de la petición
-				    error : function(xhr, status) {
-				        bootbox.alert('Disculpe, existió un problema');
-				    }
-				});
-			}
-		}); 
+		borrar_p($(this));
 	});
 
 	$("#agregar_p").click(function(){
@@ -198,39 +144,7 @@ $(document).ready(function(){
 	});
 
 	$(".i-codigo").on("change", function(){
-		input_codigo = $(this).find("input");
-		codigo = input_codigo.val();
-		if(codigo != ""){
-			$.ajax({
-			    // la URL para la petición
-			    url : "obtener_codigo",
-			 
-			    // especifica si será una petición POST o GET
-			    type : "POST",
-
-			    //especifica el tipo de dato que espera recibir
-			    dataType: 'json',
-
-			    //datos pasados por metodo post
-			    data: { d_codigo : codigo },
-
-			    // código a ejecutar si la petición es satisfactoria;
-			    // la respuesta es pasada como argumento a la función
-			    success : function(respuesta) {
-			    	if(respuesta != null){
-			    		$(input_codigo).tooltip({title: "<ul>YA EXISTE EL CODIGO DE BARRAS EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li><li>Codigo de barras: " + respuesta[0].codigo_barras + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
-			    		input_codigo.val("").focus();
-			    	}
-			    },
-			 
-			    // código a ejecutar si la petición falla;
-			    // son pasados como argumentos a la función
-			    // el objeto de la petición en crudo y código de estatus de la petición
-			    error : function(xhr, status) {
-			        bootbox.alert('Disculpe, existió un problema');
-			    }
-			});
-		}
+		validar_codigo($(this));
 	});
 });
 
@@ -238,6 +152,42 @@ function valida_opcion(obj_select){
 	if($(obj_select).val() == 't'){
 		input_marca = "<input type='text' name='marca' onchange='validar_marca(this)' class='marca_input'>";
 		$(obj_select).parent().html(input_marca);
+	}
+}
+
+function validar_codigo(obj_td){
+	input_codigo = $(obj_td).find("input");
+	codigo = input_codigo.val();
+	if(codigo != ""){
+		$.ajax({
+		    // la URL para la petición
+		    url : "obtener_codigo",
+		 
+		    // especifica si será una petición POST o GET
+		    type : "POST",
+
+		    //especifica el tipo de dato que espera recibir
+		    dataType: 'json',
+
+		    //datos pasados por metodo post
+		    data: { d_codigo : codigo },
+
+		    // código a ejecutar si la petición es satisfactoria;
+		    // la respuesta es pasada como argumento a la función
+		    success : function(respuesta) {
+		    	if(respuesta != null){
+		    		$(input_codigo).tooltip({title: "<ul>YA EXISTE EL CODIGO DE BARRAS EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li><li>Codigo de barras: " + respuesta[0].codigo_barras + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
+		    		input_codigo.val("").focus();
+		    	}
+		    },
+		 
+		    // código a ejecutar si la petición falla;
+		    // son pasados como argumentos a la función
+		    // el objeto de la petición en crudo y código de estatus de la petición
+		    error : function(xhr, status) {
+		        bootbox.alert('Disculpe, existió un problema');
+		    }
+		});
 	}
 }
 
@@ -484,4 +434,66 @@ function validar(obj_check){
 	}else{
 		$(obj_check).parent().removeClass("no-check").addClass("check");
 	}
+}
+
+function editar_p(obj_button){
+	if($(obj_button).attr('class') == 'btn btn-info btn-sm editar_p'){
+		tr_parent = $(obj_button).parent().parent();
+		num_td = tr_parent.find("td").length - 2;
+		marca_sel = tr_parent.find("td").eq(1).attr("id");
+		
+		for (var i = 1; i < num_td; i++) {
+			td_table = tr_parent.children("td").eq(i);
+			if(i == 1){
+				html_marcas = obtener_m(marca_sel, td_table);
+			}else{
+				td_valor = td_table.html();
+				html_input = "<input type='text' size='10' class='input_req' onchange='validar(this)' value='" + td_valor + "' />";
+				td_table.html(html_input);
+			}
+		}
+
+		$(obj_button).removeClass("btn-info editar_p").addClass("btn-success actualizar_p");
+		$(obj_button).find("span").removeClass("glyphicon-edit").addClass("glyphicon-ok");
+	}else{
+		actualizar_producto($(obj_button));
+	}
+}
+
+function borrar_p(obj_button){
+	tr_parent = $(obj_button).parent().parent();
+	valor_tr = tr_parent.attr('id');;
+	producto = valor_tr.split("_");
+	bootbox.confirm("Seguro que desea borrar el producto?", function(result) {
+		if(result){
+			$.ajax({
+			    // la URL para la petición
+			    url : "borrar_producto",
+			 
+			    // especifica si será una petición POST o GET
+			    type : "POST",
+
+			    // envia los valores del form
+			    data : { datos_p : producto[1] },
+
+			    //especifica el tipo de dato que espera recibir
+			    dataType: 'html',
+
+			    // código a ejecutar si la petición es satisfactoria;
+			    // la respuesta es pasada como argumento a la función
+			    success : function(respuesta_borrar) {
+			    	bootbox.alert(respuesta_borrar, function() {
+					  location.href = "index";
+					});
+			    },
+			 
+			    // código a ejecutar si la petición falla;
+			    // son pasados como argumentos a la función
+			    // el objeto de la petición en crudo y código de estatus de la petición
+			    error : function(xhr, status) {
+			        bootbox.alert('Disculpe, existió un problema');
+			    }
+			});
+		}
+	}); 
 }
