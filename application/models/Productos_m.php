@@ -21,7 +21,22 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_productos($id_marca = null, $modelo = null){
+	function obtener_modelos(){
+		$sql = "SELECT count(id_producto) as num_p
+				FROM productos";
+
+		$query = $this->db->query($sql);
+        $row = $query->row();
+
+		if (isset($row))
+		{
+		    return $row->num_p;;
+		}else{
+      		return 0;
+      	}
+	}
+
+	function obtener_productos($id_marca = null, $modelo = null, $limit = 2, $offset = 1){
 		$sql = "SELECT p.id_producto, m.id_marca, m.marca, p.modelo, p.descripcion, p.precio
 				FROM productos p 
 				INNER JOIN marca m ON(m.id_marca = p.id_marca) ";
@@ -38,7 +53,8 @@ class Productos_m extends CI_Model{
 			}
 		}
 
-		$sql .= "ORDER BY p.id_producto";
+		$sql .= "ORDER BY p.id_producto
+				LIMIT " . $limit . " OFFSET " . $offset;
 
 		$query = $this->db->query($sql);
         $rows = $query->result();

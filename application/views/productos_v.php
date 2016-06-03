@@ -104,18 +104,16 @@
 		<div class="col-sm-12 text-center">
 			<nav>
 				<ul class="pagination">
-					<li>
-						<a href="#" aria-label="Previous">
+					<li class="first">
+						<a href="#" aria-label="Previous" onclick="obtener_productos(this, 1)">
 							<span aria-hidden="true">&laquo;</span>
 						</a>
 					</li>
-					<li><a href="#">1</a></li>
-					<li><a href="#">2</a></li>
-					<li><a href="#">3</a></li>
-					<li><a href="#">4</a></li>
-					<li><a href="#">5</a></li>
-					<li>
-						<a href="#" aria-label="Next">
+				<?  for ($i = 1 ; $i <= $paginas ; $i++): ?>
+					<li class="<?= $i == 1 ? 'active' : ''; ?> pag_<?= $i ?>"><a href="#" onclick="obtener_productos(this, <?= $i ?>)"><?= $i ?></a></li>
+				<? endfor; ?>
+					<li class="last">
+						<a href="#" aria-label="Next" onclick="obtener_productos(this, <?= $paginas ?>)">
 							<span aria-hidden="true">&raquo;</span>
 						</a>
 					</li>

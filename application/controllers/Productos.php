@@ -15,13 +15,22 @@ class Productos extends CI_Controller {
 		$data["archivo_js"] = "productos.js";
 
 		$tallas = $this->productos_m->obtener_tallas();
+		$modelos = $this->obtener_modelos();
+		if ($modelos != 0) {
+			$paginas = $modelos/2;
+		} else {
+			$paginas = 1;
+		}
+		
 		$productos = $this->productos_m->obtener_productos();
-		$producto_talla = $this->productos_m->obtener_producto_talla();
+		$cadena_p = $this->cadena_productos($productos);
+		$producto_talla = $this->productos_m->obtener_producto_talla(null, $cadena_p);
 		$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
 
 		$data["tallas"] = $tallas;
 		$data["productos"] = $productos;
 		$data["productos_tallas"] = $productos_tallas;
+		$data["paginas"] = (int) $paginas+1;
 
 		$this->load->view('plantillas/header',$data);
 		$this->load->view('productos_v');
@@ -70,6 +79,12 @@ class Productos extends CI_Controller {
 		unset($arreglo_tmp);
 
 		return $arreglo_tallas;
+	}
+
+	public function obtener_modelos(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->obtener_modelos();
+		return $respuesta;
 	}
 
 	public function obtener_marcas($select = null){

@@ -84,7 +84,7 @@ $(document).ready(function(){
 	});
 
 	$("#agregar_p").click(function(){
-		tr_html = "<tr id='producto'>";
+		tr_html = "<tr id='producto' style='background: lightgray;'>";
 		tr_html +=	"<td class='text-center no-item'></td>";
 		tr_html +=	"<td class='text-center' id='marca'></td>";
 		tr_html +=	"<td class='text-center' onchange='validar_modelo(this)'>";
@@ -94,7 +94,7 @@ $(document).ready(function(){
 		tr_html +=	"	<input class='input_req' value='' type='text' size='10'>";
 		tr_html +=	"</td>";
 		for(i = 1 ; i <= 26 ; i++){
-			tr_html +=	"<td class='text-center no-check'>";
+			tr_html +=	"<td class='text-center no-check' onchange='validar_codigo(this)' style='background: lightgray;'>";
 			tr_html +=		"<input class='input_req' onchange='validar(this)' type='text' size='10'>";
 			tr_html +=	"</td>";
 		}
@@ -249,7 +249,7 @@ function validar_modelo(object_td){
 	    success : function(respuesta) {
 	    	if(respuesta != null){
 	    		$(input_modelo).tooltip({title: "<ul>YA EXISTE EL MODELO EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
-	    		input_modelo.val(input_modelo.val()).focus();
+	    		input_modelo.val("").focus();
 	    	}
 	    },
 	 
@@ -421,7 +421,7 @@ function obtener_m(object_id, object_td){
 }
 
 function cancelar(obj_button){
-	bootbox.confirm("Seguro que desea borrar el producto?", function(result) {alert(result);
+	bootbox.confirm("Seguro que desea borrar el producto?", function(result) {
 		if(result){
 			$(obj_button).parent().parent().remove();
 		}
@@ -440,10 +440,10 @@ function editar_p(obj_button){
 	if($(obj_button).attr('class') == 'btn btn-info btn-sm editar_p'){
 		tr_parent = $(obj_button).parent().parent();
 		num_td = tr_parent.find("td").length - 2;
-		marca_sel = tr_parent.find("td").eq(1).attr("id");
+		marca_sel = tr_parent.css('background', 'lightgray').find("td").eq(1).attr("id");
 		
 		for (var i = 1; i < num_td; i++) {
-			td_table = tr_parent.children("td").eq(i);
+			td_table = tr_parent.children("td").eq(i).css('background', 'lightgray');
 			if(i == 1){
 				html_marcas = obtener_m(marca_sel, td_table);
 			}else{
@@ -496,4 +496,10 @@ function borrar_p(obj_button){
 			});
 		}
 	}); 
+}
+
+function obtener_productos(obj_a, pag){
+	$(".pagination").find("li").removeClass("active");
+	pag_li = $(obj_a).parent();
+	$(".pag_" + pag).addClass("active");
 }
