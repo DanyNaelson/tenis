@@ -17,6 +17,13 @@ class Entradas extends CI_Controller {
 		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "entradas.js";
 
+		$almacenes = $this->entradas_m->obtener_almacenes();
+		$tallas = $this->entradas_m->obtener_tallas();
+
+		$data["almacenes"] = $almacenes;
+		$data["tallas"] = $tallas;
+		$data["productos"] = array();
+
 		$this->load->view('plantillas/header',$data);
 		$this->load->view('entradas_v');
 		$this->load->view('plantillas/footer',$data);
