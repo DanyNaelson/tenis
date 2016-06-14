@@ -68,15 +68,25 @@ class Administracion_m extends CI_Model{
 		$d_usuario = explode("-", $datos_usuario);
 		$insert = "";
 
+		$this->db->trans_begin();
+
 		$this->db->set('usuario', $d_usuario[1]);
 		$this->db->set('password', $d_usuario[2]);
 		$this->db->where('id_usuario', $d_usuario[0]);
 		$str = $this->db->update('usuarios');
 
+		if ($this->db->trans_status() === FALSE){
+		    $this->db->trans_rollback();
+		}
+
 		if ($str == 1)
 		{
 			$this->db->where('id_usuario', $d_usuario[0]);
 			$str = $this->db->delete('usuario_permisos');
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
 
 			if ($str == 1)
 			{
@@ -96,6 +106,12 @@ class Administracion_m extends CI_Model{
 						else
 						{
 							$insert = "0";
+						}
+
+						if ($this->db->trans_status() === FALSE){
+						    $this->db->trans_rollback();
+						}else{
+						    $this->db->trans_commit();
 						}
 					}
 
@@ -124,13 +140,25 @@ class Administracion_m extends CI_Model{
 	function borrar_usuario($datos_usuario){
 		$id_usuario = $datos_usuario;
 
+		$this->db->trans_begin();
+
 		$this->db->where('id_usuario', $id_usuario);
 		$str = $this->db->delete('usuarios');
+
+		if ($this->db->trans_status() === FALSE){
+		    $this->db->trans_rollback();
+		}
 
 		if ($str == 1)
 		{
 			$this->db->where('id_usuario', $id_usuario);
 			$str = $this->db->delete('usuario_permisos');
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}else{
+			    $this->db->trans_commit();
+			}
 
 			if ($str == 1)
 			{
@@ -153,12 +181,18 @@ class Administracion_m extends CI_Model{
 		$d_usuario = explode("-", $datos_usuario);
 		$insert = "";
 
+		$this->db->trans_begin();
+
 		$data = array(
 	        'usuario' => $d_usuario[1],
 	        'password' => $d_usuario[2]
 		);
 
 		$str = $this->db->insert('usuarios', $data);
+
+		if ($this->db->trans_status() === FALSE){
+		    $this->db->trans_rollback();
+		}
 
 		$id_ultimo = $this->db->insert_id();
 
@@ -189,6 +223,12 @@ class Administracion_m extends CI_Model{
 					$mensaje = "Se ingresó el usuario correctamente.";
 				} else {
 					$mensaje = "Error al insertar permisos del usuario.";
+				}
+
+				if ($this->db->trans_status() === FALSE){
+				    $this->db->trans_rollback();
+				}else{
+				    $this->db->trans_commit();
 				}
 			}
 		}

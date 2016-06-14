@@ -7,6 +7,10 @@ class Productos extends CI_Controller {
 	{
 		$this->load->model('productos_m');
 		
+		if (!isset($_SESSION["id_usuario"])) {
+			header('Location: /inventarios/login/');
+		}
+		
 		$data["id_usuario"] = $_SESSION["id_usuario"];
 		$data["nombre"] = $_SESSION["nombre"];
 		$data["titulo"] = "Sistema de inventarios | Productos";
@@ -17,7 +21,11 @@ class Productos extends CI_Controller {
 		$tallas = $this->productos_m->obtener_tallas();
 		$modelos = $this->obtener_modelos();
 		if ($modelos != 0) {
-			$paginas = $modelos/2;
+			if(($modelos % 2) == 0){
+				$paginas = $modelos/2;
+			}else{
+				$paginas = ceil($modelos/2);
+			}
 		} else {
 			$paginas = 1;
 		}
@@ -30,7 +38,7 @@ class Productos extends CI_Controller {
 		$data["tallas"] = $tallas;
 		$data["productos"] = $productos;
 		$data["productos_tallas"] = $productos_tallas;
-		$data["paginas"] = (int) $paginas+1;
+		$data["paginas"] = $paginas;
 
 		$this->load->view('plantillas/header',$data);
 		$this->load->view('productos_v');
@@ -81,9 +89,9 @@ class Productos extends CI_Controller {
 		return $arreglo_tallas;
 	}
 
-	public function obtener_modelos(){
+	public function obtener_modelos($id_marca = null, $modelo = null){
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->obtener_modelos();
+		$respuesta = $this->productos_m->obtener_modelos($id_marca, $modelo);
 		return $respuesta;
 	}
 
@@ -107,91 +115,104 @@ class Productos extends CI_Controller {
 	public function actualizar_producto()
 	{
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->actualizar_producto($_POST["datos_p"]);
+		$respuesta = $this->productos_m->actualizar_producto($this->input->post("datos_p"));
 		echo $respuesta;
 	}
 
 	public function borrar_producto(){
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->borrar_producto($_POST["datos_p"]);
+		$respuesta = $this->productos_m->borrar_producto($this->input->post("datos_p"));
 		echo $respuesta;
 	}
 
 	public function insertar_producto(){
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->insertar_producto($_POST["datos_p"]);
+		$respuesta = $this->productos_m->insertar_producto($this->input->post("datos_p"));
 		echo $respuesta;
 	}
 
 	public function obtener_codigo(){
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->obtener_codigo($_POST["d_codigo"]);
+		$respuesta = $this->productos_m->obtener_codigo($this->input->post("d_codigo"));
 		echo json_encode($respuesta);
 	}
 
 	public function validar_marca(){
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->validar_marca($_POST["p_marca"]);
+		$respuesta = $this->productos_m->validar_marca($this->input->post("p_marca"));
 		echo json_encode($respuesta);
 	}
 
 	public function validar_modelo(){
 		$this->load->model('productos_m');
-		$respuesta = $this->productos_m->validar_modelo($_POST["p_modelo"]);
+		$respuesta = $this->productos_m->validar_modelo($this->input->post("p_modelo"));
 		echo json_encode($respuesta);
 	}
 
-	public function busqueda_producto(){
-		$marca = trim($_POST["marcas_select"]);
-		$modelo = trim($_POST["modelo"]);
-		$codigo_barras = trim($_POST["codigo_barras"]);
-		$orden_busqueda = 'f';
+	public function busqueda_producto($pag = 1, $offset = 0){
+		$marca = trim($this->input->post("marcas_select"));
+		$modelo = trim($this->input->post("modelo"));
+		$codigo_barras = trim($this->input->post("codigo_barras"));
+		$registros = trim($this->input->post("registros"));
+		$orden_busqueda = 't';
+		$offset = ($pag * $registros) - $registros;
+		$paginas = 1;
+		$limit = $registros;
 		$tallas = array();
 		$productos = array();
 		$productos_tallas = array();
 
 		if ($marca == "0") {
 			$marca = null;
-		}else{
-			$orden_busqueda = 't';
 		}
 
 		if ($modelo == "") {
 			$modelo = null;
-		}else{
-			$orden_busqueda = 't';
 		}
 
 		if ($codigo_barras == "") {
 			$codigo_barras = null;
+		}else{
+			$orden_busqueda = 'f';
 		}
 
 		$this->load->model('productos_m');
+		$tallas = $this->productos_m->obtener_tallas();
 
-		if($marca == null && $modelo == null && $codigo_barras == null){
-			$tallas = $this->productos_m->obtener_tallas();
-			$productos = $this->productos_m->obtener_productos();
-			$producto_talla = $this->productos_m->obtener_producto_talla();
-			$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
-		}else{
-			$tallas = $this->productos_m->obtener_tallas();
+		if($orden_busqueda == 't'){
+			$productos = $this->productos_m->obtener_productos($marca, $modelo, $limit, $offset);
 
-			if($orden_busqueda == 't'){
-				$productos = $this->productos_m->obtener_productos($marca, $modelo);
-
-				if(!empty($productos)){
-					$cadena_p = $this->cadena_productos($productos);
-					$producto_talla = $this->productos_m->obtener_producto_talla($codigo_barras, $cadena_p);
-					$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+			if(!empty($productos)){
+				$cadena_p = $this->cadena_productos($productos);
+				$producto_talla = $this->productos_m->obtener_producto_talla($codigo_barras, $cadena_p);
+				$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+				$modelos = $this->obtener_modelos($marca, $modelo);
+			
+				if ($modelos != 0) {
+					if(($modelos % $registros) == 0){
+						$paginas = $modelos/$registros;
+					}else{
+						$paginas = ceil($modelos/$registros);
+					}
 				}
-			}else{
-				$producto_talla = $this->productos_m->obtener_producto_talla($codigo_barras);
+			}
+		}else{
+			$producto_talla = $this->productos_m->obtener_producto_talla($codigo_barras);
 
-				if(!empty($producto_talla)){
-					$productos = $this->productos_m->obtener_productos($producto_talla[0]->id_marca, $producto_talla[0]->modelo);
-					$cadena_p = $this->cadena_productos($productos);
-					$producto_talla = $this->productos_m->obtener_producto_talla(null, $cadena_p);
-					$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+			if(!empty($producto_talla)){
+				$productos = $this->productos_m->obtener_productos($producto_talla[0]->id_marca, $producto_talla[0]->modelo, $limit, $offset);
+				$cadena_p = $this->cadena_productos($productos);
+				$producto_talla = $this->productos_m->obtener_producto_talla(null, $cadena_p);
+				$productos_tallas = $this->crear_arreglo_producto($tallas, $productos, $producto_talla);
+
+				$modelos = count($productos);
+
+				if ($modelos != 0) {
+					if(($modelos % $registros) == 0){
+						$paginas = $modelos/$registros;
+					}else{
+						$paginas = ceil($modelos/$registros);
+					}
 				}
 			}
 		}
@@ -201,8 +222,32 @@ class Productos extends CI_Controller {
 		$data["productos_tallas"] = $productos_tallas;
 
 		$respuesta = $this->create_table_html($tallas, $productos, $productos_tallas);
+
+		$html_pags = '<ul class="pagination">';
+		$html_pags .= 	'<li class="first">';
+		$html_pags .= 		'<a href="#" aria-label="Previous" onclick="obtener_productos(this, 1)">';
+		$html_pags .= 			'<span aria-hidden="true">&laquo;</span>';
+		$html_pags .= 		'</a>';
+		$html_pags .= 	'</li>';
+
+		for ($i = 1 ; $i <= $paginas ; $i++) { 
+			$html_pags .= '<li class="';
+			if($i == $pag){
+				$html_pags .= 'active ';
+			}
+			$html_pags .= 'pag_' . $i . '">';
+			$html_pags .= 	'<a href="#" onclick="obtener_productos(this, ' . $i . ')">' . $i . '</a>';
+			$html_pags .= '</li>';
+		}
+
+		$html_pags .= 	'<li class="last">';
+		$html_pags .= 		'<a href="#" aria-label="Next" onclick="obtener_productos(this, ' . $paginas . ')">';
+		$html_pags .= 			'<span aria-hidden="true">&raquo;</span>';
+		$html_pags .= 		'</a>';
+		$html_pags .= 	'</li>';
+		$html_pags .= '</ul>';
 		
-		echo $respuesta;
+		echo $respuesta . "|||" . $html_pags;
 	}
 
 	public function cadena_productos($arreglo_productos){

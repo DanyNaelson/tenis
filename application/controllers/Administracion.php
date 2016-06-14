@@ -66,19 +66,19 @@ class Administracion extends CI_Controller {
 	public function actualizar_usuario()
 	{
 		$this->load->model('administracion_m');
-		$respuesta = $this->administracion_m->actualizar_usuario($_POST["datos_u"]);
+		$respuesta = $this->administracion_m->actualizar_usuario($this->input->post("datos_u"));
 		echo $respuesta;
 	}
 
 	public function borrar_usuario(){
 		$this->load->model('administracion_m');
-		$respuesta = $this->administracion_m->borrar_usuario($_POST["datos_u"]);
+		$respuesta = $this->administracion_m->borrar_usuario($this->input->post("datos_u"));
 		echo $respuesta;
 	}
 
 	public function insertar_usuario(){
 		$this->load->model('administracion_m');
-		$respuesta = $this->administracion_m->insertar_usuario($_POST["datos_u"]);
+		$respuesta = $this->administracion_m->insertar_usuario($this->input->post("datos_u"));
 		echo $respuesta;
 	}
 }

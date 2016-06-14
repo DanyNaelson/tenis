@@ -39,6 +39,8 @@ $(document).ready(function(){
 			$("#modelo").val("");
 		}
 
+		talla_sel = $("#tallas").val();
+
 		$.ajax({
 		    // la URL para la petición
 		    url : "busqueda_producto",
@@ -55,7 +57,32 @@ $(document).ready(function(){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_busqueda) {
-		    	$("#tabla_productos").html(respuesta_busqueda);
+		    	respuesta_busqueda = respuesta_busqueda.split("|||");
+	    		$("#tabla_productos").html(respuesta_busqueda[0]);
+	    		$("#pags").html(respuesta_busqueda[1]);
+	    		if($("#codigo_barras").val() != ""){
+		    		for (i = 4; i <= 29; i++) {
+		    			td_current = $("#tabla_productos").find("tr").find("td").eq(i);
+		    			if(td_current.html() == $("#codigo_barras").val()){
+		    				td_current.css({ 'background-color' : 'lightgreen', 'color' : 'blue' });
+		    			}
+		    		}
+		    	}
+
+		    	if (talla_sel != '0'){
+			    	tr_table = $("#tabla_productos").find("tr");
+
+			    	for(j = 0 ; j <= tr_table.length ; j++){
+			    		tr_parent = tr_table.eq(j);
+				    	for (k = 4 ; k < 29 ; k++) {
+				    		td_current = tr_parent.children().eq(k);
+
+				    		if((k - 3) != talla_sel){
+				    			td_current.css('display', 'none');
+				    		}
+				    	}
+				    }
+				}
 		    },
 		 
 		    // código a ejecutar si la petición falla;
@@ -84,6 +111,8 @@ $(document).ready(function(){
 	});
 
 	$("#agregar_p").click(function(){
+		$("#tabla_productos").find($("td, th")).css("display", "");
+
 		tr_html = "<tr id='producto' style='background: lightgray;'>";
 		tr_html +=	"<td class='text-center no-item'></td>";
 		tr_html +=	"<td class='text-center' id='marca'></td>";
@@ -276,7 +305,7 @@ function actualizar_producto(obj_boton){
 		if(etiqueta == "select"){
 			datos_producto += "|" + td_table.find("select").val() + 'select';
 		}else if(etiqueta == "input"){
-			if(tr_parent.children("td").eq(1).find("input").val() == "" || tr_parent.children("td").eq(2).find("input").val() == "" || tr_parent.children("td").eq(3).find("input").val() == "" /*|| tr_parent.children("td").eq(29).find("input").val() == ""*/){
+			if(tr_parent.children("td").eq(1).find("input").val() == "" || tr_parent.children("td").eq(2).find("input").val() == "" || tr_parent.children("td").eq(3).find("input").val() == ""){
 				td_table.find("input").focus();
 				actualizar = false;
 				bootbox.alert("El campo Marca, Modelo, Descripción y precio no pueden estar vacíos.");
@@ -305,8 +334,25 @@ function actualizar_producto(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_actualizar) {
-		    	bootbox.alert(respuesta_actualizar, function() {
-				  location.href = "index";
+		    	mensaje = respuesta_actualizar.split("|");
+		    	bootbox.alert(mensaje[0], function() {
+		    		if (mensaje[1] == 't') {
+		    			tr_parent.find(".actualizar_p").removeClass("btn btn-success btn-sm actualizar_p").addClass("btn btn-info btn-sm editar_p");
+						tr_parent.find(".editar_p").find("span").removeClass("glyphicon-ok").addClass("glyphicon-edit");
+		    			tr_parent.css('background', 'none');
+		    			td_count = tr_parent.find("td").length -2;
+
+		    			for (i = 1 ; i < td_count ; i++) {
+		    				td_current = tr_parent.find("td").eq(i);
+		    				if(td_current.children().prop("tagName").toLowerCase() == 'select'){
+		    					valor_td = td_current.children().find("option:selected").text();
+		    				}else{
+		    					valor_td = td_current.children().val();
+		    				}
+		    				td_current.html(valor_td);
+		    				validar_td(td_current, i);
+		    			}
+		    		}
 				});
 		    },
 		 
@@ -314,9 +360,21 @@ function actualizar_producto(obj_boton){
 		    // son pasados como argumentos a la función
 		    // el objeto de la petición en crudo y código de estatus de la petición
 		    error : function(xhr, status) {
-		        alert('Disculpe, existió un problema');
+		        bootbox.alert('Disculpe, existió un problema');
 		    }
 		});
+	}
+}
+
+function validar_td(td_current, i){
+	if(i >= 4 && i <= 28){
+		if(valor_td == "") {
+			td_current.css("background-color", "#f2dede");
+		}else{
+			td_current.css("background-color", "#dff0d8");
+		}
+	}else{
+		td_current.css('background', 'none');
 	}
 }
 
@@ -333,7 +391,7 @@ function insertar_producto(obj_boton){
 		if(etiqueta == "select"){
 			datos_producto += td_table.find("select").val() + 'select';
 		}else if(etiqueta == "input"){
-			if(tr_parent.children("td").eq(1).find("input").val() == "" || tr_parent.children("td").eq(2).find("input").val() == "" || tr_parent.children("td").eq(3).find("input").val() == "" /*|| tr_parent.children("td").eq(29).find("input").val() == ""*/){
+			if(tr_parent.children("td").eq(1).find("input").val() == "" || tr_parent.children("td").eq(2).find("input").val() == "" || tr_parent.children("td").eq(3).find("input").val() == ""){
 				td_table.find("input").focus();
 				actualizar = false;
 				bootbox.alert("El campo Marca, Modelo, Descripción y precio no pueden estar vacíos.");
@@ -438,6 +496,7 @@ function validar(obj_check){
 
 function editar_p(obj_button){
 	if($(obj_button).attr('class') == 'btn btn-info btn-sm editar_p'){
+		$("#tabla_productos").find($("td, th")).css("display", "");
 		tr_parent = $(obj_button).parent().parent();
 		num_td = tr_parent.find("td").length - 2;
 		marca_sel = tr_parent.css('background', 'lightgray').find("td").eq(1).attr("id");
@@ -502,4 +561,61 @@ function obtener_productos(obj_a, pag){
 	$(".pagination").find("li").removeClass("active");
 	pag_li = $(obj_a).parent();
 	$(".pag_" + pag).addClass("active");
+
+	registros = $("#registros").val();
+
+	marca = $("#marca_select select").val();
+	modelo = $("#modelo").val();
+	codigo_barras = $("#codigo_barras").val();
+
+	variables_post = "marcas_select=" + marca + "&modelo=" + modelo + "&codigo_barras=" + codigo_barras + "&registros=" + registros;
+
+	form_productos = $(this);
+	if($("#codigo_barras").val() != ""){
+		$("#marca_select option").each(function(index){
+			if(index == '0'){
+				$(this).prop("selected", true);
+			}else{
+				$(this).prop("selected", false);
+			}
+		});
+		$("#modelo").val("");
+	}
+
+	$.ajax({
+	    // la URL para la petición
+	    url : "busqueda_producto/" + pag,
+	 
+	    // especifica si será una petición POST o GET
+	    type : "POST",
+
+	    // envia los valores del form
+	    data : variables_post,
+
+	    //especifica el tipo de dato que espera recibir
+	    dataType: 'html',
+
+	    // código a ejecutar si la petición es satisfactoria;
+	    // la respuesta es pasada como argumento a la función
+	    success : function(respuesta_busqueda) {
+	    	respuesta_busqueda = respuesta_busqueda.split("|||");
+	    	$("#tabla_productos").html(respuesta_busqueda[0]);
+	    	$("#pags").html(respuesta_busqueda[1]);
+	    	if($("#codigo_barras").val() != ""){
+	    		for (var i = 4; i <= 29; i++) {
+	    			td_current = $("#tabla_productos").find("tr").find("td").eq(i);
+	    			if(td_current.html() == $("#codigo_barras").val()){
+	    				td_current.css({ 'background-color' : 'lightgreen', 'color' : 'blue' });
+	    			}
+	    		}
+	    	}
+	    },
+	 
+	    // código a ejecutar si la petición falla;
+	    // son pasados como argumentos a la función
+	    // el objeto de la petición en crudo y código de estatus de la petición
+	    error : function(xhr, status) {
+	        bootbox.alert('Disculpe, existió un problema');
+	    }
+	});
 }

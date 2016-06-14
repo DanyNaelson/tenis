@@ -21,9 +21,20 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_modelos(){
+	function obtener_modelos($id_marca = null, $modelo = null){
 		$sql = "SELECT count(id_producto) as num_p
-				FROM productos";
+				FROM productos ";
+
+		if (!is_null($id_marca)){
+			$sql .= "WHERE id_marca = " . $id_marca . " ";
+			if (!is_null($modelo)) {
+				$sql .= "AND modelo = '" . $modelo . "'";
+			}
+		}else{
+			if (!is_null($modelo)) {
+				$sql .= "WHERE modelo = '" . $modelo . "'";
+			}
+		}
 
 		$query = $this->db->query($sql);
         $row = $query->row();
@@ -36,7 +47,7 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_productos($id_marca = null, $modelo = null, $limit = 2, $offset = 1){
+	function obtener_productos($id_marca = null, $modelo = null, $limit = 2, $offset = 0){
 		$sql = "SELECT p.id_producto, m.id_marca, m.marca, p.modelo, p.descripcion, p.precio
 				FROM productos p 
 				INNER JOIN marca m ON(m.id_marca = p.id_marca) ";
@@ -53,7 +64,7 @@ class Productos_m extends CI_Model{
 			}
 		}
 
-		$sql .= "ORDER BY p.id_producto
+		$sql .= "ORDER BY m.marca, p.modelo
 				LIMIT " . $limit . " OFFSET " . $offset;
 
 		$query = $this->db->query($sql);
@@ -124,6 +135,8 @@ class Productos_m extends CI_Model{
 		$insert = "";
 		$mensaje = "No se ingresaron datos para actualizar el producto.";
 
+		$this->db->trans_begin();
+		
 		if($posicion === false){
 			$data = array(
 		        'marca' => $d_producto[1]
@@ -131,6 +144,10 @@ class Productos_m extends CI_Model{
 
 			$str = $this->db->insert('marca', $data);
 			$id_ultimo_m = $this->db->insert_id();
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
 		}
 		else
 		{
@@ -146,10 +163,18 @@ class Productos_m extends CI_Model{
 		$this->db->where('id_producto', $id_producto);
 		$str = $this->db->update('productos');
 
+		if ($this->db->trans_status() === FALSE){
+		    $this->db->trans_rollback();
+		}
+
 		if ($str == 1)
 		{
 			$this->db->where('id_producto', $id_producto);
 			$str = $this->db->delete('producto_talla');
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
 
 			if ($str == 1)
 			{
@@ -179,8 +204,16 @@ class Productos_m extends CI_Model{
 
 						if ($tipo_m[0] != '0') {
 							$mensaje = "Se ingresaron los codigos de barra correctamente.";
+							$mensaje .= "|t";
 						} else {
 							$mensaje = "Error al insertar codigos de barra.";
+							$mensaje .= "|f";
+						}
+
+						if ($this->db->trans_status() === FALSE){
+						    $this->db->trans_rollback();
+						}else{
+						    $this->db->trans_commit();
 						}
 					}
 				}
@@ -188,11 +221,13 @@ class Productos_m extends CI_Model{
 			else
 			{
 				$mensaje = "Error al borrar permisos del usuario.";
+				$mensaje .= "|f";
 			}
 		}
 		else
 		{
 			$mensaje = "Error al actualizar los datos del producto.";
+			$mensaje .= "|f";
 		}
 
 		return $mensaje;
@@ -201,8 +236,14 @@ class Productos_m extends CI_Model{
 	function borrar_producto($datos_producto){
 		$id_producto = $datos_producto;
 
+		$this->db->trans_begin();
+
 		$this->db->where('id_producto', $id_producto);
 		$str = $this->db->delete('productos');
+
+		if ($this->db->trans_status() === FALSE){
+		    $this->db->trans_rollback();
+		}
 
 		if ($str == 1)
 		{
@@ -216,6 +257,12 @@ class Productos_m extends CI_Model{
 			else
 			{
 				$mensaje = "Error al borrar productos-talla.";
+			}
+			
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}else{
+			    $this->db->trans_commit();
 			}
 		}
 		else
@@ -231,12 +278,19 @@ class Productos_m extends CI_Model{
 		$posicion = strpos($d_producto[0], "select");
 		$insert = "";
 
+		$this->db->trans_begin();
+
 		if($posicion === false){
 			$data = array(
 		        'marca' => trim($d_producto[0])
 			);
 
 			$str = $this->db->insert('marca', $data);
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
+
 			$id_ultimo_m = $this->db->insert_id();
 		}
 		else
@@ -256,6 +310,11 @@ class Productos_m extends CI_Model{
 			);
 
 			$str = $this->db->insert('productos', $data);
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
+
 			$id_ultimo_p = $this->db->insert_id();
 
 			if ($str == 1)
@@ -288,6 +347,12 @@ class Productos_m extends CI_Model{
 							$mensaje = "Se ingresaron los codigos de barra correctamente.";
 						} else {
 							$mensaje = "Error al insertar codigos de barra.";
+						}
+
+						if ($this->db->trans_status() === FALSE){
+						    $this->db->trans_rollback();
+						}else{
+						    $this->db->trans_commit();
 						}
 					}
 				}

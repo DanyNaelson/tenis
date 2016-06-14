@@ -13,6 +13,26 @@
 				    <label for="codigo_barras">Codigo de Barras: </label>
 				    <input type="text" class="form-control" id="codigo_barras" name="codigo_barras" placeholder="Código de Barras">
 				</div>
+				<div class="form-group">
+				    <label for="tallas">Tallas: </label>
+				    <select name="tallas" id="tallas" class="form-control">
+				    	<option value="0">Seleccionar...</option>
+				    <? 	$tal = 1;
+					foreach ($tallas as $talla): ?>
+				    	<option value="<?= $tal ?>"><?= $talla->talla ?></option>
+					<? 	$tal++;
+					endforeach; ?>
+				    </select>
+				</div>
+				<div class="form-group">
+				    <label for="registros">Mostrar </label>
+				    <select name="registros" id="registros" class="form-control">
+				    	<option value="2">2</option>
+				    	<option value="10">10</option>
+				    	<option value="20">20</option>
+				    </select>
+				    <label for="registros"> registros</label>
+				</div>
 				<button type="submit" class="btn btn-info">Buscar</button>
 			</form>
 		</div>
@@ -31,9 +51,11 @@
 						<th class="text-center" class="marca">Marca</th>
 						<th class="text-center" class="modelo">Modelo</th>
 						<th class="text-center" class="descripcion">Descripcion</th>
-					<? foreach ($tallas as $talla): ?>
-						<th class="text-center"><?= ucfirst($talla->talla) ?></th>
-					<? endforeach; ?>
+					<? 	$tal = 1;
+						foreach ($tallas as $talla): ?>
+						<th class="text-center talla-<?= $tal ?>"><?= ucfirst($talla->talla) ?></th>
+					<? 	$tal++;
+						endforeach; ?>
 						<th class="text-center" class="precio">Precio</th>
 						<th class="text-center">Editar</th>
 						<th class="text-center">Borrar</th>
@@ -102,7 +124,7 @@
 	</div>
 	<div class="row">
 		<div class="col-sm-12 text-center">
-			<nav>
+			<nav id="pags">
 				<ul class="pagination">
 					<li class="first">
 						<a href="#" aria-label="Previous" onclick="obtener_productos(this, 1)">
