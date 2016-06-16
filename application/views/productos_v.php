@@ -27,7 +27,6 @@
 				<div class="form-group">
 				    <label for="registros">Mostrar </label>
 				    <select name="registros" id="registros" class="form-control">
-				    	<option value="2">2</option>
 				    	<option value="10">10</option>
 				    	<option value="20">20</option>
 				    </select>
@@ -144,15 +143,17 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-sm-4">
+		<div class="col-xs-12 col-sm-4 text-left">
 			<a href="<?= $pagina_retorno ?>" class="btn btn-default btn-sm" role="button">
 				<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Regresar
 			</a>
 		</div>
-		<div class="col-sm-4">
-			&nbsp;
+		<div class="col-xs-12 col-sm-4 text-center">
+			<button type="button" class="btn btn-success btn-sm" id="crear_cb">
+				Crear código de barras <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+			</button>
 		</div>
-		<div class="col-sm-4 text-right">
+		<div class="col-xs-12 col-sm-4 text-right">
 			<button type="button" class="btn btn-info btn-sm" id="agregar_p">
 				Agregar <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 			</button>

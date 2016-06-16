@@ -40,12 +40,15 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-sm-4">
+		<div class="col-xs-12 col-sm-4 text-left">
 			<a href="<?= $pagina_retorno ?>" class="btn btn-default btn-sm" role="button">
 				<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Regresar
 			</a>
 		</div>
-		<div class="col-sm-4 col-sm-offset-4 text-right">
+		<div class="col-xs-12 col-sm-4 text-center">
+			&nbsp;
+		</div>
+		<div class="col-xs-12 col-sm-4 text-right">
 			<button type="button" class="btn btn-info btn-sm" id="agregar_u">
 				Agregar <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 			</button>

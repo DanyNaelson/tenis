@@ -124,9 +124,12 @@ $(document).ready(function(){
 		tr_html +=	"</td>";
 		for(i = 1 ; i <= 26 ; i++){
 			tr_html +=	"<td class='text-center no-check' onchange='validar_codigo(this)' style='background: lightgray;'>";
-			tr_html +=		"<input class='input_req' onchange='validar(this)' type='text' size='10'>";
+			tr_html +=		"<input class='input_req' onchange='validar(this)' onkeypress='enter_tab(event, this)' type='text' size='10'>";
 			tr_html +=	"</td>";
 		}
+		tr_html +=	"<td class='text-center no-check' style='background: lightgray;'>";
+		tr_html +=		"<input class='input_req' onchange='validar(this)' type='text' size='10'>";
+		tr_html +=	"</td>";
 		tr_html +=	"<td class='text-center'>";
 		tr_html +=		"<button type='button' class='btn btn-success btn-sm insertar_p' onclick='insertar_producto(this)'>";
 		tr_html +=			"<span class='glyphicon glyphicon-ok' aria-hidden='true'></span>";
@@ -175,7 +178,46 @@ $(document).ready(function(){
 	$(".i-codigo").on("change", function(){
 		validar_codigo($(this));
 	});
+
+	$("#crear_cb").on("click", function(){
+		bootbox.prompt("Ingresar código de barras: ", function(result) {                
+		  	if (result !== null) {                                             
+		    	$.ajax({
+				    // la URL para la petición
+				    url : "/inventarios/barcode",
+				 
+				    // especifica si será una petición POST o GET
+				    type : "POST",
+
+				    //datos pasados por metodo post
+				    data: { codigo : result },
+
+				    //especifica el tipo de dato que espera recibir
+				    dataType: 'html',
+
+				    // código a ejecutar si la petición es satisfactoria;
+				    // la respuesta es pasada como argumento a la función
+				    success : function(respuesta_codigo) {
+				    	bootbox.alert(respuesta_codigo);
+				    },
+				 
+				    // código a ejecutar si la petición falla;
+				    // son pasados como argumentos a la función
+				    // el objeto de la petición en crudo y código de estatus de la petición
+				    error : function(xhr, status) {
+				        bootbox.alert('Disculpe, existió un problema');
+				    }
+				});                              
+		  	}
+		});
+	});
 });
+
+function enter_tab(event, obj_input){
+	if(event.keyCode == 13){
+		$(obj_input).parent().next("td").children("input").focus();
+	}
+}
 
 function valida_opcion(obj_select){
 	if($(obj_select).val() == 't'){
@@ -205,8 +247,22 @@ function validar_codigo(obj_td){
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta) {
 		    	if(respuesta != null){
-		    		$(input_codigo).tooltip({title: "<ul>YA EXISTE EL CODIGO DE BARRAS EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li><li>Codigo de barras: " + respuesta[0].codigo_barras + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
+		    		$(input_codigo).tooltip({title: "<p>YA EXISTE EL CODIGO: </p><p>Marca: " + respuesta[0].marca + "</p><p>Modelo: " + respuesta[0].modelo + "</p>", html: true, placement: "bottom", trigger: "focus"});
 		    		input_codigo.val("").focus();
+		    	}else{
+		    		tr_parent = $(obj_td).parent();
+		    		num_td = tr_parent.find("td").length;
+		    		codigos = 0;
+		    		for (i = 4; i <= num_td - 2; i++) {
+		    			td_current = tr_parent.find("td").eq(i);
+		    			if(codigo == $(td_current).find("input").val()){
+		    				codigos++;
+		    			}
+		    		}
+		    		if (codigos > 1){
+    					$(input_codigo).tooltip({title: "<p>YA EXISTE EL CODIGO EN ESTE MISMO MODELO.</p>", html: true, placement: "bottom", trigger: "focus"});
+    		input_codigo.val("").focus();
+    				}
 		    	}
 		    },
 		 
@@ -277,7 +333,7 @@ function validar_modelo(object_td){
 	    // la respuesta es pasada como argumento a la función
 	    success : function(respuesta) {
 	    	if(respuesta != null){
-	    		$(input_modelo).tooltip({title: "<ul>YA EXISTE EL MODELO EN: <li>Marca: " + respuesta[0].marca + "</li><li>Modelo: " + respuesta[0].modelo + "</li><li>Descripción: " + respuesta[0].descripcion + "</li></ul>", html: true, placement: "bottom", trigger: "focus"});
+	    		$(input_modelo).tooltip({title: "<p>YA EXISTE EL MODELO EN: </p><p>Marca: " + respuesta[0].marca + "</p><p>Modelo: " + respuesta[0].modelo + "</p></p>", html: true, placement: "bottom", trigger: "focus"});
 	    		input_modelo.val("").focus();
 	    	}
 	    },
@@ -367,7 +423,7 @@ function actualizar_producto(obj_boton){
 }
 
 function validar_td(td_current, i){
-	if(i >= 4 && i <= 28){
+	if(i >= 4 && i <= 29){
 		if(valor_td == "") {
 			td_current.css("background-color", "#f2dede");
 		}else{
@@ -424,8 +480,9 @@ function insertar_producto(obj_boton){
 		    // código a ejecutar si la petición es satisfactoria;
 		    // la respuesta es pasada como argumento a la función
 		    success : function(respuesta_insertar) {
-		    	bootbox.alert(respuesta_insertar, function() {
-				  location.href = "index";
+		    	mensaje = respuesta_insertar.split("|");
+		    	bootbox.alert(mensaje[0], function() {
+		    		actualizar_tr(tr_parent, mensaje[1]);
 				});
 		    },
 		 
@@ -436,6 +493,32 @@ function insertar_producto(obj_boton){
 		        bootbox.alert('Disculpe, existió un problema');
 		    }
 		});
+	}
+}
+
+function actualizar_tr(tr_parent, mensaje){
+	if (mensaje == 't') {
+		tr_parent.find(".insertar_p").removeClass("btn btn-success btn-sm insertar_p").addClass("btn btn-info btn-sm editar_p");
+		tr_parent.find(".editar_p").find("span").removeClass("glyphicon-ok").addClass("glyphicon-edit");
+		tr_parent.find(".editar_p").attr("onclick", "");
+		tr_parent.find(".editar_p").on("click", function(){
+			editar_p($(this));
+		});
+		tr_parent.css('background', 'none');
+		td_count = tr_parent.find("td").length -2;
+
+		for (i = 1 ; i < td_count ; i++) {
+			td_current = tr_parent.find("td").eq(i);
+			
+			if(td_current.children().prop("tagName").toLowerCase() == 'select'){
+				valor_td = td_current.children().find("option:selected").text();
+			}else{
+				valor_td = td_current.children().val();
+			}
+
+			td_current.html(valor_td);
+			validar_td(td_current, i);
+		}
 	}
 }
 
@@ -507,7 +590,7 @@ function editar_p(obj_button){
 				html_marcas = obtener_m(marca_sel, td_table);
 			}else{
 				td_valor = td_table.html();
-				html_input = "<input type='text' size='10' class='input_req' onchange='validar(this)' value='" + td_valor + "' />";
+				html_input = "<input type='text' size='10' class='input_req' onchange='validar(this)' value='" + td_valor + "' onkeypress='enter_tab(event, this)' />";
 				td_table.html(html_input);
 			}
 		}

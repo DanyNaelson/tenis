@@ -21,10 +21,10 @@ class Productos extends CI_Controller {
 		$tallas = $this->productos_m->obtener_tallas();
 		$modelos = $this->obtener_modelos();
 		if ($modelos != 0) {
-			if(($modelos % 2) == 0){
-				$paginas = $modelos/2;
+			if(($modelos % 10) == 0){
+				$paginas = $modelos/10;
 			}else{
-				$paginas = ceil($modelos/2);
+				$paginas = ceil($modelos/10);
 			}
 		} else {
 			$paginas = 1;
@@ -221,7 +221,7 @@ class Productos extends CI_Controller {
 		$data["productos"] = $productos;
 		$data["productos_tallas"] = $productos_tallas;
 
-		$respuesta = $this->create_table_html($tallas, $productos, $productos_tallas);
+		$respuesta = $this->create_table_html($tallas, $productos, $productos_tallas, $offset);
 
 		$html_pags = '<ul class="pagination">';
 		$html_pags .= 	'<li class="first">';
@@ -261,7 +261,7 @@ class Productos extends CI_Controller {
 		return $cadena_p;
 	}
 
-	public function create_table_html($tallas, $productos, $productos_tallas){
+	public function create_table_html($tallas, $productos, $productos_tallas, $offset){
 		$html = '<thead>
 				<tr class="th-blue">
 					<th class="text-center">#</th>
@@ -281,15 +281,15 @@ class Productos extends CI_Controller {
 			<tbody>';
 		for ($i = 0 ; $i < count($productos) ; $i++){
 			$html .= '<tr id="producto_' . $productos[$i]->id_producto . '">
-					<td class="text-center no-item">' . ($i+1) . '</td>
+					<td class="text-center no-item">' . ($offset+$i+1) . '</td>
 					<td class="text-center marca" id="marca_' . $productos[$i]->id_marca . '">' . $productos[$i]->marca . '</td>
 					<td class="text-center modelo" onchange="validar_modelo(this)">' . $productos[$i]->modelo . '</td>
 					<td class="text-center descripcion">' . $productos[$i]->descripcion . '</td>';
 			for ($j = 0 ; $j < count($tallas) ; $j++){
 				if($productos_tallas[$i][$j] != ''){
-					$html .= '<td class="text-center i-codigo check" onchange="validar_codigo(this)">' . $productos_tallas[$i][$j] . '</td>';
+					$html .= '<td class="text-center i-codigo check" onchange="validar_codigo(this)" onkeypress="enter_tab(event, this)">' . $productos_tallas[$i][$j] . '</td>';
 				}else{
-					$html .= '<td class="text-center i-codigo no-check" onchange="validar_codigo(this)"></td>';
+					$html .= '<td class="text-center i-codigo no-check" onchange="validar_codigo(this)" onkeypress="enter_tab(event, this)"></td>';
 				}
 			}
 			$html .= '<td class="text-center precio">' . $productos[$i]->precio . '</td>

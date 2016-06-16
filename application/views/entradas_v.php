@@ -90,17 +90,17 @@
 		</div><!-- /.modal -->
 	</div>
 	<div class="row">
-		<div class="col-sm-4 text-center">
+		<div class="col-xs-4 text-center">
 			<button type="button" class="btn btn-success btn-sm" id="finalizar">
 				Finalizar <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 			</button>
 		</div>
-		<div class="col-sm-4 text-center">
+		<div class="col-xs-4 text-center">
 			<button type="button" class="btn btn-warning btn-sm" id="pausar">
 				Pausar <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
 			</button>
 		</div>
-		<div class="col-sm-4 text-center">
+		<div class="col-xs-4 text-center">
 			<button type="button" class="btn btn-danger btn-sm" id="cancelar">
 				Cancelar <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 			</button>
@@ -195,15 +195,15 @@
 		</div>
 	</div-->
 	<div class="row">
-		<div class="col-sm-4">
+		<div class="col-xs-12 col-sm-4 text-left">
 			<a href="<?= $pagina_retorno ?>" class="btn btn-default btn-sm" role="button">
 				<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Regresar
 			</a>
 		</div>
-		<div class="col-sm-4">
+		<div class="col-xs-12 col-sm-4 text-center">
 			&nbsp;
 		</div>
-		<div class="col-sm-4 text-right">
+		<div class="col-xs-12 col-sm-4 text-right">
 			&nbsp;
 		</div>
 	</div>

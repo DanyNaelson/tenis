@@ -47,7 +47,7 @@ class Productos_m extends CI_Model{
       	}
 	}
 
-	function obtener_productos($id_marca = null, $modelo = null, $limit = 2, $offset = 0){
+	function obtener_productos($id_marca = null, $modelo = null, $limit = 10, $offset = 0){
 		$sql = "SELECT p.id_producto, m.id_marca, m.marca, p.modelo, p.descripcion, p.precio
 				FROM productos p 
 				INNER JOIN marca m ON(m.id_marca = p.id_marca) ";
@@ -277,6 +277,7 @@ class Productos_m extends CI_Model{
 		$d_producto = explode("|", $datos_producto);
 		$posicion = strpos($d_producto[0], "select");
 		$insert = "";
+		$mensaje = "Necesita ingresar por lo menos un código de barras.";
 
 		$this->db->trans_begin();
 
@@ -345,8 +346,10 @@ class Productos_m extends CI_Model{
 
 						if ($tipo_m[0] != '0') {
 							$mensaje = "Se ingresaron los codigos de barra correctamente.";
+							$mensaje .= "|t";
 						} else {
 							$mensaje = "Error al insertar codigos de barra.";
+							$mensaje .= "|f";
 						}
 
 						if ($this->db->trans_status() === FALSE){
@@ -360,11 +363,13 @@ class Productos_m extends CI_Model{
 			else
 			{
 				$mensaje = "Error al insertar el producto.";
+				$mensaje .= "|f";
 			}
 		}
 		else
 		{
 			$mensaje = "Error al insertar la marca del producto.";
+			$mensaje .= "|f";
 		}
 
 		return $mensaje;
