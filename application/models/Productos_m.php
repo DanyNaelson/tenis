@@ -132,7 +132,7 @@ class Productos_m extends CI_Model{
 		$d_producto = explode("|", $datos_producto);
 		$id_producto = str_replace("producto_", "", trim($d_producto[0]));
 		$posicion = strpos($d_producto[1], "select");
-		$insert = "";
+		$update = "";
 		$mensaje = "No se ingresaron datos para actualizar el producto.";
 
 		$this->db->trans_begin();
@@ -169,59 +169,64 @@ class Productos_m extends CI_Model{
 
 		if ($str == 1)
 		{
-			$this->db->where('id_producto', $id_producto);
-			$str = $this->db->delete('producto_talla');
+			
+			for($i = 4; $i < count($d_producto) - 1 ; $i++){
+				if(trim($d_producto[$i]) != "")
+				{
 
-			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			}
+					$this->db->select('id_producto_talla');
+					$this->db->from('producto_talla');
+					$this->db->where('id_producto', $id_producto);
+					$this->db->where('id_talla', $i - 3);
+					$query = $this->db->get();
+					$rows = $query->result();
 
-			if ($str == 1)
-			{
-				for($i = 4; $i < count($d_producto) - 1 ; $i++){
-					if(trim($d_producto[$i]) != "")
-					{
+					if(!empty($rows)){
+
+						$this->db->set('codigo_barras', trim($d_producto[$i]));
+						$this->db->where('id_producto', $rows[0]->id_producto_talla);
+						$str = $this->db->update('producto_talla');
+
+					}else{
+
 						$data = array(
-					        'id_producto' => trim($id_producto),
-					        'id_talla' => $i - 3,
-					        'codigo_barras' => trim($d_producto[$i]),
-					        'id_almacen' => NULL,
-					        'cantidad' => NULL
-						);
-
+						        'id_producto' => $id_producto,
+						        'id_talla' => $i - 3,
+						        'codigo_barras' => trim($d_producto[$i]),
+						        'id_almacen' => NULL,
+						        'cantidad' => NULL
+							);
+						
 						$str = $this->db->insert('producto_talla', $data);
 
-						if ($str == 1)
-						{
-							$insert .= "-1";
-						}
-						else
-						{
-							$insert = "0";
-						}
+					}
 
-						$tipo_m = explode("-", $insert);
+					if ($str == 1)
+					{
+						$update .= "-1";
+					}
+					else
+					{
+						$update = "0";
+					}
 
-						if ($tipo_m[0] != '0') {
-							$mensaje = "Se ingresaron los codigos de barra correctamente.";
-							$mensaje .= "|t";
-						} else {
-							$mensaje = "Error al insertar codigos de barra.";
-							$mensaje .= "|f";
-						}
+					$tipo_m = explode("-", $update);
 
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}else{
-						    $this->db->trans_commit();
-						}
+					if ($tipo_m[0] != '0') {
+						$mensaje = "Se ingresaron los codigos de barra correctamente.";
+						$mensaje .= "|t";
+					} else {
+						$mensaje = "Error al insertar codigos de barra.";
+						$mensaje .= "|f";
+					}
+
+					if ($this->db->trans_status() === FALSE){
+					    $this->db->trans_rollback();
+					}else{
+						$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se actualizo el modelo: " . trim($d_producto[2]) . " y id_talla: " . ($i - 3));
+					    $this->db->trans_commit();
 					}
 				}
-			}
-			else
-			{
-				$mensaje = "Error al borrar permisos del usuario.";
-				$mensaje .= "|f";
 			}
 		}
 		else
@@ -262,6 +267,7 @@ class Productos_m extends CI_Model{
 			if ($this->db->trans_status() === FALSE){
 			    $this->db->trans_rollback();
 			}else{
+				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se eliminó el id_producto: " . $id_producto);
 			    $this->db->trans_commit();
 			}
 		}
@@ -355,6 +361,7 @@ class Productos_m extends CI_Model{
 						if ($this->db->trans_status() === FALSE){
 						    $this->db->trans_rollback();
 						}else{
+							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se ingreso el producto con modelo: " . trim($d_producto[1]) . ", id_talla: " . ($i - 2) . " y con codigo de barras: " . trim($d_producto[$i]));
 						    $this->db->trans_commit();
 						}
 					}

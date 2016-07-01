@@ -32,27 +32,55 @@ class Entradas extends CI_Controller {
 	public function obtener_producto(){
 		$this->load->model('entradas_m');
 		$codigo_barras = trim($this->input->post("codigo_barras"));
-		$producto = $this->entradas_m->obtener_producto($codigo_barras);
-		$tr_html = $this->crea_tr($producto);
-		echo $tr_html;
+		$producto = array();
+		$tr_html = "";
+
+		if ($codigo_barras != "") {
+			$producto = $this->entradas_m->obtener_producto($codigo_barras);
+		}
+
+		if (empty($producto)) {
+			$respuesta = 'null';
+		} else {
+			$this->load->library("entradas_lib");
+			$this->entradas_lib->set_properties($producto[0]->id_producto, $producto[0]->marca, $producto[0]->modelo, $producto[0]->descripcion, $producto[0]->talla);
+			$this->entradas_lib->set_entradas();
+			$key = $this->entradas_lib->find_modelo($codigo_barras);
+
+			$respuesta = json_encode($producto);
+		}
+		
+		echo $respuesta;
 	}
 
-	public function crea_tr($producto){
-		$html_tr = "<tr id='producto_" . $producto[0]->id_producto . "'>";
-		$html_tr .= 	"<td></td>";
-		$html_tr .= 	"<td>" . $producto[0]->marca . "</td>";
-		$html_tr .= 	"<td>" . $producto[0]->modelo . "</td>";
-		$html_tr .= 	"<td>" . $producto[0]->descripcion . "</td>";
-		$html_tr .= 	"<td>" . $producto[0]->talla . "</td>";
-		$html_tr .= 	"<td>1</td>";
-		$html_tr .= 	"<td>
-							<button type='button' class='btn btn-danger btn-sm' id='cancelar'>
-								<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>
-							</button>
-						</td>";
-		$html_tr .= "</tr>";
+	public function obtener_marcas(){
+		$this->load->model('entradas_m');
+		$producto_marcas = $this->entradas_m->obtener_marcas();
+		echo json_encode($producto_marcas);
+	}
 
-		return $html_tr;
+	public function obtener_producto_modelo($marca = null, $modelo = null){
+		if (trim($modelo) == ""){
+			$modelo = null;
+		}
+
+		$this->load->model('entradas_m');
+		$producto_modelo = $this->entradas_m->obtener_producto_modelo(trim($marca), trim($modelo));
+		echo json_encode($producto_modelo);
+	}
+
+	public function obtener_tallas_select(){
+		$this->load->model('entradas_m');
+		$tallas = $this->entradas_m->obtener_tallas();
+
+		$html_select = "<select class='form-control talla_select' name='talla_select' onchange='valida_talla(this)'>";
+		$html_select .= "<option value='0'>Seleccionar...</option>'";
+		foreach ($tallas as $talla) {
+			$html_select .= "<option value='" . $talla->id_talla . "'>" . $talla->talla . "</option>'";
+		}
+		$html_select .= "</select>";
+
+		echo $html_select;
 	}
 
 }

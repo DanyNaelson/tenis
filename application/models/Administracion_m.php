@@ -111,6 +111,7 @@ class Administracion_m extends CI_Model{
 						if ($this->db->trans_status() === FALSE){
 						    $this->db->trans_rollback();
 						}else{
+							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se actualizó el id_permiso: " . ($i - 2) . " del usuario: " . $d_usuario[1]);
 						    $this->db->trans_commit();
 						}
 					}
@@ -157,6 +158,7 @@ class Administracion_m extends CI_Model{
 			if ($this->db->trans_status() === FALSE){
 			    $this->db->trans_rollback();
 			}else{
+				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se eliminó el id_usuario: " . $id_usuario);
 			    $this->db->trans_commit();
 			}
 
@@ -228,6 +230,7 @@ class Administracion_m extends CI_Model{
 				if ($this->db->trans_status() === FALSE){
 				    $this->db->trans_rollback();
 				}else{
+					$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se ingreso el id_permiso: " . ($i - 2) . " del usuario: " . $d_usuario[1]);
 				    $this->db->trans_commit();
 				}
 			}

@@ -69,9 +69,9 @@
 						<td class="text-center descripcion"><?= $productos[$i]->descripcion ?></td>
 					<? for ($j = 0 ; $j < count($tallas) ; $j++): ?>
 						<? if($productos_tallas[$i][$j] != ''): ?>
-							<td class="text-center i-codigo check"><?= $productos_tallas[$i][$j] ?></td>
+							<td class="text-center i-codigo check talla_<?= ($j + 1) ?>"><?= $productos_tallas[$i][$j] ?></td>
 						<? else: ?>
-							<td class="text-center i-codigo no-check"></td>
+							<td class="text-center i-codigo no-check talla_<?= ($j + 1) ?>"></td>
 						<? endif; ?>
 					<? endfor; ?>
 						<td class="text-center precio"><?= $productos[$i]->precio ?></td>

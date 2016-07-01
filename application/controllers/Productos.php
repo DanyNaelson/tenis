@@ -287,9 +287,9 @@ class Productos extends CI_Controller {
 					<td class="text-center descripcion">' . $productos[$i]->descripcion . '</td>';
 			for ($j = 0 ; $j < count($tallas) ; $j++){
 				if($productos_tallas[$i][$j] != ''){
-					$html .= '<td class="text-center i-codigo check" onchange="validar_codigo(this)" onkeypress="enter_tab(event, this)">' . $productos_tallas[$i][$j] . '</td>';
+					$html .= '<td class="text-center i-codigo check talla_' . ($j + 1) . '" onchange="validar_codigo(this)" onkeypress="enter_tab(event, this)">' . $productos_tallas[$i][$j] . '</td>';
 				}else{
-					$html .= '<td class="text-center i-codigo no-check" onchange="validar_codigo(this)" onkeypress="enter_tab(event, this)"></td>';
+					$html .= '<td class="text-center i-codigo no-check talla_' . ($j + 1) . '" onchange="validar_codigo(this)" onkeypress="enter_tab(event, this)"></td>';
 				}
 			}
 			$html .= '<td class="text-center precio">' . $productos[$i]->precio . '</td>

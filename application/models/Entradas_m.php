@@ -47,9 +47,28 @@ class Entradas_m extends CI_Model{
 
 	}
 
+	function obtener_marcas(){
+
+		$this->db->select('*');
+		$this->db->from('marca');
+		
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
 	function obtener_producto($codigo_barras = null){
 
-		$this->db->select('p.id_producto,m.marca,p.modelo,p.descripcion,t.talla');
+		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla');
 		$this->db->from('producto_talla pt');
 		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
 		$this->db->join('marca m', 'm.id_marca = p.id_marca');
@@ -59,6 +78,34 @@ class Entradas_m extends CI_Model{
 			$this->db->where('pt.codigo_barras', $codigo_barras);
 		}
 
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
+	function obtener_producto_modelo($marca = null, $modelo = null){
+
+		$this->db->select('p.id_producto,m.marca,p.modelo,p.descripcion');
+		$this->db->from('productos p');
+		$this->db->join('marca m', 'm.id_marca = p.id_marca');
+
+		if (!is_null($marca)){
+			$this->db->where('p.id_marca', $marca);
+		}
+
+		if ($modelo != ''){
+			$this->db->where('p.modelo', $modelo);
+		}
+		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
 
 		$row = $query->result();

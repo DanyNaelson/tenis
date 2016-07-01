@@ -40,7 +40,7 @@ $(document).ready(function(){
 		tr_parent = $(this).parent().parent();
 		valor_tr = tr_parent.attr('id');;
 		usuario = valor_tr.split("_");
-		confirm("Seguro que desea borrar el usuario?", function(result) {
+		bootbox.confirm("Seguro que desea borrar el usuario?", function(result) {
 			if(result){
 				$.ajax({
 				    // la URL para la petición
@@ -126,7 +126,7 @@ function actualizar_usuario(obj_boton){
 			if(td_table.find("input").val() == "" || td_table.find("input").val() == " "){
 				td_table.find("input").focus();
 				actualizar = false;
-				alert("El campo Usuario y Contraseña no pueden estar vacíos.");
+				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
 				return false;
 			}else{
 				valor_input = td_table.find("input").val();
@@ -187,7 +187,7 @@ function insertar_usuario(obj_boton){
 			if(td_table.find("input").val() == "" || td_table.find("input").val() == " "){
 				td_table.find("input").focus();
 				actualizar = false;
-				alert("El campo Usuario y Contraseña no pueden estar vacíos.");
+				bootbox.alert("El campo Usuario y Contraseña no pueden estar vacíos.");
 				return false;
 			}else{
 				valor_input = td_table.find("input").val();

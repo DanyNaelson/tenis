@@ -115,7 +115,7 @@ $(document).ready(function(){
 
 		tr_html = "<tr id='producto' style='background: lightgray;'>";
 		tr_html +=	"<td class='text-center no-item'></td>";
-		tr_html +=	"<td class='text-center' id='marca'></td>";
+		tr_html +=	"<td class='text-center marca_sel'></td>";
 		tr_html +=	"<td class='text-center' onchange='validar_modelo(this)'>";
 		tr_html +=	"	<input class='input_req' value='' type='text' size='10'>";
 		tr_html +=	"</td>";
@@ -163,7 +163,7 @@ $(document).ready(function(){
 		    	}
 		    	html_marcas += "<option value='t'>OTRO...</option>";
 		    	html_marcas += "</select>";
-		    	$("#marca").html(html_marcas);
+		    	$(".marca_sel").html(html_marcas);
 		    },
 		 
 		    // código a ejecutar si la petición falla;
