@@ -62,17 +62,15 @@
 						</td>
 					</tr>
 				<? endfor; ?>
-				</tbody>
-				<tfoot>
-					<tr class="th-blue">
-						<th class="marca text-center">Marca</th>
-						<th class="modelo text-center">Modelo</th>
-						<th class="descripcion text-center">Descripcion</th>
-						<th class="talla text-center">Talla</th>
-						<th class="cantidad text-center">Cantidad</th>
-						<th class="text-center">Borrar</th>
+					<tr class="text-center">
+						<td style="border: hidden;"></td>
+						<td style="border: hidden;"></td>
+						<td style="border: hidden;"></td>
+						<td class="total_entradas th-blue"><b>Total: </b></td>
+						<td id="total_e">0</td>
+						<td style="border: hidden;"></td>
 					</tr>
-				</tfoot>
+				</tbody>
 			</table>
 		</div>
 		<div id="info" class="modal fade" tabindex="-1" role="dialog">
@@ -119,7 +117,6 @@
 			<table class="table table-bordered table-condensed" id="tabla_productos">
 				<thead>
 					<tr class="th-blue">
-						<th class="text-center">#</th>
 						<th class="text-center" class="marca">Marca</th>
 						<th class="text-center" class="modelo">Modelo</th>
 						<th class="text-center" class="descripcion">Descripcion</th>
@@ -129,44 +126,7 @@
 					</tr>
 				</thead>
 				<tbody>
-				<? for ($i = 0 ; $i < count($productos) ; $i++): ?>
-					<tr id="producto_<?= $productos[$i]->id_producto ?>">
-						<td class="text-center no-item"><?= $i+1 ?></td>
-						<td class="text-center marca" id="marca_<?= $productos[$i]->id_marca ?>"><?= $productos[$i]->marca ?></td>
-						<td class="text-center modelo" onchange="validar_modelo(this)"><?= $productos[$i]->modelo ?></td>
-						<td class="text-center descripcion"><?= $productos[$i]->descripcion ?></td>
-					<? for ($j = 0 ; $j < count($tallas) ; $j++): ?>
-						<? if($productos_tallas[$i][$j] != ''): ?>
-							<td class="text-center i-codigo check"><?= $productos_tallas[$i][$j] ?></td>
-						<? else: ?>
-							<td class="text-center i-codigo no-check"></td>
-						<? endif; ?>
-					<? endfor; ?>
-						<td class="text-center precio"><?= $productos[$i]->precio ?></td>
-						<td class="text-center">
-							<button type="button" class="btn btn-info btn-sm editar_p">
-								<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-							</button>
-						</td>
-						<td class="text-center">
-							<button type="button" class="btn btn-danger btn-sm borrar_p">
-								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-							</button>
-						</td>
-					</tr>
-				<? endfor; ?>
 				</tbody>
-				<tfoot>
-					<tr class="th-blue">
-						<th class="text-center">#</th>
-						<th class="text-center" class="marca">Marca</th>
-						<th class="text-center" class="modelo">Modelo</th>
-						<th class="text-center" class="descripcion">Descripcion</th>
-					<? foreach ($tallas as $talla): ?>
-						<th class="text-center"><?= ucfirst($talla->talla) ?></th>
-					<? endforeach; ?>
-					</tr>
-				</tfoot>
 			</table>
 		</div>
 	</div>

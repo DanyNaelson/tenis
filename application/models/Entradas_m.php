@@ -120,4 +120,26 @@ class Entradas_m extends CI_Model{
 
 	}
 
+	function obtener_talla_cantidad($id_producto){
+
+		$this->db->select('id_talla,cantidad');
+		$this->db->from('producto_talla');
+		$this->db->where('id_producto', $id_producto);
+		$this->db->order_by('id_talla', 'ASC');
+
+		//echo $this->db->get_compiled_select();die;
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
 }

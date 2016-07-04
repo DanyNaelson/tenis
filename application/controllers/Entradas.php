@@ -83,4 +83,39 @@ class Entradas extends CI_Controller {
 		echo $html_select;
 	}
 
+	public function obtener_talla_cantidad(){
+		$this->load->model('entradas_m');
+		$talla_cantidad = $this->entradas_m->obtener_talla_cantidad(trim($this->input->post("id_prod")));
+		$count_tallas = count($this->entradas_m->obtener_tallas());
+		$talla_cantidad_def = $this->crea_arr_talla_cantidad($talla_cantidad, $count_tallas, trim($this->input->post("id_talla")));
+		echo json_encode($talla_cantidad_def);
+	}
+
+	public function crea_arr_talla_cantidad($talla_cantidad, $count_tallas, $talla){
+		$talla_cantidad_def = array();
+		$id_talla = 0;
+
+		for ($i = 0 ; $i < $count_tallas ; $i++) {
+			$id_talla = $i + 1;
+
+			if(isset($talla_cantidad[0]->id_talla)){
+				if($talla_cantidad[0]->id_talla == $id_talla){
+					$talla_cantidad_def[$i]["cantidad"] = $talla_cantidad[0]->cantidad;
+					
+					if($talla == $id_talla){
+						$talla_cantidad_def[$i]["cantidad"]++;
+					}
+
+					array_shift($talla_cantidad);
+				}else{
+					$talla_cantidad_def[$i]["cantidad"] = "0";
+				}
+			}else{
+				$talla_cantidad_def[$i]["cantidad"] = "0";
+			}
+		}
+
+		return $talla_cantidad_def;
+	}
+
 }

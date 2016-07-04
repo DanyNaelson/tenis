@@ -194,7 +194,7 @@ class Productos_m extends CI_Model{
 						        'id_talla' => $i - 3,
 						        'codigo_barras' => trim($d_producto[$i]),
 						        'id_almacen' => NULL,
-						        'cantidad' => NULL
+						        'cantidad' => 0
 							);
 						
 						$str = $this->db->insert('producto_talla', $data);
@@ -334,7 +334,7 @@ class Productos_m extends CI_Model{
 					        'id_talla' => $i - 2,
 					        'codigo_barras' => trim($d_producto[$i]),
 					        'id_almacen' => NULL,
-					        'cantidad' => NULL
+					        'cantidad' => 0
 						);
 
 						$str = $this->db->insert('producto_talla', $data);
