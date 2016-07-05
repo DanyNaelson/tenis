@@ -1,4 +1,12 @@
 <div class="container">
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <h1><?= $modulo ?></h1>
+    </div>
+  </div>
+  <div class="row">
+    &nbsp;
+  </div>
 <? if(isset($permisos[0]->permiso)): ?>
   	<div class="row">
   		<div class="col-sm-6 btn_menu text-center">

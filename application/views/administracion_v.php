@@ -1,5 +1,13 @@
 <div class="container">
 	<div class="row">
+		<div class="col-sm-12 text-center">
+			<h1><?= $modulo ?></h1>
+		</div>
+	</div>
+	<div class="row">
+		&nbsp;
+	</div>
+	<div class="row">
 		<div class="col-sm-12 table-responsive">
 			<table class="table table-bordered table-condensed" id="tabla_usuarios">
 				<tr class="th-blue">

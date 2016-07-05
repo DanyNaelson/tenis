@@ -1,5 +1,13 @@
 <div class="container">
 	<div class="row">
+		<div class="col-sm-12 text-center">
+			<h1><?= $modulo ?></h1>
+		</div>
+	</div>
+	<div class="row">
+		&nbsp;
+	</div>
+	<div class="row">
 		<div class="col-sm-12">
 			<form class="form-inline" id="buscar">
 				<div class="form-group" id="marca_select">

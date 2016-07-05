@@ -22,6 +22,7 @@ class Inicio extends CI_Controller {
 		$data["nombre"] = $_SESSION["nombre"];
 		$data["titulo"] = "Sistema de inventarios | Inicio";
 		$data["login"] = false;
+		$data["modulo"] = "Inicio";
 		$data["archivo_js"] = "inicio.js";
 		$data["permisos"] = $permisos_usuario;
 

@@ -1,5 +1,13 @@
 <div class="container">
 	<div class="row">
+		<div class="col-sm-12 text-center">
+			<h1><?= $modulo ?></h1>
+		</div>
+	</div>
+	<div class="row">
+		&nbsp;
+	</div>
+	<div class="row">
 		<div class="col-sm-12 col-md-4">
 			<div class="text-center">
 			    <label for="almacen">Almacen: </label>
@@ -183,6 +191,7 @@
 										<th class="modelo text-center">Modelo</th>
 										<th class="descripcion text-center">Descripcion</th>
 										<th class="talla text-center">Talla</th>
+										<th class="cantidad text-center">Cantidad</th>
 									</tr>
 								</thead>
 								<tbody>

@@ -11,6 +11,7 @@ class Administracion extends CI_Controller {
 		$data["nombre"] = $_SESSION["nombre"];
 		$data["titulo"] = "Sistema de inventarios | Administrador";
 		$data["login"] = false;
+		$data["modulo"] = "Administración";
 		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "administracion.js";
 

@@ -14,6 +14,7 @@ class Entradas extends CI_Controller {
 		$data["nombre"] = $_SESSION["nombre"];
 		$data["titulo"] = "Sistema de inventarios | Entradas";
 		$data["login"] = false;
+		$data["modulo"] = "Entradas";
 		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "entradas.js";
 
@@ -42,10 +43,10 @@ class Entradas extends CI_Controller {
 		if (empty($producto)) {
 			$respuesta = 'null';
 		} else {
-			$this->load->library("entradas_lib");
-			$this->entradas_lib->set_properties($producto[0]->id_producto, $producto[0]->marca, $producto[0]->modelo, $producto[0]->descripcion, $producto[0]->talla);
-			$this->entradas_lib->set_entradas();
-			$key = $this->entradas_lib->find_modelo($codigo_barras);
+			$this->load->library("movimientos_lib");
+			$this->movimientos_lib->set_properties($producto[0]->id_producto, $producto[0]->marca, $producto[0]->modelo, $producto[0]->descripcion, $producto[0]->talla);
+			$this->movimientos_lib->set_movimientos();
+			$key = $this->movimientos_lib->find_modelo($codigo_barras);
 
 			$respuesta = json_encode($producto);
 		}
