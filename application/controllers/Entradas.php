@@ -119,4 +119,12 @@ class Entradas extends CI_Controller {
 		return $talla_cantidad_def;
 	}
 
+	public function registrar_entrada(){
+		$this->load->model('entradas_m');
+		$entrada = $this->input->post("obj_entrie");
+		$entrada_detalle = $this->input->post("obj_entrie_detail");
+		$respuesta_entrada = $this->entradas_m->registrar_entrada($entrada, $entrada_detalle);
+		echo json_encode($respuesta_entrada);
+	}
+
 }
