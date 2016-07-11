@@ -53,23 +53,6 @@
 					</tr>
 				</thead>
 				<tbody>
-				<? for ($i = 0 ; $i < count($productos) ; $i++): ?>
-					<tr class="text-center"> id="producto_<?= $productos[$i]->id_producto ?>">
-						<td class="no-item"><?= $i+1 ?></td>
-						<td class="marca" id="marca_<?= $productos[$i]->id_marca ?>"><?= $productos[$i]->marca ?></td>
-						<td class="modelo"><?= $productos[$i]->modelo ?></td>
-						<td class="descripcion"><?= $productos[$i]->descripcion ?></td>
-						<td class="precio"><?= $productos[$i]->talla ?></td>
-						<td class="cantidad">
-							<input name="cantidad" id="cantidad_<?= $productos[$i]->id_producto ?>" />
-						</td>
-						<td>
-							<button type="button" class="btn btn-danger btn-sm borrar_p">
-								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-							</button>
-						</td>
-					</tr>
-				<? endfor; ?>
 					<tr class="text-center">
 						<td style="border: hidden;"></td>
 						<td style="border: hidden;"></td>
@@ -134,6 +117,14 @@
 					</tr>
 				</thead>
 				<tbody>
+					<tr class="text-center" id="tr_tallas">
+						<td style="border: hidden;"></td>
+						<td style="border: hidden;"></td>
+						<td class="total_tallas th-blue"><b>Total tallas: </b></td>
+					<? foreach ($tallas as $talla): ?>
+						<td class="text-center idtalla_<?= $talla->id_talla ?>">0</td>
+					<? endforeach; ?>
+					</tr>
 				</tbody>
 			</table>
 		</div>

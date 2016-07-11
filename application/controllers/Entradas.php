@@ -18,7 +18,7 @@ class Entradas extends CI_Controller {
 		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "entradas.js";
 
-		$almacenes = $this->entradas_m->obtener_almacenes();
+		$almacenes = $this->entradas_m->obtener_almacenes($data["id_usuario"]);
 		$tallas = $this->entradas_m->obtener_tallas();
 
 		$data["almacenes"] = $almacenes;
@@ -102,10 +102,6 @@ class Entradas extends CI_Controller {
 			if(isset($talla_cantidad[0]->id_talla)){
 				if($talla_cantidad[0]->id_talla == $id_talla){
 					$talla_cantidad_def[$i]["cantidad"] = $talla_cantidad[0]->cantidad;
-					
-					if($talla == $id_talla){
-						$talla_cantidad_def[$i]["cantidad"]++;
-					}
 
 					array_shift($talla_cantidad);
 				}else{
@@ -124,7 +120,7 @@ class Entradas extends CI_Controller {
 		$entrada = $this->input->post("obj_entrie");
 		$entrada_detalle = $this->input->post("obj_entrie_detail");
 		$respuesta_entrada = $this->entradas_m->registrar_entrada($entrada, $entrada_detalle);
-		echo json_encode($respuesta_entrada);
+		echo $respuesta_entrada;
 	}
 
 }
