@@ -123,4 +123,44 @@ class Entradas extends CI_Controller {
 		echo $respuesta_entrada;
 	}
 
+	public function crear_json(){
+		$this->load->helper('file');
+		$obj_json = $this->input->post("datos_json");
+		$id_almacen = $obj_json[0]["idalmacen"];
+		$remove_str = array("\\t", "\\n");
+		$obj_json = str_replace($remove_str, "", json_encode($obj_json));
+		$array_json = (array)json_decode($obj_json);
+		$respuesta = array();
+
+		if(is_file('../inventarios/assets/json/entradas.json')){
+			$file_json = file_get_contents('../inventarios/assets/json/entradas.json');
+			$json_php = (array)json_decode($file_json);
+			$cont = 0;
+
+			foreach ($json_php as $json_p) {
+				foreach ($json_p as $arr_j) {
+					$search = array_search($id_almacen, $arr_j);var_dump($search);die;
+					if($search == "idalmacen"){
+						$cont++;
+					}
+				}
+			}
+			var_dump($cont);die;
+			if($cont > 0){
+				$respuesta["resp"] = "No se puede pausar la entrada debido a que ya existe otra en pausa en el mismo almacén.|f";
+			}else{
+				array_push($json_php, $array_json);
+				$file_j = fopen('../inventarios/assets/json/entradas.json', "w+");
+				$response = fwrite($file_j, json_encode($json_php));
+				$respuesta["resp"] = "Se creó el archivo correctamente.|t";
+			}
+
+		}else{
+			$file_j = fopen('../inventarios/assets/json/entradas.json', "w+");
+			$response = fwrite($file_j, $obj_json);
+		}
+
+		echo json_encode($respuesta);
+	}
+
 }
