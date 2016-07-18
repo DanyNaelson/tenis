@@ -88,9 +88,10 @@
 			</button>
 		</div>
 		<div class="col-xs-4 text-center">
-			<button type="button" class="btn btn-warning btn-sm" id="pausar">
+			&nbsp;
+			<!--button type="button" class="btn btn-warning btn-sm" id="pausar">
 				Pausar <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
-			</button>
+			</button-->
 		</div>
 		<div class="col-xs-4 text-center">
 			<button type="button" class="btn btn-danger btn-sm" id="cancelar">

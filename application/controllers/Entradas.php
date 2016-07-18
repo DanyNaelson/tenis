@@ -123,7 +123,7 @@ class Entradas extends CI_Controller {
 		echo $respuesta_entrada;
 	}
 
-	public function crear_json(){
+	/*public function crear_json(){
 		$this->load->helper('file');
 		$obj_json = $this->input->post("datos_json");
 		$id_almacen = $obj_json[0]["idalmacen"];
@@ -161,6 +161,6 @@ class Entradas extends CI_Controller {
 		}
 
 		echo json_encode($respuesta);
-	}
+	}*/
 
 }

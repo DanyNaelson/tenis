@@ -101,7 +101,7 @@ class Entradas_m extends CI_Model{
 			$this->db->where('p.id_marca', $marca);
 		}
 
-		if (!is_null($modelo) && $marca != ""){
+		if (!is_null($modelo) && ($modelo != "") && ($modelo != '0')){
 			$this->db->where('p.modelo', $modelo);
 		}
 		//echo $this->db->get_compiled_select();die;
@@ -170,6 +170,7 @@ class Entradas_m extends CI_Model{
 				'folio' => $folio,
 		        'id_tipo_movimiento' => 1,
 		        'cantidad' => $entrada["cantidad"],
+		        'precio' => 0,
 		        'fecha' => $fecha_entrada,
 		        'id_almacen' => $entrada["id_almacen"]
 			);
@@ -230,7 +231,8 @@ class Entradas_m extends CI_Model{
 					        'id_movimiento' => $id_ultimo_e,
 					        'id_producto' => $entrada_detalle[$i]["id_producto"],
 					        'id_talla' => $entrada_detalle[$i]["id_talla"],
-					        'cantidad' => $entrada_detalle[$i]["cantidad"]
+					        'cantidad' => $entrada_detalle[$i]["cantidad"],
+					        'precio' => 0
 						);
 
 						$str = $this->db->insert('detalle_movimiento', $data_det);
