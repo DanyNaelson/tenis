@@ -172,7 +172,8 @@ class Entradas_m extends CI_Model{
 		        'cantidad' => $entrada["cantidad"],
 		        'precio' => 0,
 		        'fecha' => $fecha_entrada,
-		        'id_almacen' => $entrada["id_almacen"]
+		        'id_almacen' => $entrada["id_almacen"],
+		        'confirmacion' => 1
 			);
 
 			$str = $this->db->insert('movimientos', $data);
