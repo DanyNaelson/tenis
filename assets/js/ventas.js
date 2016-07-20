@@ -244,7 +244,7 @@ $(document).ready(function(){
 	$("#ticket").on("click", function(){
 		var tbody = $("#tabla_ventas").find("tbody");
 		var id_almacen = $("#almacen").val();
-		var count_tr = $(tbody).find("tr").length;
+		count_tr = $(tbody).find("tr").length;
 
 		if(id_almacen != 0){
 			if(count_tr > 1){
