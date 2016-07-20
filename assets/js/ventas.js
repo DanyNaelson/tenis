@@ -366,7 +366,7 @@ function crea_tr_sales(sales){
 		html_tr += "</tr>";
 
 		cantidad_t += parseInt(sales[i].cantidad);
-		precio_t += parseInt(sales[i].precio);
+		precio_t += parseInt(sales[i].precio) * parseInt(sales[i].cantidad);
 	}
 
 	$("#total_v").html(cantidad_t);
