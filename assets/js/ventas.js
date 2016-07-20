@@ -250,7 +250,7 @@ $(document).ready(function(){
 			if(count_tr > 1){
 				bootbox.confirm("Estás seguro de finalizar la venta?", function(result) {
 					if(result){
-						get_values_sale(tbody);
+						get_values_sale(tbody, id_almacen);
 					}
 				});
 			}else{
@@ -538,7 +538,7 @@ function update_quantity(operation, quantity_remove){
 	$("#total_v").text(quantity_new);
 }
 
-function get_values_sale(tbody_sale){
+function get_values_sale(tbody_sale, id_almacen){
 	sale = new Object;
 	sale_detail = new Array();
 
