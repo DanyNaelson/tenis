@@ -158,7 +158,7 @@
 		</div>
 		<div class="col-xs-12 col-sm-4 text-center">
 			<button type="button" class="btn btn-success btn-sm" id="crear_cb">
-				Crear código de barras <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				Crear código de barras <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span>
 			</button>
 		</div>
 		<div class="col-xs-12 col-sm-4 text-right">

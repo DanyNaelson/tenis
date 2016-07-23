@@ -27,6 +27,20 @@
 	color: #FFF;
 }
 
+.th-transfer-e{
+	background-color: #2aabd2;
+	color: #FFF;
+}
+
+.th-transfer-o{
+	background-color: #eb9316;
+	color: #FFF;
+}
+
 #login{
 	padding: 8em 3em;
+}
+
+#t_entrada, #t_salida{
+	border-radius: 50%;
 }

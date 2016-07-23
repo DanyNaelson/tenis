@@ -368,7 +368,7 @@ class Ventas_m extends CI_Model{
 		$this->db->join('marca m', 'm.id_marca = p.id_marca');
 		$this->db->join('talla t', 't.id_talla = pt.id_talla');
 		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
-		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen . " AND mv.confirmacion = 0");
+		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen . " AND mv.confirmacion = 0 AND mv.id_tipo_movimiento = 4");
 		$this->db->order_by('mv.id_movimiento,dm.id_detalle_movimiento', 'ASC');
 
 		//echo $this->db->get_compiled_select();die;
@@ -404,6 +404,9 @@ class Ventas_m extends CI_Model{
 				$respuesta = array('mensaje' => 'No se actualizó el movimiento con id: ' . $movimiento . '.', 'resp' => 'f');
 			    $this->db->trans_rollback();
 			    return $respuesta;
+			}else{
+				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se confirmo el cierre de venta con los id_movimientos: " . $movimientos);
+				$this->db->trans_commit();
 			}
 		}
 
