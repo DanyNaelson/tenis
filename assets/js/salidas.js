@@ -35,7 +35,7 @@ $(document).ready(function(){
 				    			cantidad_max = 0;
 
 				    			for (i = 0; i < respuesta_producto.length ; i++) {
-				    				if(respuesta_producto[i].id_tipo_movimiento == 1){
+				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
 				    					cantidad_max -= parseInt(respuesta_producto[i].cantidad);
