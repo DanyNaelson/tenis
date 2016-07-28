@@ -89,7 +89,7 @@ class Ventas_m extends CI_Model{
 
 	function obtener_producto($codigo_barras = null, $id_almacen = null){
 
-		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad');
+		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
 		$this->db->from('producto_talla pt');
 		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
 		$this->db->join('marca m', 'm.id_marca = p.id_marca');
@@ -154,7 +154,7 @@ class Ventas_m extends CI_Model{
 
 	function obtener_talla_cantidad($id_producto, $id_almacen, $id_talla = null){
 
-		$this->db->select('pt.id_talla,mv.id_tipo_movimiento,dm.cantidad');
+		$this->db->select('pt.id_talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
 		$this->db->from('producto_talla pt');
 		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
 		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
@@ -183,7 +183,7 @@ class Ventas_m extends CI_Model{
 
 	function obtener_cantidad_producto($id_producto, $id_talla, $id_almacen){
 
-		$this->db->select('mv.id_tipo_movimiento,dm.cantidad');
+		$this->db->select('mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
 		$this->db->from('producto_talla pt');
 		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
 		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);

@@ -38,7 +38,9 @@ $(document).ready(function(){
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
-				    					cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion != -1){
+				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    					}
 				    				}
 				    			}
 
@@ -58,9 +60,14 @@ $(document).ready(function(){
 					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					    		}
 				    		}else{
-				    			tr_new = crea_tr(respuesta_producto);
-				    			$("#tabla_ventas tbody").prepend(tr_new);
-				    			update_quantity("s", 1);
+				    			c_max = obtener_cantidad_max(respuesta_producto);alert(c_max);
+				    			if(c_max >= 1){
+					    			tr_new = crea_tr(respuesta_producto);
+					    			$("#tabla_ventas tbody").prepend(tr_new);
+					    			update_quantity("s", 1);
+					    		}else{
+					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
+					    		}
 				    		}
 				    	}
 				    	$("#codigo_barras").val("");
@@ -665,10 +672,12 @@ function obtener_cantidad_max(respuesta_modelo){
 	var cant_max = 0;
 	
 	for(var i = 0 ; i < respuesta_modelo.length ; i++){
-		if(respuesta_modelo[i].id_tipo_movimiento == '1'){
+		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
 			cant_max += parseInt(respuesta_modelo[i].cantidad);
 		}else{
-			cant_max -= parseInt(respuesta_modelo[i].cantidad);
+			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion != '-1'){
+				cant_max -= parseInt(respuesta_modelo[i].cantidad);
+			}
 		}
 	}
 

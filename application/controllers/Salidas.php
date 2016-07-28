@@ -111,11 +111,12 @@ class Salidas extends CI_Controller {
 			foreach ($talla_cantidad as $talla_c) {
 				if(isset($talla_c->id_talla)){
 					if($talla_c->id_talla == $id_talla){
-						
 						if($talla_c->id_tipo_movimiento == 1 || $talla_c->id_tipo_movimiento == 7 || $talla_c->id_tipo_movimiento == 8 || $talla_c->id_tipo_movimiento == 9){
 							$cantidad_real += $talla_c->cantidad;
 						}else{
-							$cantidad_real -= $talla_c->cantidad;
+							if($talla_c->id_tipo_movimiento == 3 && $talla_c->confirmacion != -1){
+								$cantidad_real -= $talla_c->cantidad;
+							}
 						}
 						
 						$talla_cantidad_def[$i]["cantidad"] = $cantidad_real;

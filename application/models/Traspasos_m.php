@@ -139,7 +139,7 @@ class traspasos_m extends CI_Model{
 
 	function obtener_producto($codigo_barras = null, $id_almacen = null){
 
-		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad');
+		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
 		$this->db->from('producto_talla pt');
 		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
 		$this->db->join('marca m', 'm.id_marca = p.id_marca');
@@ -545,157 +545,40 @@ class traspasos_m extends CI_Model{
 		return $respuesta;
 	}
 
-	/*function registrar_traspaso($traspaso, $traspaso_detalle){
-
-		$fecha_traspaso = date("Y-m-d H:m:s");
-		$insert = "";
-		$mensaje = "";
-		$str = 1;
+	function cancelar_movimientos($id_movimientos){
+		$id_movimiento = explode(",", $id_movimientos);
+		$fecha_cancelacion = date("Y-m-d H:m:s");
+		$respuesta = array('mensaje' => 'Se han cancelado correctamente los movimientos de traspaso.', 'resp' => 't');
 
 		$this->db->trans_begin();
 
-		$this->db->select('id_movimiento');
-		$this->db->from('movimientos');
-		$this->db->where('id_tipo_movimiento', 3);
-
-		//echo $this->db->get_compiled_select();die;
-		$query = $this->db->get();
-
-		if ($this->db->trans_status() === FALSE){
-		    $this->db->trans_rollback();
-		}
-
-		$row = count($query->result());
-
-		if (is_int($row)) {
-
-			$folio = 'TS' . ($row + 1);
-
-			$data = array(
-				'folio' => $folio,
-		        'id_tipo_movimiento' => 3,
-		        'cantidad' => $traspaso["cantidad"],
-		        'fecha' => $fecha_traspaso,
-		        'id_almacen' => $traspaso["id_almacen"],
-		        'precio' => $traspaso["precio"],
-		        'confirmacion' => 0
-			);
-
-			$str = $this->db->insert('movimientos', $data);
+		foreach ($id_movimiento as $movimiento) {
+			$mov = explode("|", $movimiento);
+			$this->db->set('confirmacion', -1);
+			$this->db->where('id_movimiento', $mov[0]);
+			$this->db->where('id_almacen', $mov[1]);
+			$str = $this->db->update('movimientos');
 
 			if ($this->db->trans_status() === FALSE){
+				$respuesta = array('mensaje' => 'No se actualizo el movimiento de cancelacion con id: ' . $mov[0] . '.', 'resp' => 'f');
 			    $this->db->trans_rollback();
+			    return $mensaje;
 			}
+			
+			$this->db->where('id_movimiento', $mov[0]);
+			$this->db->where('id_almacen', $mov[1]);
+			$this->db->delete('transito');
 
-			$id_ultimo_e = $this->db->insert_id();
-
-			if ($str == 1)
-			{
-				
-				for($i = 0; $i < count($traspaso_detalle) ; $i++){
-
-					$this->db->select('cantidad');
-					$this->db->from('producto_talla');
-					$this->db->where('id_producto', $traspaso_detalle[$i]["id_producto"]);
-					$this->db->where('id_talla', $traspaso_detalle[$i]["id_talla"]);
-
-					//echo $this->db->get_compiled_select();die;
-					$query = $this->db->get();
-
-					if ($this->db->trans_status() === FALSE){
-					    $this->db->trans_rollback();
-					}
-
-					$row = $query->result();
-
-					if (empty($row)) {
-						$data_pt = array(
-					        'id_producto' => $traspaso_detalle[$i]["id_producto"],
-					        'id_talla' => $traspaso_detalle[$i]["id_talla"],
-					        'codigo_barras' => '',
-					        'id_almacen' => NULL,
-					        'cantidad' => $traspaso_detalle[$i]["cantidad"]
-						);
-
-						$str = $this->db->insert('producto_talla', $data_pt);
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}
-					}else{
-						$cantidad = (int)$row[0]->cantidad - (int)$traspaso_detalle[$i]["cantidad"];
-
-						if($cantidad < 0){
-							$mensaje = "Error al actualizar la cantidad del producto ya que es menor que 0.";
-							$mensaje .= "|f";
-
-							if ($this->db->trans_status() === FALSE){
-							    $this->db->trans_rollback();
-							}
-						}
-
-						$this->db->set('cantidad', $cantidad);
-						$this->db->where('id_producto', $traspaso_detalle[$i]["id_producto"]);
-						$this->db->where('id_talla', $traspaso_detalle[$i]["id_talla"]);
-						$str = $this->db->update('producto_talla');
-					}
-
-					if($str == 1){
-
-						$data_det = array(
-					        'id_movimiento' => $id_ultimo_e,
-					        'id_producto' => $traspaso_detalle[$i]["id_producto"],
-					        'id_talla' => $traspaso_detalle[$i]["id_talla"],
-					        'cantidad' => $traspaso_detalle[$i]["cantidad"],
-					        'precio' => $traspaso_detalle[$i]["precio"]
-						);
-
-						$str = $this->db->insert('detalle_movimiento', $data_det);
-
-						if ($str == 1)
-						{
-							$insert .= "-1";
-						}
-						else
-						{
-							$insert = "0";
-						}
-
-						$tipo_m = explode("-", $insert);
-
-						if ($tipo_m[0] != '0') {
-							$mensaje = "Se ingresaron los detalles de traspaso correctamente.";
-							$mensaje .= "|t";
-						} else {
-							$mensaje = "Error al insertar el detalle_movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-							$mensaje .= "|f";
-						}
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}else{
-							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro la traspaso con id: " . $id_ultimo_e);
-						    $this->db->trans_commit();
-						}
-
-					}else{
-						$mensaje = "Error al actualizar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-						$mensaje .= "|f";
-					}
-				}
+			if ($this->db->trans_status() === FALSE){
+				$respuesta = array('mensaje' => 'No se borro el movimiento de transito con id: ' . $mov[0] . '.', 'resp' => 'f');
+			    $this->db->trans_rollback();
+			    return $mensaje;
 			}
-			else
-			{
-				$mensaje = "Error al insertar el movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-				$mensaje .= "|f";
-			}
-
-		}else{
-			$mensaje = "Error al consultar los movimientos de traspaso, intentelo nuevamente.";
-			$mensaje .= "|f";
 		}
 
-		return $mensaje;
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se cancelo el o los traspasos con los id_movimientos: " . $id_movimientos);
+		$this->db->trans_commit();
+		return $respuesta;
 
-	}*/
+	}
 }

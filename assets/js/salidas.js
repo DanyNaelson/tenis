@@ -38,7 +38,9 @@ $(document).ready(function(){
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
-				    					cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion != -1){
+				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    					}
 				    				}
 				    			}
 
@@ -65,16 +67,21 @@ $(document).ready(function(){
 					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					    		}
 				    		}else{
-				    			tr_new = crea_tr(respuesta_producto);
-				    			$("#tabla_salidas tbody").prepend(tr_new);
-				    			update_quantity("s", 1);
+				    			c_max = obtener_cantidad_max(respuesta_producto);
+				    			if(c_max >= 1){
+					    			tr_new = crea_tr(respuesta_producto);
+					    			$("#tabla_salidas tbody").prepend(tr_new);
+					    			update_quantity("s", 1);
 
-				    			tr_current_p = $(".prod_" + respuesta_producto[0].id_producto).length;
+					    			tr_current_p = $(".prod_" + respuesta_producto[0].id_producto).length;
 
-					    		if(tr_current_p > 0){
-					    			add_quantity_prod(respuesta_producto[0].id_producto, respuesta_producto[0].id_talla, 1);
+						    		if(tr_current_p > 0){
+						    			add_quantity_prod(respuesta_producto[0].id_producto, respuesta_producto[0].id_talla, 1);
+						    		}else{
+										obtener_talla_cantidad(respuesta_producto, 1);
+						    		}
 					    		}else{
-									obtener_talla_cantidad(respuesta_producto, 1);
+					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					    		}
 				    		}
 				    	}
@@ -635,10 +642,12 @@ function obtener_cantidad_max(respuesta_modelo){
 	var cant_max = 0;
 	
 	for(var i = 0 ; i < respuesta_modelo.length ; i++){
-		if(respuesta_modelo[i].id_tipo_movimiento == '1'){
+		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
 			cant_max += parseInt(respuesta_modelo[i].cantidad);
 		}else{
-			cant_max -= parseInt(respuesta_modelo[i].cantidad);
+			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion != '-1'){
+				cant_max -= parseInt(respuesta_modelo[i].cantidad);
+			}
 		}
 	}
 

@@ -40,7 +40,9 @@ $(document).ready(function(){
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
-				    					cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion != -1){
+				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    					}
 				    				}
 				    			}
 
@@ -60,9 +62,14 @@ $(document).ready(function(){
 					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					    		}
 				    		}else{
-				    			tr_new = crea_tr(respuesta_producto);
-				    			$("#tabla_traspasos tbody").prepend(tr_new);
-				    			update_quantity("s", 1);
+				    			c_max = obtener_cantidad_max(respuesta_producto);
+				    			if(c_max >= 1){
+					    			tr_new = crea_tr(respuesta_producto);
+					    			$("#tabla_traspasos tbody").prepend(tr_new);
+					    			update_quantity("s", 1);
+					    		}else{
+					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
+					    		}
 				    		}
 				    	}
 				    	$("#codigo_barras").val("");
@@ -391,7 +398,7 @@ function crea_table_transfers(transfers){
 		html_table += 			'</tr>';
 		html_table += 			'<tr class="text-center">';
 		html_table += 				'<td style="border: hidden;"></td>';
-		html_table += 				'<td style="border: hidden;"><button onclick="cancel_transfer(' + transfers[0].outlet[k][0].id_movimiento + ')" style="display: inline-block;" type="button" class="btn btn-sm btn-danger" class="cancel_transfer">Cancelar traspaso <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>';
+		html_table += 				'<td style="border: hidden;"><button onclick="cancel_transfer(\'' + transfers[0].outlet[k][0].id_movimiento + '|' + transfers[0].outlet[k][0].id_almacen_s + '\', this)" style="display: inline-block;" type="button" class="btn btn-sm btn-danger" class="cancel_transfer">Cancelar traspaso <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>';
 		html_table += 				'<td style="border: hidden;"></td>';
 		html_table += 				'<td style="border: hidden;"></td>';
 		html_table += 				'<td style="border: hidden;"><button onclick="final_transfer(' + transfers[0].outlet[k][0].id_movimiento + ', this)" style="display: inline-block;" type="button" class="btn btn-sm btn-success" class="final_transfer">Confirmar traspaso <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button></td>';
@@ -584,7 +591,7 @@ function final_transfer(id_movimiento, obj_button){
 	});
 }
 
-function cancel_transfer(id_movimiento){
+function cancel_transfer(id_movimiento, obj_button){
 	var table_id_movimiento = $(obj_button).parent().parent().parent().parent();
 	$.ajax({
 	    // la URL para la petición
@@ -666,22 +673,6 @@ function crea_tr(producto){
 
 	return html_tr;
 }
-
-/*function update_total_precio(){
-	tbody = $("#tabla_traspasos").find("tbody");
-	tr_current = $(tbody).find("tr");
-	tr_count = tr_current.length;
-
-	var quantity_new = 0;
-	var quantity_current;
-
-	for (var i = 0; i < tr_count - 1 ; i++){
-		quantity_current = parseInt($(tr_current).eq(i).find(".cantidad_v").text()) * parseInt($(tr_current).eq(i).find(".precio_v").find("input").val());
-		quantity_new += quantity_current;
-	}
-
-	$("#total_p").text(quantity_new);
-}*/
 
 function remove_tr(obj_button){
 	tr_current = $(obj_button).parent().parent();
@@ -870,10 +861,12 @@ function obtener_cantidad_max(respuesta_modelo){
 	var cant_max = 0;
 	
 	for(var i = 0 ; i < respuesta_modelo.length ; i++){
-		if(respuesta_modelo[i].id_tipo_movimiento == '1'){
+		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
 			cant_max += parseInt(respuesta_modelo[i].cantidad);
 		}else{
-			cant_max -= parseInt(respuesta_modelo[i].cantidad);
+			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion != '-1'){
+				cant_max -= parseInt(respuesta_modelo[i].cantidad);
+			}
 		}
 	}
 

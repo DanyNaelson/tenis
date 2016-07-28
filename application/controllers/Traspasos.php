@@ -214,7 +214,14 @@ class Traspasos extends CI_Controller {
 	public function confirmar_movimientos(){
 		$this->load->model('traspasos_m');
 		$id_movimientos = $this->input->post("movs");
-		$confirmacion_ventas = $this->traspasos_m->confirmar_traspasos($id_movimientos);
-		echo json_encode($confirmacion_ventas);
+		$confirmacion_traspasos = $this->traspasos_m->confirmar_traspasos($id_movimientos);
+		echo json_encode($confirmacion_traspasos);
+	}
+
+	public function cancelar_movimientos(){
+		$this->load->model('traspasos_m');
+		$id_movimientos = $this->input->post("movs");
+		$cancelacion_traspasos = $this->traspasos_m->cancelar_movimientos($id_movimientos);
+		echo json_encode($cancelacion_traspasos);
 	}
 }

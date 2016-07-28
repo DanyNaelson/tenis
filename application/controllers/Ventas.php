@@ -90,7 +90,7 @@ class Ventas extends CI_Controller {
 		
 		$cant_max = 0;
 		foreach ($producto_talla_cantidad as $producto_talla) {
-			if ($producto_talla->id_tipo_movimiento == 1 || $producto_talla->id_tipo_movimiento == 7 || $producto_talla->id_tipo_movimiento == 8 || $producto_talla->id_tipo_movimiento == 9) {
+			if ($producto_talla->id_tipo_movimiento == 1 || ($talla_c->id_tipo_movimiento == 3 && $talla_c->confirmacion == -1) || $producto_talla->id_tipo_movimiento == 7 || $producto_talla->id_tipo_movimiento == 8 || $producto_talla->id_tipo_movimiento == 9) {
 				$cant_max += $producto_talla->cantidad;
 			} else {
 				$cant_max -= $producto_talla->cantidad;
