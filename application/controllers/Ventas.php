@@ -60,13 +60,13 @@ class Ventas extends CI_Controller {
 		echo json_encode($producto_marcas);
 	}
 
-	public function obtener_producto_modelo($marca = null, $modelo = null){
+	public function obtener_producto_modelo($marca = null, $modelo = null, $almacen = null){
 		if (trim($modelo) == ""){
 			$modelo = null;
 		}
 
 		$this->load->model('ventas_m');
-		$producto_modelo = $this->ventas_m->obtener_producto_modelo(trim($marca), trim($modelo));
+		$producto_modelo = $this->ventas_m->obtener_producto_modelo(trim($marca), trim($modelo), trim($almacen));
 		echo json_encode($producto_modelo);
 	}
 

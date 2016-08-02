@@ -178,7 +178,7 @@ class traspasos_m extends CI_Model{
 			$this->db->where('p.id_marca', $marca);
 		}
 
-		if (!is_null($modelo) && $modelo != "" && $modelo != 0){
+		if (!is_null($modelo) && $modelo != "" && $modelo != '0'){
 			$this->db->where('p.modelo', $modelo);
 		}
 
@@ -204,7 +204,7 @@ class traspasos_m extends CI_Model{
 
 	function obtener_talla_cantidad($id_producto, $id_almacen, $id_talla = null){
 
-		$this->db->select('pt.id_talla,mv.id_tipo_movimiento,dm.cantidad');
+		$this->db->select('pt.id_talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
 		$this->db->from('producto_talla pt');
 		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
 		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
@@ -233,7 +233,7 @@ class traspasos_m extends CI_Model{
 
 	function obtener_cantidad_producto($id_producto, $id_talla, $id_almacen){
 
-		$this->db->select('mv.id_tipo_movimiento,dm.cantidad');
+		$this->db->select('mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
 		$this->db->from('producto_talla pt');
 		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
 		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
@@ -566,7 +566,7 @@ class traspasos_m extends CI_Model{
 			}
 			
 			$this->db->where('id_movimiento', $mov[0]);
-			$this->db->where('id_almacen', $mov[1]);
+			$this->db->where('id_almacen', $mov[2]);
 			$this->db->delete('transito');
 
 			if ($this->db->trans_status() === FALSE){

@@ -128,7 +128,7 @@ class Ventas_m extends CI_Model{
 			$this->db->where('p.id_marca', $marca);
 		}
 
-		if (!is_null($modelo) && $modelo != "" && $modelo != 0){
+		if (!is_null($modelo) && $modelo != "" && $modelo != '0'){
 			$this->db->where('p.modelo', $modelo);
 		}
 
@@ -405,7 +405,7 @@ class Ventas_m extends CI_Model{
 			    $this->db->trans_rollback();
 			    return $respuesta;
 			}else{
-				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se confirmo el cierre de venta con los id_movimientos: " . $movimientos);
+				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se confirmo el cierre de venta con los id_movimientos: " . $id_movimientos);
 				$this->db->trans_commit();
 			}
 		}

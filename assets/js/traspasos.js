@@ -40,7 +40,9 @@ $(document).ready(function(){
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
-				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion != -1){
+				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion == -1){
+				    						cantidad_max -= 0;
+				    					}else{
 				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
 				    					}
 				    				}
@@ -398,7 +400,7 @@ function crea_table_transfers(transfers){
 		html_table += 			'</tr>';
 		html_table += 			'<tr class="text-center">';
 		html_table += 				'<td style="border: hidden;"></td>';
-		html_table += 				'<td style="border: hidden;"><button onclick="cancel_transfer(\'' + transfers[0].outlet[k][0].id_movimiento + '|' + transfers[0].outlet[k][0].id_almacen_s + '\', this)" style="display: inline-block;" type="button" class="btn btn-sm btn-danger" class="cancel_transfer">Cancelar traspaso <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>';
+		html_table += 				'<td style="border: hidden;"><button onclick="cancel_transfer(\'' + transfers[0].outlet[k][0].id_movimiento + '|' + transfers[0].outlet[k][0].id_almacen_s +  '|' + transfers[0].outlet[k][0].id_almacen_e + '\', this)" style="display: inline-block;" type="button" class="btn btn-sm btn-danger" class="cancel_transfer">Cancelar traspaso <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>';
 		html_table += 				'<td style="border: hidden;"></td>';
 		html_table += 				'<td style="border: hidden;"></td>';
 		html_table += 				'<td style="border: hidden;"><button onclick="final_transfer(' + transfers[0].outlet[k][0].id_movimiento + ', this)" style="display: inline-block;" type="button" class="btn btn-sm btn-success" class="final_transfer">Confirmar traspaso <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button></td>';
@@ -512,14 +514,27 @@ function confirm_transfers(){
 
 	    	if(json_p.resp == 't'){
 	    		table_id_movimiento.slideUp('fast');
-	    		var valor_entrada_t = $("#t_entrada").text().trim();
-	    		var valor_current = parseInt(valor_entrada_t) - 1;
+	    		var valor_salida_t = $("#t_salida").text().trim();
+	    		var valor_current = parseInt(valor_salida_t) - 1;
 
 	    		if (valor_current == 0){
-	    			$("#t_entrada").remove();
+	    			$("#t_salida").remove();
 	    		}else{
-	    			$("#t_entrada").text(valor_current);
-	    			$("#t_entrada").append('<span class="glyphicon glyphicon-save" aria-hidden="true"></span>');
+	    			$("#t_salida").text(valor_current);
+	    			$("#t_salida").append('<span class="glyphicon glyphicon-open" aria-hidden="true"></span>');
+	    		}
+
+	    		if($("#entry_" + id_movimiento).length > 0){
+	    			$("#entry_" + id_movimiento).slideUp('fast');
+	    			var valor_entrada_t = $("#t_entrada").text().trim();
+		    		var valor_current_e = parseInt(valor_entrada_t) - 1;
+
+		    		if (valor_current_e == 0){
+		    			$("#t_entrada").remove();
+		    		}else{
+		    			$("#t_entrada").text(valor_current_e);
+		    			$("#t_entrada").append('<span class="glyphicon glyphicon-save" aria-hidden="true"></span>');
+		    		}
 	    		}
 	    	}
 	    },
@@ -864,7 +879,9 @@ function obtener_cantidad_max(respuesta_modelo){
 		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
 			cant_max += parseInt(respuesta_modelo[i].cantidad);
 		}else{
-			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion != '-1'){
+			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion == '-1'){
+				cant_max -= 0;
+			}else{
 				cant_max -= parseInt(respuesta_modelo[i].cantidad);
 			}
 		}

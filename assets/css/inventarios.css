@@ -10,6 +10,10 @@
 	padding: 20px 10px;
 }
 
+.cantidad_s input{
+	width: 35%;
+}
+
 .check{
 	background-color: #dff0d8;
 }

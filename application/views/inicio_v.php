@@ -55,4 +55,16 @@
   	<? endif ?>
 	</div>
 <? endif ?>
+<? if(isset($permisos[8]->permiso)): ?>
+  <div class="row">
+      <div class="col-sm-6 btn_menu text-center">
+        <a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[8]->permiso ?>/" role="button"><?= ucfirst($permisos[8]->permiso) ?></a>
+      </div>
+    <? if(isset($permisos[9]->permiso)): ?>
+      <div class="col-sm-6 btn_menu text-center">
+        <a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[9]->permiso ?>/" role="button"><?= ucfirst($permisos[9]->permiso) ?></a>
+      </div>
+    <? endif ?>
+  </div>
+<? endif ?>
 </div>

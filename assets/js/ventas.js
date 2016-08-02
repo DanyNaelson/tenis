@@ -38,7 +38,9 @@ $(document).ready(function(){
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
-				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion != -1){
+				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion == -1){
+				    						cantidad_max -= 0;
+				    					}else{
 				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
 				    					}
 				    				}
@@ -60,7 +62,7 @@ $(document).ready(function(){
 					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					    		}
 				    		}else{
-				    			c_max = obtener_cantidad_max(respuesta_producto);alert(c_max);
+				    			c_max = obtener_cantidad_max(respuesta_producto);
 				    			if(c_max >= 1){
 					    			tr_new = crea_tr(respuesta_producto);
 					    			$("#tabla_ventas tbody").prepend(tr_new);
@@ -675,7 +677,9 @@ function obtener_cantidad_max(respuesta_modelo){
 		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
 			cant_max += parseInt(respuesta_modelo[i].cantidad);
 		}else{
-			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion != '-1'){
+			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion == '-1'){
+				cant_max -= 0;
+			}else{
 				cant_max -= parseInt(respuesta_modelo[i].cantidad);
 			}
 		}
