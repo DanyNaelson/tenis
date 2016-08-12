@@ -1,6 +1,60 @@
 /* Funciones de producto */
 $(document).ready(function(){
 
+	$("#folio_venta").on("keypress", function(event){
+		
+		folio_v = $(this).val().trim();
+		almacen = $("#almacen").val();
+		if(event.keyCode == 13){
+			if(almacen > 0){
+				$.ajax({
+				    // la URL para la petición
+				    url : "obtener_producto_folio",
+				 
+				    // especifica si será una petición POST o GET
+				    type : "POST",
+
+				    //datos enviados mediante post
+				    data: { folio : folio_v,
+				    		id_almacen : almacen },
+
+				    //especifica el tipo de dato que espera recibir
+				    dataType: 'json',
+
+				    // código a ejecutar si la petición es satisfactoria;
+				    // la respuesta es pasada como argumento a la función
+				    success : function(respuesta_producto) {
+				    	if (respuesta_producto == null) {
+				    		bootbox.alert('La venta no se realizó en el almacén seleccionado o el folio no existe en ventas, favor de ingresarlo correctamente.');
+				    	}else{
+				    		tr_current = $("." + folio_v);
+				    		tr_count = $(tr_current).length;
+
+				    		if(tr_count > 0){
+				    			bootbox.alert('La venta ya fue cargada anteriormente.');
+				    		}else{
+				    			tr_new_folio = crea_tr_venta(respuesta_producto, folio_v);
+				    			$("#tabla_folios tbody").prepend(tr_new_folio);
+				    		}
+				    	}
+				    	update_difference();
+				    	$("#folio_venta").val("");
+				    },
+				 
+				    // código a ejecutar si la petición falla;
+				    // son pasados como argumentos a la función
+				    // el objeto de la petición en crudo y código de estatus de la petición
+				    error : function(xhr, status) {
+				        bootbox.alert('Disculpe, existió un problema');
+				    }
+				});
+			}else{
+				$(this).val("");
+				bootbox.alert("Debes seleccionar un almacén para realizar la búsqueda del producto.");
+			}
+		}
+	});
+
 	$("#codigo_barras").on("keypress", function(event){
 		
 		codigo = $(this).val();
@@ -31,20 +85,22 @@ $(document).ready(function(){
 				    		tr_count = $(tr_current).find(".talla_" + respuesta_producto[0].id_talla).length;
 
 				    		if(tr_count > 0){
-				    			cantidad_sal = parseInt($(tr_current).find(".talla_" + respuesta_producto[0].id_talla).next().text()) + 1;
+				    			cantidad_venta = parseInt($(tr_current).find(".talla_" + respuesta_producto[0].id_talla).parent().find('.cantidad_v').text()) + 1;
 				    			cantidad_max = 0;
 
 				    			for (i = 0; i < respuesta_producto.length ; i++) {
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
 				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
 				    				}else{
-				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion != -1){
+				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion == -1){
+				    						cantidad_max -= 0;
+				    					}else{
 				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
 				    					}
 				    				}
 				    			}
 
-				    			if(cantidad_max >= cantidad_sal){
+				    			if(cantidad_max >= cantidad_venta){
 					    			td_current = $(tr_current).find(".talla_" + respuesta_producto[0].id_talla);
 					    			
 					    			if(td_current.length > 0){
@@ -54,14 +110,7 @@ $(document).ready(function(){
 					    				$("#tabla_cambios tbody").prepend(tr_new);
 					    			}
 
-					    			update_quantity("s", 1);
-					    			tr_current_p = $(".prod_" + respuesta_producto[0].id_producto).length;
-
-						    		if(tr_current_p > 0){
-						    			add_quantity_prod(respuesta_producto[0].id_producto, respuesta_producto[0].id_talla, 1);
-						    		}else{
-										obtener_talla_cantidad(respuesta_producto, 1);
-						    		}
+					    			update_quantity("s", 1, "v");
 
 					    		}else{
 					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
@@ -71,20 +120,13 @@ $(document).ready(function(){
 				    			if(c_max >= 1){
 					    			tr_new = crea_tr(respuesta_producto);
 					    			$("#tabla_cambios tbody").prepend(tr_new);
-					    			update_quantity("s", 1);
-
-					    			tr_current_p = $(".prod_" + respuesta_producto[0].id_producto).length;
-
-						    		if(tr_current_p > 0){
-						    			add_quantity_prod(respuesta_producto[0].id_producto, respuesta_producto[0].id_talla, 1);
-						    		}else{
-										obtener_talla_cantidad(respuesta_producto, 1);
-						    		}
+					    			update_quantity("s", 1, "v");
 					    		}else{
 					    			bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					    		}
 				    		}
 				    	}
+				    	update_difference();
 				    	$("#codigo_barras").val("");
 				    },
 				 
@@ -192,10 +234,10 @@ $(document).ready(function(){
 							html_tr +=		'<td class="cantidad_s"><input type="number" min="1" value="1" /></td>';
 							html_tr += '</tr>';
 							$("#tabla_modelos").find("tbody").prepend(html_tr);
-							$("#tabla_modelos").find(".tallas_s").load( "obtener_tallas_select", function( response, status, xhr ) {
+							$("#tabla_modelos").find(".tallas_s").load("obtener_tallas_select", function( response, status, xhr ) {
 								if ( status == "error" ) {
-									var msg = "Sorry but there was an error: ";
-									$( "#error" ).html( msg + xhr.status + " " + xhr.statusText );
+									var msg = "Disculpe, existió un problema: ";
+									bootbox.alert( msg + xhr.status + " " + xhr.statusText );
 								}
 							});
 						}
@@ -243,12 +285,12 @@ $(document).ready(function(){
 				td_current = $(tr_class).find(".talla_" + productos[0].id_talla);
 
 				if(td_current.length > 0) {
-					cantidad_sal = parseInt($(".producto_" + productos[0].id_producto).find(".cantidad").text()) + parseInt(cantidad_sel);
-					cantidad_max_sal = parseInt($(".prod_" + productos[0].id_producto).find(".tallaid_" + productos[0].id_talla).text()) + parseInt($(".producto_" + productos[0].id_producto).find(".cantidad").text());
+					cantidad_sal = parseInt($(td_current).parent().find(".cantidad_v").text()) + parseInt(cantidad_sel);
+					cantidad_max_sal = parseInt($(td_current).parent().find(".cant_max").val());
 
 					if(cantidad_sal <= cantidad_max_sal){
-						add_quantity_prod(productos[0].id_producto, productos[0].id_talla, cantidad_sel);
-						update_quantity("s", cantidad_sel);
+						//add_quantity_prod(productos[0].id_producto, productos[0].id_talla, cantidad_sel);
+						update_quantity("s", cantidad_sel, "v");
 						add_quantity($(td_current).parent(), cantidad_sel);
 					}else{
 						bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
@@ -258,65 +300,65 @@ $(document).ready(function(){
 				}
 			}
 		}
-
+		update_difference();
 		$(tbody).html("");
 		$('#modelos_p').modal("hide");
 	});
 
-	$("#finalizar").on("click", function(){
-		tbody = $("#tabla_cambios").find("tbody");
-		id_almacen = $("#almacen").val();
+	$("#ticket").on("click", function(){
+		var tbody = $("#tabla_cambios").find("tbody");
+		var id_almacen = $("#almacen").val();
 		count_tr = $(tbody).find("tr").length;
 
 		if(id_almacen != 0){
 			if(count_tr > 1){
-				bootbox.confirm("Estás seguro de finalizar la salida?", function(result) {
+				bootbox.confirm("Estás seguro de finalizar la venta?", function(result) {
 					if(result){
-						get_values_outlet(tbody);
+						get_values_sale(tbody, id_almacen);
 					}
 				});
 			}else{
-				bootbox.alert("Necesitas agregar productos para registrar una salida.");
+				bootbox.alert("Necesitas agregar productos para registrar una venta.");
 			}
 		}else{
-			bootbox.alert("Debes seleccionar el almacén donde se hará la salida.");
+			bootbox.alert("Debes seleccionar el almacén donde se hará la venta.");
 			$("#almacen").focus();
 		}
 	});
 
-	/*$("#pausar").on("click", function(){
-		tbody = $("#tabla_cambios").find("tbody");
-		id_almacen = $("#almacen").val();
-		count_tr = $(tbody).find("tr").length;
+	$("#finalizar").on("click", function(){
+		if($(this).text().length == 35){
+			var tbody = $("#tabla_cambios").find("tbody");
+			var id_almacen = $("#almacen").val();
 
-		if(id_almacen != 0){
-			if(count_tr > 1){
-				bootbox.confirm("Estás seguro de pausar la salida?", function(result) {
-					if(result){
-						get_values_outlet(tbody);
-					}
-				});
+			if(id_almacen != 0){
+				get_sales_day(id_almacen);
 			}else{
-				bootbox.alert("Necesitas agregar productos para pausar una salida.");
+				bootbox.alert("Debes seleccionar el almacén donde se hará la venta.");
+				$("#almacen").focus();
 			}
-		}else{
-			bootbox.alert("Debes seleccionar el almacén donde se hará la salida.");
-			$("#almacen").focus();
 		}
-	});*/
+	});
 
 	$("#cancelar").on("click", function(){
-		tbody = $("#tabla_cambios").find("tbody");
-		count_tr = $(tbody).find("tr").length;
+		var tbody = $("#tabla_cambios").find("tbody");
+		var count_tr = $(tbody).find("tr").length;
 
 		if(count_tr > 1){
-			bootbox.confirm("Estás seguro de cancelar la salida?", function(result) {
+			bootbox.confirm("Estás seguro de cancelar la venta?", function(result) {
 				if(result){
 					tbody_clean();
+
+					$("#ticket").prop("disabled", false);
+		    		$("#almacen").prop("disabled", false);
+		    		$("#codigo_barras").prop("disabled", false);
+		    		$("#buscar_modelo").prop("disabled", false);
+					$("#finalizar").slideUp("fast").text("Cierre ventas (Día)");
+					$("#finalizar").slideDown("slow").removeAttr("onclick");
 				}
 			});
 		}else{
-			bootbox.alert("Necesitas agregar productos para cancelar una salida.");
+			bootbox.alert("Necesitas agregar productos para cancelar una venta.");
 		}
 	});
 
@@ -325,47 +367,178 @@ $(document).ready(function(){
 	});
 });
 
-function add_quantity(tr_current, quantity){
-	td_cantidad = $(tr_current).find(".cantidad");
-	quantity_current = parseInt($(td_cantidad).text());
-	quantity_new = quantity_current + parseInt(quantity);
-	$(tr_current).find("td.cantidad").text(quantity_new);
+function get_sales_day(id_almacen){
+	$.ajax({
+	    // la URL para la petición
+	    url : "obtener_ventas",
+	 
+	    // especifica si será una petición POST o GET
+	    type : "POST",
+
+	    //datos pasados por el metodo post
+	    data: { almacen : id_almacen },
+
+	    //especifica el tipo de dato que espera recibir
+	    dataType: 'json',
+
+	    // código a ejecutar si la petición es satisfactoria;
+	    // la respuesta es pasada como argumento a la función
+	    success : function(sales) {
+	    	if(sales != null){
+	    		tbody_clean();
+	    		$("#ticket").prop("disabled", true);
+	    		$("#almacen").prop("disabled", true);
+	    		$("#codigo_barras").prop("disabled", true);
+	    		$("#buscar_modelo").prop("disabled", true);
+	    		$("#finalizar").slideUp("fast").text("Confirmar ventas (Día)");
+	    		var tr_new_prod = crea_tr_sales(sales);
+	    		$("#tabla_cambios").find("tbody").prepend(tr_new_prod);
+	    		$("#finalizar").slideDown("slow").attr("onclick", "closing_day()");
+	    	}else{
+	    		bootbox.alert("No existen ventas en este almacén.");
+	    	}
+	    },
+	 
+	    // código a ejecutar si la petición falla;
+	    // son pasados como argumentos a la función
+	    // el objeto de la petición en crudo y código de estatus de la petición
+	    error : function(xhr, status) {
+	        bootbox.alert('Disculpe, existió un problema');
+	    }
+	});
 }
 
-function add_quantity_prod(id_prod, id_talla, quantity){
-	quantity_current = parseInt($(".prod_" + id_prod).find(".tallaid_" + id_talla).text());
-	
-	quantity_new = quantity_current - parseInt(quantity);
-	$(".prod_" + id_prod).find(".tallaid_" + id_talla).text(quantity_new).css("background-color", "greenyellow");
-}
+function crea_tr_sales(sales){
+	var precio_t = 0;
+	var cantidad_t = 0;
+	var html_tr = "";
 
-function remove_quantity_prod(tr_current, quantity){
-	classP = $(tr_current).attr("class").split(" ");
-	id_prod = classP[1].split("_");
-	classT = $(tr_current).find("TD").eq(3).attr("class");
-	id_talla = classT.split("_");
-	quantity_current = parseInt($(".prod_" + id_prod[1]).find(".tallaid_" + id_talla[1]).text());
-	
-	quantity_new = quantity_current + quantity;
+	for (var i = 0; i < sales.length; i++) {
+		html_tr += "<tr class='text-center producto_" + sales[i].id_producto + "'>";
+		html_tr += 	"<td style='border: hidden; background-color: white;'><input class='movs' type='hidden' value='" + sales[i].id_movimiento + "' /></td>";
+		html_tr += 	"<td class='cantidad_v'>" + sales[i].cantidad + "</td>";
+		html_tr += 	"<td class='marca_v'>" + sales[i].marca + "</td>";
+		html_tr += 	"<td class='modelo_v'>" + sales[i].modelo + "</td>";
+		html_tr += 	"<td class='descripcion_v'>" + sales[i].descripcion + "</td>";
+		html_tr += 	"<td class='talla_" + sales[i].id_talla + "'>" + sales[i].talla + "</td>";
+		html_tr += 	"<td class='precio_v'>" + sales[i].precio + "</td>";
+		html_tr += 	"<td>";
+		html_tr +=		"<button type='button' class='btn btn-danger btn-sm' disabled='disabled'>";
+		html_tr +=			"<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>";
+		html_tr +=		"</button>";
+		html_tr +=	"</td>";
+		html_tr += "</tr>";
 
-	if(quantity_new > 0){
-		$(".prod_" + id_prod[1]).find(".tallaid_" + id_talla[1]).text(quantity_new).css("background-color", "greenyellow");
-	}else{
-		$(".prod_" + id_prod[1]).find(".tallaid_" + id_talla[1]).text(quantity_new).css("background-color", "white");
+		cantidad_t += parseInt(sales[i].cantidad);
+		precio_t += parseInt(sales[i].precio) * parseInt(sales[i].cantidad);
 	}
 
-	return id_prod[1];
+	$("#total_vv").html(cantidad_t);
+	$("#total_pv").html(precio_t);
+
+	return html_tr;
+}
+
+function closing_day(){
+	tbody = $("#tabla_cambios").find("tbody");
+	td_class = tbody.find(".movs");
+	var movimientos = new Array;
+
+	for (var i = 0; i < td_class.length; i++) {
+		if(i > 0){
+			if(td_class.eq(i).val() != td_class.eq(i-1).val()){
+				movimientos.push(td_class.eq(i).val());
+			}
+		}else{
+			movimientos.push(td_class.eq(i).val());
+		}
+	}
+
+	var id_movimientos = movimientos.toString();
+	
+	$.ajax({
+	    // la URL para la petición
+	    url : "confirmar_movimientos",
+	 
+	    // especifica si será una petición POST o GET
+	    type : "POST",
+
+	    // envia los valores del form
+	    data : { movs : id_movimientos },
+
+	    //especifica el tipo de dato que espera recibir
+	    dataType: 'html',
+
+	    // código a ejecutar si la petición es satisfactoria;
+	    // la respuesta es pasada como argumento a la función
+	    success : function(confirmacion_ventas) {
+	    	var confirmacion = jQuery.parseJSON(confirmacion_ventas);
+	    	bootbox.alert(confirmacion.mensaje, function() {
+				if(confirmacion.resp == 't'){
+					location.href = "index";
+				}
+			});
+	    },
+	 
+	    // código a ejecutar si la petición falla;
+	    // son pasados como argumentos a la función
+	    // el objeto de la petición en crudo y código de estatus de la petición
+	    error : function(xhr, status) {
+	        bootbox.alert('Disculpe, existió un problema');
+	    }
+	});
+}
+
+function add_quantity(tr_current, quantity){
+	td_cantidad = $(tr_current).find(".cantidad_v");
+	quantity_current = parseInt($(td_cantidad).text());
+	quantity_new = quantity_current + parseInt(quantity);
+	$(tr_current).find("td.cantidad_v").text(quantity_new);
+}
+
+function crea_tr_venta(producto, folio){
+	var cant_max = 0;
+	var total_precio = 0;
+	html_tr = "";
+
+	for(var i = 0 ; i < producto.length ; i++){
+		html_tr += "<tr class='text-center product_" + producto[i].id_producto + " " + folio + "'>";
+		html_tr += 	"<td style='border: hidden; background-color: white;'></td>";
+		html_tr += 	"<td class='cantidad_c'>" + producto[i].cantidad + "</td>";
+		html_tr += 	"<td class='marca_c'>" + producto[i].marca + "</td>";
+		html_tr += 	"<td class='modelo_c'>" + producto[i].modelo + "</td>";
+		html_tr += 	"<td class='descripcion_c'>" + producto[i].descripcion + "</td>";
+		html_tr += 	"<td class='talla_" + producto[i].id_talla + "'>" + producto[i].talla + "</td>";
+		html_tr += 	"<td class='precio_c'>" + producto[i].precio + "</td>";
+		html_tr += 	"<td>";
+		html_tr +=		"<button type='button' class='btn btn-danger btn-sm' onclick='remove_tr(this, \"c\");'>";
+		html_tr +=			"<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>";
+		html_tr +=		"</button>";
+		html_tr +=	"</td>";
+		html_tr += "</tr>";
+
+		cant_max += parseInt(producto[i].cantidad);
+		total_precio += (parseInt(producto[i].cantidad) * parseInt(producto[i].precio));
+	}
+
+	$("#total_vc").html(cant_max);
+	$("#total_pc").html(total_precio);
+
+	return html_tr;
 }
 
 function crea_tr(producto){
+	var cant_max = obtener_cantidad_max(producto);
 	html_tr = "<tr class='text-center producto_" + producto[0].id_producto + "'>";
-	html_tr += 	"<td class='marca'>" + producto[0].marca + "</td>";
-	html_tr += 	"<td class='modelo'>" + producto[0].modelo + "</td>";
-	html_tr += 	"<td class='descripcion'>" + producto[0].descripcion + "</td>";
+	html_tr += 	"<td style='border: hidden; background-color: white;'><input type='hidden' class='cant_max' value='" + cant_max + "' /></td>";
+	html_tr += 	"<td class='cantidad_v'>1</td>";
+	html_tr += 	"<td class='marca_v'>" + producto[0].marca + "</td>";
+	html_tr += 	"<td class='modelo_v'>" + producto[0].modelo + "</td>";
+	html_tr += 	"<td class='descripcion_v'>" + producto[0].descripcion + "</td>";
 	html_tr += 	"<td class='talla_" + producto[0].id_talla + "'>" + producto[0].talla + "</td>";
-	html_tr += 	"<td class='cantidad'>1</td>";
+	html_tr += 	"<td class='precio_v'><input style='width:100%;' type='number' value='0' onkeyup='update_total_precio()'/></td>";
 	html_tr += 	"<td>";
-	html_tr +=		"<button type='button' class='btn btn-danger btn-sm' onclick='remove_tr(this);'>";
+	html_tr +=		"<button type='button' class='btn btn-danger btn-sm' onclick='remove_tr(this, \"v\");'>";
 	html_tr +=			"<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>";
 	html_tr +=		"</button>";
 	html_tr +=	"</td>";
@@ -374,40 +547,42 @@ function crea_tr(producto){
 	return html_tr;
 }
 
-function remove_tr(obj_button){
-	tr_current = $(obj_button).parent().parent();
+function update_total_precio(){
+	tbody = $("#tabla_cambios").find("tbody");
+	tr_current = $(tbody).find("tr");
+	tr_count = tr_current.length;
 
-	if($(tr_current).find(".cantidad").children().prop("tagName") == 'INPUT'){
-		quantity_current = 1;
-	}else{
-		quantity_current = parseInt($(tr_current).find(".cantidad").text());
+	var quantity_new = 0;
+	var quantity_current;
+
+	for (var i = 0; i < tr_count - 1 ; i++){
+		quantity_current = parseInt($(tr_current).eq(i).find(".cantidad_v").text()) * parseInt($(tr_current).eq(i).find(".precio_v").find("input").val());
+		quantity_new += quantity_current;
 	}
+
+	$("#total_pv").text(quantity_new);
+
+	update_difference();
+}
+
+function remove_tr(obj_button, tipo){
+	tr_current = $(obj_button).parent().parent();
+	quantity_current = parseInt($(tr_current).find(".cantidad_" + tipo).text());
 
 	if(quantity_current > 1){
-		ask_quantity(quantity_current, tr_current);
+		ask_quantity(quantity_current, tr_current, tipo);
 	}else{
-		bootbox.confirm("Estás seguro de borrar el producto de la salida?", function(result) {
+		bootbox.confirm("Estás seguro de borrar el producto de la venta?", function(result) {
 			if(result){
-				id_prod = remove_quantity_prod(tr_current, 1);
 				$(tr_current).remove();
-				remove_tr_prod(id_prod);
-				update_quantity("r", 1);
+				update_quantity("r", 1, tipo);
+				update_price(tr_current, tipo, 1);
 			}
 		});
-	}
-	
+	}	
 }
 
-function remove_tr_prod(id_prod){
-	count_class = $("#tabla_cambios").find(".producto_" + id_prod).length;
-
-	if(count_class == 0){
-		$(".producto_" + id_prod[1]).find(".talla_" + id_talla[1]).css("background-color", "white");
-		$(".prod_" + id_prod).remove();
-	}
-}
-
-function ask_quantity(quantity_current, tr_current){
+function ask_quantity(quantity_current, tr_current, tipo){
 	bootbox.prompt({
 		title: "Cuántas piezas quieres borrar?",
 		//value: "makeusabrew",
@@ -421,19 +596,17 @@ function ask_quantity(quantity_current, tr_current){
 				}else{
 					if(quantity_remove > 0){
 						if(quantity_remove > quantity_current){
-							bootbox.alert('La cantidad a borrar debe ser menor o igual a la cantidad en la salida.');
+							bootbox.alert('La cantidad a borrar debe ser menor o igual a la cantidad en la venta.');
 						}else{
 							quantity_new_ask = quantity_current - quantity_remove;
 							if(quantity_new_ask == 0){
-								id_prod = remove_quantity_prod(tr_current, quantity_remove);
 								$(tr_current).remove();
-								remove_tr_prod(id_prod);
 							}else{
-								id_prod = remove_quantity_prod(tr_current, quantity_remove);
-								$(tr_current).find(".cantidad").text(quantity_new_ask);
+								$(tr_current).find(".cantidad_" + tipo).text(quantity_new_ask);
 							}
 
-							update_quantity("r", quantity_remove);
+							update_quantity("r", quantity_remove, tipo);
+							update_price(tr_current, tipo, quantity_remove);
 						}
 					}else{
 						bootbox.alert('La cantidad a borrar debe ser mayor que cero.');
@@ -452,8 +625,8 @@ function valida_talla(obj_input){
 	}
 }
 
-function update_quantity(operation, quantity_remove){
-	quantity_current = parseInt($("#total_s").text());
+function update_quantity(operation, quantity_remove, tipo){
+	quantity_current = parseInt($("#total_v" + tipo).text());
 
 	if (operation == "s"){
 		quantity_new = quantity_current + parseInt(quantity_remove);
@@ -461,106 +634,93 @@ function update_quantity(operation, quantity_remove){
 		quantity_new = quantity_current - parseInt(quantity_remove);
 	}
 	
-	$("#total_s").text(quantity_new);
+	$("#total_v" + tipo).text(quantity_new);
 }
 
-function crea_tr_prod(producto, talla_cantidad){
-	html_productos = "<tr class='prod_" + producto[0].id_producto + " text-center'>";
-	html_productos += 	"<td class='marc'>" + producto[0].marca + "</td>";
-	html_productos += 	"<td class='mod'>" + producto[0].modelo + "</td>";
-	html_productos += 	"<td class='desc'>" + producto[0].descripcion + "</td>";
-	cont = 0;
-	for (var talla in talla_cantidad) {
-		cont++;
-		html_productos += "<td class='tallaid_" + cont + "'>" + talla_cantidad[talla].cantidad + "</td>";
+function update_price(tr_current, tipo, cant_delete){
+	var precio_unit = 0;
+	var precio = 0;
+	var total_current = 0;
+	var total_new = 0;
+
+	if(tipo == "c"){
+		precio_unit = parseInt($(tr_current).find(".precio_" + tipo).text());
+	}else{
+		precio_unit = parseInt($(tr_current).find(".precio_" + tipo).find("input").val());
+
+		if(isNaN(precio_unit)){
+			bootbox.alert("El precio debe ser un número entero.");
+			return false;
+		}
 	}
 
-	html_productos += "</tr>";
+	precio = precio_unit * cant_delete;
+	total_current = parseInt($("#total_p" + tipo).text());
+	total_new = total_current - precio;
 
-	return html_productos;
+	$("#total_p" + tipo).text(total_new);
+
+	update_difference();
 }
 
-function obtener_talla_cantidad(producto, cantidad){
-	almacen = $("#almacen").val();
-
-	$.ajax({
-	    // la URL para la petición
-	    url : "obtener_talla_cantidad",
-	 
-	    // especifica si será una petición POST o GET
-	    type : "POST",
-
-	    //datos pasados por el metodo post
-	    data: { id_prod : producto[0].id_producto,
-	    		id_talla : producto[0].id_talla,
-	    		id_almacen : almacen },
-
-	    //especifica el tipo de dato que espera recibir
-	    dataType: 'json',
-
-	    // código a ejecutar si la petición es satisfactoria;
-	    // la respuesta es pasada como argumento a la función
-	    success : function(talla_cantidad) {
-	    	tr_new_prod = crea_tr_prod(producto, talla_cantidad);
-			$("#tabla_productos tbody").prepend(tr_new_prod);
-			$(".prod_" + producto[0].id_producto).find(".tallaid_" + producto[0].id_talla).css("background-color", "greenyellow");
-			cant = parseInt(cantidad);
-
-			if(cant > 0){
-				current_q = $(".prod_" + producto[0].id_producto).find(".tallaid_" + producto[0].id_talla).text();
-				new_q = parseInt(current_q) - cant;
-				$(".prod_" + producto[0].id_producto).find(".tallaid_" + producto[0].id_talla).text(new_q);
-			}
-	    },
-	 
-	    // código a ejecutar si la petición falla;
-	    // son pasados como argumentos a la función
-	    // el objeto de la petición en crudo y código de estatus de la petición
-	    error : function(xhr, status) {
-	        bootbox.alert('Disculpe, existió un problema');
-	    }
-	});
+function update_difference(){
+	var difference = 0;
+	var total_v = parseInt($("#total_pv").text());
+	var total_c = parseInt($("#total_pc").text());
+	
+	difference = total_v - total_c;
+	$("#diferencia").text(difference);
 }
 
-function get_values_outlet(tbody_outlet){
-	outlet = new Object;
-	outlet_detail = new Array();
+function get_values_sale(tbody_sale, id_almacen){
+	sale = new Object;
+	sale_detail = new Array();
 
-	outlet.cantidad = parseInt($("#total_s").text());
-	outlet.id_almacen = id_almacen;
+	sale.cantidad = parseInt($("#total_v").text());
+	sale.id_almacen = id_almacen;
+	sale.precio = parseInt($("#total_p").text());
 
 	for(i = 0 ; i < (count_tr - 1) ; i++){
-		tr_id = $(tbody_outlet).find("tr").eq(i).attr("class");
+		tr_id = $(tbody_sale).find("tr").eq(i).attr("class");
 		tr_id_producto = tr_id.split(" ");
 		id_producto_tr = tr_id_producto[1].split("_");
 
-		tr_talla = $(tbody_outlet).find("tr").eq(i).find("td").eq(3).attr("class");
+		tr_talla = $(tbody_sale).find("tr").eq(i).find("td").eq(5).attr("class");
 		tr_id_talla = tr_talla.split("_");
 		id_talla_tr = tr_id_talla[1];
 
-		cantidad = $(tbody_outlet).find("tr").eq(i).find(".cantidad").text();
+		cantidad = $(tbody_sale).find("tr").eq(i).find(".cantidad_v").text();
 
-		outlet_detail[i] = new Object;
+		precio = $(tbody_sale).find("tr").eq(i).find(".precio_v").find('input').val();
 
-		outlet_detail[i].id_producto = id_producto_tr[1];
-		outlet_detail[i].id_talla = id_talla_tr;
-		outlet_detail[i].cantidad = cantidad;
+		if(precio.trim() == '0'){
+			bootbox.alert('Todos los precios deben ser mayor a 0.');
+			$(tbody_sale).find("tr").eq(i).find(".precio_v").find('input').focus();
+			return false;
+		}
+
+		sale_detail[i] = new Object;
+
+		sale_detail[i].id_producto = id_producto_tr[1];
+		sale_detail[i].id_talla = id_talla_tr;
+		sale_detail[i].cantidad = cantidad;
+		sale_detail[i].precio = precio;
 	}
 
-	send_values_outlet(outlet, outlet_detail);
+	send_values_sale(sale, sale_detail);
 }
 
-function send_values_outlet(outlet, outlet_detail){
+function send_values_sale(sale, sale_detail){
 	$.ajax({
 	    // la URL para la petición
-	    url : "registrar_salida",
+	    url : "registrar_venta",
 	 
 	    // especifica si será una petición POST o GET
 	    type : "POST",
 
 	    //datos enviados mediante post
-	    data: { obj_outlet : outlet,
-	    		obj_outlet_detail: outlet_detail },
+	    data: { obj_sale : sale,
+	    		obj_sale_detail: sale_detail },
 
 	    //especifica el tipo de dato que espera recibir
 	    dataType: 'html',
@@ -600,11 +760,13 @@ function obtener_cantidad_modelo(producto, tr_class, almacen, cantidad_sel, tall
 	    		var cantidad_max = obtener_cantidad_max(respuesta_modelo);
 		    	if(cantidad_sel <= cantidad_max){
 		    		html_tr = '<tr class="text-center producto_' + productos[0].id_producto + '">';
-					html_tr += 		'<td class="marca">' + productos[0].marca + '</td>';
-					html_tr += 		'<td class="modelo">' + productos[0].modelo + '</td>';
-					html_tr += 		'<td class="descripcion">' + productos[0].descripcion + '</td>';
+		    		html_tr +=		'<td style="border: hidden; background-color: white;"><input type="hidden" class="cant_max" value="' + cantidad_max + '" /></td>';
+					html_tr +=		'<td class="cantidad_v">' + cantidad_sel + '</td>';
+					html_tr += 		'<td class="marca_v">' + productos[0].marca + '</td>';
+					html_tr += 		'<td class="modelo_v">' + productos[0].modelo + '</td>';
+					html_tr += 		'<td class="descripcion_v">' + productos[0].descripcion + '</td>';
 					html_tr +=		'<td class="talla_' + productos[0].id_talla + '">' + productos[0].talla + '</td>';
-					html_tr +=		'<td class="cantidad">' + cantidad_sel + '</td>';
+					html_tr +=		'<td class="precio_v"><input style="width:100%;" type="number" value="0" onkeyup="update_total_precio()"/></td>';
 					html_tr += 	"<td>";
 					html_tr +=		"<button type='button' class='btn btn-danger btn-sm' onclick='remove_tr(this);'>";
 					html_tr +=			"<span class='glyphicon glyphicon-remove' aria-hidden='true'></span>";
@@ -614,11 +776,6 @@ function obtener_cantidad_modelo(producto, tr_class, almacen, cantidad_sel, tall
 
 					$("#tabla_cambios tbody").prepend(html_tr);
 
-					if(tr_class.length == 0){
-						obtener_talla_cantidad(productos, cantidad_sel);
-					}
-
-					add_quantity_prod(productos[0].id_producto, productos[0].id_talla, cantidad_sel);
 					update_quantity("s", cantidad_sel);
 					add_quantity($(td_current).parent(), cantidad_sel);
 		    	}else{
@@ -645,7 +802,9 @@ function obtener_cantidad_max(respuesta_modelo){
 		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
 			cant_max += parseInt(respuesta_modelo[i].cantidad);
 		}else{
-			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion != '-1'){
+			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion == '-1'){
+				cant_max -= 0;
+			}else{
 				cant_max -= parseInt(respuesta_modelo[i].cantidad);
 			}
 		}
@@ -655,23 +814,14 @@ function obtener_cantidad_max(respuesta_modelo){
 }
 
 function tbody_clean(){
-	tbody_s = $("#tabla_cambios").find("tbody");
-	tr_current = $(tbody_s).find("tr");
+	tbody_v = $("#tabla_cambios").find("tbody");
+	tr_current = $(tbody_v).find("tr");
 	tr_count = $(tr_current).length;
 
 	for (i = 0 ; i < tr_count - 1 ; i++) {
 		$(tr_current).eq(i).remove();
 	}
 
-	$("#total_s").text("0");
-
-	tbody_p = $("#tabla_productos").find("tbody");
-	tr_current_p = $(tbody_p).find("tr");
-	tr_count_p = $(tr_current_p).length;
-
-	for (i = 0 ; i < tr_count_p - 1 ; i++) {
-		$(tr_current_p).eq(i).remove();
-	}
-
-	$("#tr_tallas").find("td.tallas_c").text("0");	
+	$("#total_v").text("0");
+	$("#total_p").text("0");	
 }

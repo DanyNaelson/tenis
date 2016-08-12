@@ -7,27 +7,44 @@ class Cambios extends CI_Controller {
 		$this->load->model('cambios_m');
 		
 		if (!isset($_SESSION["id_usuario"])) {
-			header('Location: /inventarios/login/');
+			header('Location: /incambiorios/login/');
 		}
 		
 		$data["id_usuario"] = $_SESSION["id_usuario"];
 		$data["nombre"] = $_SESSION["nombre"];
-		$data["titulo"] = "Sistema de inventarios | Cambios";
+		$data["titulo"] = "Sistema de incambiorios | Cambios";
 		$data["login"] = false;
 		$data["modulo"] = "Cambios";
-		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
+		$data["pagina_retorno"] = "/incambiorios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "cambios.js";
 
 		$almacenes = $this->cambios_m->obtener_almacenes($data["id_usuario"]);
-		$tallas = $this->cambios_m->obtener_tallas();
 
 		$data["almacenes"] = $almacenes;
-		$data["tallas"] = $tallas;
-		$data["productos"] = array();
 
 		$this->load->view('plantillas/header',$data);
 		$this->load->view('cambios_v');
 		$this->load->view('plantillas/footer',$data);
+	}
+
+	public function obtener_producto_folio(){
+		$this->load->model('cambios_m');
+		$folio = trim($this->input->post("folio"));
+		$id_almacen = trim($this->input->post("id_almacen"));
+		$producto = array();
+		$tr_html = "";
+
+		if ($folio != "") {
+			$producto = $this->cambios_m->obtener_producto_folio($folio, $id_almacen);
+		}
+
+		if (empty($producto)) {
+			$respuesta = 'null';
+		} else {
+			$respuesta = json_encode($producto);
+		}
+		
+		echo $respuesta;
 	}
 
 	public function obtener_producto(){
@@ -85,12 +102,20 @@ class Cambios extends CI_Controller {
 		echo $html_select;
 	}
 
-	public function obtener_talla_cantidad(){
+	public function obtener_cantidad_producto($id_producto, $id_talla, $id_almacen){
 		$this->load->model('cambios_m');
-		$talla_cantidad = $this->cambios_m->obtener_talla_cantidad(trim($this->input->post("id_prod")), trim($this->input->post("id_almacen")));
-		$count_tallas = count($this->cambios_m->obtener_tallas());
-		$talla_cantidad_def = $this->crea_arr_talla_cantidad($talla_cantidad, $count_tallas, trim($this->input->post("id_talla")));
-		echo json_encode($talla_cantidad_def);
+		$producto_talla_cantidad = $this->cambios_m->obtener_cantidad_producto($id_producto, $id_talla, $id_almacen);
+		
+		$cant_max = 0;
+		foreach ($producto_talla_cantidad as $producto_talla) {
+			if ($producto_talla->id_tipo_movimiento == 1 || ($talla_c->id_tipo_movimiento == 3 && $talla_c->confirmacion == -1) || $producto_talla->id_tipo_movimiento == 7 || $producto_talla->id_tipo_movimiento == 8 || $producto_talla->id_tipo_movimiento == 9) {
+				$cant_max += $producto_talla->cantidad;
+			} else {
+				$cant_max -= $producto_talla->cantidad;
+			}
+		}
+
+		echo $cant_max;
 	}
 
 	public function obtener_cantidad_modelo(){
@@ -105,36 +130,42 @@ class Cambios extends CI_Controller {
 
 		for ($i = 0 ; $i < $count_tallas ; $i++) {
 			$id_talla = $i + 1;
-			$cantidad_real = 0;
-			$talla_cantidad_def[$i]["cantidad"] = "0";
 
-			foreach ($talla_cantidad as $talla_c) {
-				if(isset($talla_c->id_talla)){
-					if($talla_c->id_talla == $id_talla){
-						if($talla_c->id_tipo_movimiento == 1 || $talla_c->id_tipo_movimiento == 7 || $talla_c->id_tipo_movimiento == 8 || $talla_c->id_tipo_movimiento == 9){
-							$cantidad_real += $talla_c->cantidad;
-						}else{
-							if($talla_c->id_tipo_movimiento == 3 && $talla_c->confirmacion != -1){
-								$cantidad_real -= $talla_c->cantidad;
-							}
-						}
-						
-						$talla_cantidad_def[$i]["cantidad"] = $cantidad_real;
-						array_shift($talla_cantidad);
-					}
+			if(isset($talla_cantidad[0]->id_talla)){
+				if($talla_cantidad[0]->id_talla == $id_talla){
+					$talla_cantidad_def[$i]["cantidad"] = $talla_cantidad[0]->cantidad;
+
+					array_shift($talla_cantidad);
+				}else{
+					$talla_cantidad_def[$i]["cantidad"] = "0";
 				}
+			}else{
+				$talla_cantidad_def[$i]["cantidad"] = "0";
 			}
 		}
 
 		return $talla_cantidad_def;
 	}
 
-	public function registrar_salida(){
+	public function registrar_cambio(){
 		$this->load->model('cambios_m');
-		$salida = $this->input->post("obj_outlet");
-		$salida_detalle = $this->input->post("obj_outlet_detail");
-		$respuesta_salida = $this->cambios_m->registrar_salida($salida, $salida_detalle);
-		echo $respuesta_salida;
+		$cambio = $this->input->post("obj_change");
+		$cambio_detalle = $this->input->post("obj_change_detail");
+		$respuesta_cambio = $this->cambios_m->registrar_cambio($cambio, $cambio_detalle);
+		echo $respuesta_cambio;
 	}
 
+	public function obtener_cambios(){
+		$this->load->model('cambios_m');
+		$id_almacen = $this->input->post("almacen");
+		$respuesta_cambios = $this->cambios_m->obtener_cambios($id_almacen);
+		echo json_encode($respuesta_cambios);
+	}
+
+	public function confirmar_movimientos(){
+		$this->load->model('cambios_m');
+		$id_movimientos = $this->input->post("movs");
+		$confirmacion_cambios = $this->cambios_m->confirmar_cambios($id_movimientos);
+		echo json_encode($confirmacion_cambios);
+	}
 }

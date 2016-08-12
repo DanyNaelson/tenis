@@ -27,6 +27,28 @@ class Cambios_m extends CI_Model{
 
 	}
 
+	function obtener_usuarios(){
+
+		$this->db->select('id_usuario, usuario');
+		$this->db->from('usuarios');
+		//$this->db->join('usuario_almacen ua', 'ua.id_almacen = a.id_almacen');
+		//$this->db->where('ua.id_usuario', $id_usuario);
+		$this->db->order_by('usuario', 'ASC');
+		
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
 	function obtener_tallas(){
 
 		$this->db->select('*');
@@ -51,6 +73,35 @@ class Cambios_m extends CI_Model{
 		$this->db->select('*');
 		$this->db->from('marca');
 		
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
+	function obtener_producto_folio($folio = null, $id_almacen = null){
+
+		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad,dm.precio');
+		$this->db->from('producto_talla pt');
+		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
+		$this->db->join('marca m', 'm.id_marca = p.id_marca');
+		$this->db->join('talla t', 't.id_talla = pt.id_talla');
+		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
+		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
+
+		if (!is_null($folio)){
+			$this->db->where('mv.folio', $folio);
+			//$this->db->where('dm.cantidad > 0');
+		}
+		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
 
 		$row = $query->result();
@@ -106,7 +157,7 @@ class Cambios_m extends CI_Model{
 			$this->db->where('p.id_marca', $marca);
 		}
 
-		if (!is_null($modelo) && ($modelo != "") && ($modelo != '0')){
+		if (!is_null($modelo) && $modelo != "" && $modelo != '0'){
 			$this->db->where('p.modelo', $modelo);
 		}
 
@@ -159,9 +210,34 @@ class Cambios_m extends CI_Model{
 
 	}
 
-	function registrar_salida($salida, $salida_detalle){
+	function obtener_cantidad_producto($id_producto, $id_talla, $id_almacen){
 
-		$fecha_salida = date("Y-m-d H:m:s");
+		$this->db->select('mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
+		$this->db->from('producto_talla pt');
+		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
+		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
+		$this->db->where('pt.id_producto', $id_producto);
+		$this->db->where('pt.id_talla', $id_talla);
+		$this->db->order_by('id_talla', 'ASC');
+
+		//echo $this->db->get_compiled_select();die;
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
+	function registrar_cambio($cambio, $cambio_detalle){
+
+		$fecha_cambio = date("Y-m-d H:m:s");
 		$insert = "";
 		$mensaje = "";
 		$str = 1;
@@ -170,7 +246,7 @@ class Cambios_m extends CI_Model{
 
 		$this->db->select('id_movimiento');
 		$this->db->from('movimientos');
-		$this->db->where('id_tipo_movimiento', 2);
+		$this->db->where('id_tipo_movimiento', 4);
 
 		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
@@ -183,16 +259,16 @@ class Cambios_m extends CI_Model{
 
 		if (is_int($row)) {
 
-			$folio = 'S' . ($row + 1);
+			$folio = 'V' . ($row + 1);
 
 			$data = array(
 				'folio' => $folio,
-		        'id_tipo_movimiento' => 2,
-		        'cantidad' => $salida["cantidad"],
-		        'precio' => 0,
-		        'fecha' => $fecha_salida,
-		        'id_almacen' => $salida["id_almacen"],
-		        'confirmacion' => 1
+		        'id_tipo_movimiento' => 4,
+		        'cantidad' => $cambio["cantidad"],
+		        'fecha' => $fecha_cambio,
+		        'id_almacen' => $cambio["id_almacen"],
+		        'precio' => $cambio["precio"],
+		        'confirmacion' => 0
 			);
 
 			$str = $this->db->insert('movimientos', $data);
@@ -206,12 +282,12 @@ class Cambios_m extends CI_Model{
 			if ($str == 1)
 			{
 				
-				for($i = 0; $i < count($salida_detalle) ; $i++){
+				for($i = 0; $i < count($cambio_detalle) ; $i++){
 
 					$this->db->select('cantidad');
 					$this->db->from('producto_talla');
-					$this->db->where('id_producto', $salida_detalle[$i]["id_producto"]);
-					$this->db->where('id_talla', $salida_detalle[$i]["id_talla"]);
+					$this->db->where('id_producto', $cambio_detalle[$i]["id_producto"]);
+					$this->db->where('id_talla', $cambio_detalle[$i]["id_talla"]);
 
 					//echo $this->db->get_compiled_select();die;
 					$query = $this->db->get();
@@ -224,11 +300,11 @@ class Cambios_m extends CI_Model{
 
 					if (empty($row)) {
 						$data_pt = array(
-					        'id_producto' => $salida_detalle[$i]["id_producto"],
-					        'id_talla' => $salida_detalle[$i]["id_talla"],
+					        'id_producto' => $cambio_detalle[$i]["id_producto"],
+					        'id_talla' => $cambio_detalle[$i]["id_talla"],
 					        'codigo_barras' => '',
 					        'id_almacen' => NULL,
-					        'cantidad' => $salida_detalle[$i]["cantidad"]
+					        'cantidad' => $cambio_detalle[$i]["cantidad"]
 						);
 
 						$str = $this->db->insert('producto_talla', $data_pt);
@@ -237,7 +313,7 @@ class Cambios_m extends CI_Model{
 						    $this->db->trans_rollback();
 						}
 					}else{
-						$cantidad = (int)$row[0]->cantidad - (int)$salida_detalle[$i]["cantidad"];
+						$cantidad = (int)$row[0]->cantidad - (int)$cambio_detalle[$i]["cantidad"];
 
 						if($cantidad < 0){
 							$mensaje = "Error al actualizar la cantidad del producto ya que es menor que 0.";
@@ -249,8 +325,8 @@ class Cambios_m extends CI_Model{
 						}
 
 						$this->db->set('cantidad', $cantidad);
-						$this->db->where('id_producto', $salida_detalle[$i]["id_producto"]);
-						$this->db->where('id_talla', $salida_detalle[$i]["id_talla"]);
+						$this->db->where('id_producto', $cambio_detalle[$i]["id_producto"]);
+						$this->db->where('id_talla', $cambio_detalle[$i]["id_talla"]);
 						$str = $this->db->update('producto_talla');
 					}
 
@@ -258,10 +334,10 @@ class Cambios_m extends CI_Model{
 
 						$data_det = array(
 					        'id_movimiento' => $id_ultimo_e,
-					        'id_producto' => $salida_detalle[$i]["id_producto"],
-					        'id_talla' => $salida_detalle[$i]["id_talla"],
-					        'cantidad' => $salida_detalle[$i]["cantidad"],
-					        'precio' => 0
+					        'id_producto' => $cambio_detalle[$i]["id_producto"],
+					        'id_talla' => $cambio_detalle[$i]["id_talla"],
+					        'cantidad' => $cambio_detalle[$i]["cantidad"],
+					        'precio' => $cambio_detalle[$i]["precio"]
 						);
 
 						$str = $this->db->insert('detalle_movimiento', $data_det);
@@ -278,7 +354,7 @@ class Cambios_m extends CI_Model{
 						$tipo_m = explode("-", $insert);
 
 						if ($tipo_m[0] != '0') {
-							$mensaje = "Se ingresaron los detalles de salida correctamente.";
+							$mensaje = "Se ingresaron los detalles de cambio correctamente.";
 							$mensaje .= "|t";
 						} else {
 							$mensaje = "Error al insertar el detalle_movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
@@ -288,7 +364,7 @@ class Cambios_m extends CI_Model{
 						if ($this->db->trans_status() === FALSE){
 						    $this->db->trans_rollback();
 						}else{
-							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro la salida con id: " . $id_ultimo_e);
+							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro la cambio con id: " . $id_ultimo_e);
 						    $this->db->trans_commit();
 						}
 
@@ -305,7 +381,7 @@ class Cambios_m extends CI_Model{
 			}
 
 		}else{
-			$mensaje = "Error al consultar los movimientos de salida, intentelo nuevamente.";
+			$mensaje = "Error al consultar los movimientos de cambio, intentelo nuevamente.";
 			$mensaje .= "|f";
 		}
 
@@ -313,4 +389,56 @@ class Cambios_m extends CI_Model{
 
 	}
 
+	function obtener_cambios($id_almacen){
+
+		$this->db->select('mv.id_movimiento,m.marca,p.modelo,p.descripcion,t.talla,dm.cantidad,dm.precio');
+		$this->db->from('producto_talla pt');
+		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
+		$this->db->join('marca m', 'm.id_marca = p.id_marca');
+		$this->db->join('talla t', 't.id_talla = pt.id_talla');
+		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
+		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen . " AND mv.confirmacion = 0 AND mv.id_tipo_movimiento = 4");
+		$this->db->order_by('mv.id_movimiento,dm.id_detalle_movimiento', 'ASC');
+
+		//echo $this->db->get_compiled_select();die;
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
+	function confirmar_cambios($id_movimientos){
+		$movimientos = explode(",", $id_movimientos);
+		$insert = "";
+		$mensaje = "";
+		$str = 1;
+		$respuesta = array('mensaje' => 'Se han confirmado correctamente los movimientos de cambio.', 'resp' => 't');
+
+		$this->db->trans_begin();
+
+		foreach($movimientos as $movimiento){
+			$this->db->set('confirmacion', 1);
+			$this->db->where('id_movimiento', $movimiento);
+			$this->db->update('movimientos');
+
+			if($this->db->trans_status() === FALSE){
+				$respuesta = array('mensaje' => 'No se actualizó el movimiento con id: ' . $movimiento . '.', 'resp' => 'f');
+			    $this->db->trans_rollback();
+			    return $respuesta;
+			}else{
+				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se confirmo el cierre de cambio con los id_movimientos: " . $id_movimientos);
+				$this->db->trans_commit();
+			}
+		}
+
+		return $respuesta;
+	}
 }
