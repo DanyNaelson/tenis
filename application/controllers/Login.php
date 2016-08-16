@@ -16,12 +16,20 @@ class Login extends CI_Controller {
 
 	public function valida_usuario($usuario = null, $pass = null)
 	{
+		$usuario_datos = array(
+							array("valida" => "correcto")
+						);
 		$this->load->model('login_m');
 		$usuarios = $this->login_m->obtener_usuarios($usuario, $pass);
 		if($usuarios != null){
-			echo json_encode($usuarios);
+			if($pass != null){
+	        	array_push($usuario_datos, $usuarios);
+	        }
+
+	        echo json_encode($usuario_datos);
 		}else{
-			echo json_encode(null);
+			$usuario_datos["valida"] = null;
+			echo json_encode($usuario_datos);
 		}
 	}
 }

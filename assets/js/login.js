@@ -72,7 +72,7 @@ $(document).ready(function(){
 });
 
 function validar_usuario(usuarios){
-	if(usuarios != null){
+	if(usuarios[0].valida != null){
 		$("#usuario").parent().removeClass("has-error").addClass("has-success").children(".glyphicon").removeClass("glyphicon-remove").addClass("glyphicon-ok");
 		$("#usuario").parent().children(".label-danger").html("").hide();
 		$("#password").prop("disabled", false).focus();
@@ -83,11 +83,11 @@ function validar_usuario(usuarios){
 	}
 }
 
-function validar_contraseña(usuarios){
-	if(usuarios != null){
+function validar_contraseña(usuario){
+	if(usuario[0].valida != null){
 		$("#password").parent().children(".label-danger").html("").hide();
 		$("#password").parent().removeClass("has-error").addClass("has-success").children(".glyphicon").removeClass("glyphicon-remove").addClass("glyphicon-ok");
-		location.href = "/inventarios/inicio/index/" + usuarios[0].id_usuario;
+		location.href = "/inventarios/inicio/index/" + usuario[1][0].id_usuario;
 	}else{
 		$("#password").parent().removeClass("has-success").addClass("has-error").children(".glyphicon").removeClass("glyphicon-ok").addClass("glyphicon-remove");
 		$("#password").focus().parent().children(".label-danger").html("Contraseña incorrecta, favor de ingresarla nuevamente.").slideDown('fast');
