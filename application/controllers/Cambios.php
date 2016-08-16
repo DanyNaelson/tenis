@@ -149,23 +149,12 @@ class Cambios extends CI_Controller {
 
 	public function registrar_cambio(){
 		$this->load->model('cambios_m');
-		$cambio = $this->input->post("obj_change");
-		$cambio_detalle = $this->input->post("obj_change_detail");
-		$respuesta_cambio = $this->cambios_m->registrar_cambio($cambio, $cambio_detalle);
-		echo $respuesta_cambio;
-	}
-
-	public function obtener_cambios(){
-		$this->load->model('cambios_m');
+		$cambio_v = $this->input->post("changev");
+		$cambio_detalle_v = $this->input->post("changevdetail");
+		$cambio_c = $this->input->post("changec");
+		$cambio_detalle_c = $this->input->post("changecdetail");
 		$id_almacen = $this->input->post("almacen");
-		$respuesta_cambios = $this->cambios_m->obtener_cambios($id_almacen);
-		echo json_encode($respuesta_cambios);
-	}
-
-	public function confirmar_movimientos(){
-		$this->load->model('cambios_m');
-		$id_movimientos = $this->input->post("movs");
-		$confirmacion_cambios = $this->cambios_m->confirmar_cambios($id_movimientos);
-		echo json_encode($confirmacion_cambios);
+		$respuesta_cambio = $this->cambios_m->registrar_cambio($cambio_v, $cambio_detalle_v, $cambio_c, $cambio_detalle_c, $id_almacen);
+		echo json_encode($respuesta_cambio);
 	}
 }

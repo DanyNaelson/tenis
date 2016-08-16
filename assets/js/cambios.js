@@ -305,60 +305,48 @@ $(document).ready(function(){
 		$('#modelos_p').modal("hide");
 	});
 
-	$("#ticket").on("click", function(){
-		var tbody = $("#tabla_cambios").find("tbody");
+	$("#realizar").on("click", function(){
 		var id_almacen = $("#almacen").val();
-		count_tr = $(tbody).find("tr").length;
+		var tbody_v = $("#tabla_folios").find("tbody");
+		var count_tr_v = $(tbody_v).find("tr").length;
+		var tbody_c = $("#tabla_cambios").find("tbody");
+		var count_tr_c = $(tbody_c).find("tr").length;
+		var diferencia = parseInt($("#diferencia").text());
 
 		if(id_almacen != 0){
-			if(count_tr > 1){
-				bootbox.confirm("Estás seguro de finalizar la venta?", function(result) {
-					if(result){
-						get_values_sale(tbody, id_almacen);
-					}
-				});
+			if(count_tr_v > 1 && count_tr_c > 1){
+				if(diferencia >= 0 && !isNaN(diferencia)){
+					bootbox.confirm("Estás seguro de finalizar el cambio?", function(result) {
+						if(result){
+							get_values_change(tbody_v, tbody_c, id_almacen);
+						}
+					});
+				}else{
+					bootbox.alert("La diferencia debe ser mayor a 0.");
+				}
 			}else{
-				bootbox.alert("Necesitas agregar productos para registrar una venta.");
+				bootbox.alert("Necesitas agregar productos para registrar un cambio.");
 			}
 		}else{
-			bootbox.alert("Debes seleccionar el almacén donde se hará la venta.");
+			bootbox.alert("Debes seleccionar el almacén donde se hará el cambio.");
 			$("#almacen").focus();
 		}
 	});
 
-	$("#finalizar").on("click", function(){
-		if($(this).text().length == 35){
-			var tbody = $("#tabla_cambios").find("tbody");
-			var id_almacen = $("#almacen").val();
-
-			if(id_almacen != 0){
-				get_sales_day(id_almacen);
-			}else{
-				bootbox.alert("Debes seleccionar el almacén donde se hará la venta.");
-				$("#almacen").focus();
-			}
-		}
-	});
-
 	$("#cancelar").on("click", function(){
-		var tbody = $("#tabla_cambios").find("tbody");
-		var count_tr = $(tbody).find("tr").length;
+		var tbody_cambios = $("#tabla_cambios").find("tbody");
+		var tbody_folios = $("#tabla_folios").find("tbody");
+		var count_cambios = $(tbody_cambios).find("tr").length;
+		var count_folios = $(tbody_folios).find("tr").length;
 
-		if(count_tr > 1){
-			bootbox.confirm("Estás seguro de cancelar la venta?", function(result) {
+		if(count_cambios > 1 || count_folios > 1){
+			bootbox.confirm("Estás seguro de cancelar el cambio?", function(result) {
 				if(result){
 					tbody_clean();
-
-					$("#ticket").prop("disabled", false);
-		    		$("#almacen").prop("disabled", false);
-		    		$("#codigo_barras").prop("disabled", false);
-		    		$("#buscar_modelo").prop("disabled", false);
-					$("#finalizar").slideUp("fast").text("Cierre ventas (Día)");
-					$("#finalizar").slideDown("slow").removeAttr("onclick");
 				}
 			});
 		}else{
-			bootbox.alert("Necesitas agregar productos para cancelar una venta.");
+			bootbox.alert("Necesitas agregar productos para cancelar un cambio.");
 		}
 	});
 
@@ -367,35 +355,92 @@ $(document).ready(function(){
 	});
 });
 
-function get_sales_day(id_almacen){
+function get_values_change(tbody_v, tbody_c, id_almacen){
+	var count_tr_v = $(tbody_v).find("tr").length;
+
+	var change_v = new Object;
+	var change_v_detail = new Array();
+
+	change_v.cantidad = parseInt($("#total_vc").text());
+	change_v.precio = parseInt($("#total_pc").text());
+
+	for(i = 0 ; i < (count_tr_v - 1) ; i++){
+		tr_id = $(tbody_v).find("tr").eq(i).attr("class");
+		tr_id_producto = tr_id.split(" ");
+		id_producto_v = tr_id_producto[1].split("_");
+
+		tr_talla = $(tbody_v).find("tr").eq(i).find("td").eq(5).attr("class");
+		tr_id_talla = tr_talla.split("_");
+		id_talla_v = tr_id_talla[1];
+
+		cantidad_v = $(tbody_v).find("tr").eq(i).find(".cantidad_c").text();
+
+		precio_v = $(tbody_v).find("tr").eq(i).find(".precio_c").text();
+
+		change_v_detail[i] = new Object;
+
+		change_v_detail[i].id_producto = id_producto_v[1];
+		change_v_detail[i].id_talla = id_talla_v;
+		change_v_detail[i].cantidad = cantidad_v;
+		change_v_detail[i].precio = precio_v;
+	}
+
+	var count_tr_c = $(tbody_c).find("tr").length;
+
+	var change_c = new Object;
+	var change_c_detail = new Array();
+
+	change_c.cantidad = parseInt($("#total_vv").text());
+	change_c.precio = parseInt($("#total_pv").text());
+
+	for(i = 0 ; i < (count_tr_c - 1) ; i++){
+		tr_id = $(tbody_c).find("tr").eq(i).attr("class");
+		tr_id_producto = tr_id.split(" ");
+		id_producto_c = tr_id_producto[1].split("_");
+
+		tr_talla = $(tbody_c).find("tr").eq(i).find("td").eq(5).attr("class");
+		tr_id_talla = tr_talla.split("_");
+		id_talla_c = tr_id_talla[1];
+
+		cantidad_c = $(tbody_c).find("tr").eq(i).find(".cantidad_v").text();
+
+		precio_c = $(tbody_c).find("tr").eq(i).find(".precio_v").find("input").val();
+
+		change_c_detail[i] = new Object;
+
+		change_c_detail[i].id_producto = id_producto_c[1];
+		change_c_detail[i].id_talla = id_talla_c;
+		change_c_detail[i].cantidad = cantidad_c;
+		change_c_detail[i].precio = precio_c;
+	}
+
+	send_values_change(change_v, change_v_detail, change_c, change_c_detail, id_almacen);
+}
+
+function send_values_change(change_v, change_v_detail, change_c, change_c_detail, id_almacen){
 	$.ajax({
 	    // la URL para la petición
-	    url : "obtener_ventas",
+	    url : "registrar_cambio",
 	 
 	    // especifica si será una petición POST o GET
 	    type : "POST",
 
 	    //datos pasados por el metodo post
-	    data: { almacen : id_almacen },
+	    data: { changev : change_v,
+	    		changevdetail : change_v_detail,
+	    		changec : change_c,
+	    		changecdetail : change_c_detail,
+	    		almacen : id_almacen },
 
 	    //especifica el tipo de dato que espera recibir
 	    dataType: 'json',
 
 	    // código a ejecutar si la petición es satisfactoria;
 	    // la respuesta es pasada como argumento a la función
-	    success : function(sales) {
-	    	if(sales != null){
+	    success : function(change) {
+	    	bootbox.alert(change.mensaje);
+	    	if(change.resp == 't'){
 	    		tbody_clean();
-	    		$("#ticket").prop("disabled", true);
-	    		$("#almacen").prop("disabled", true);
-	    		$("#codigo_barras").prop("disabled", true);
-	    		$("#buscar_modelo").prop("disabled", true);
-	    		$("#finalizar").slideUp("fast").text("Confirmar ventas (Día)");
-	    		var tr_new_prod = crea_tr_sales(sales);
-	    		$("#tabla_cambios").find("tbody").prepend(tr_new_prod);
-	    		$("#finalizar").slideDown("slow").attr("onclick", "closing_day()");
-	    	}else{
-	    		bootbox.alert("No existen ventas en este almacén.");
 	    	}
 	    },
 	 
@@ -437,56 +482,6 @@ function crea_tr_sales(sales){
 	$("#total_pv").html(precio_t);
 
 	return html_tr;
-}
-
-function closing_day(){
-	tbody = $("#tabla_cambios").find("tbody");
-	td_class = tbody.find(".movs");
-	var movimientos = new Array;
-
-	for (var i = 0; i < td_class.length; i++) {
-		if(i > 0){
-			if(td_class.eq(i).val() != td_class.eq(i-1).val()){
-				movimientos.push(td_class.eq(i).val());
-			}
-		}else{
-			movimientos.push(td_class.eq(i).val());
-		}
-	}
-
-	var id_movimientos = movimientos.toString();
-	
-	$.ajax({
-	    // la URL para la petición
-	    url : "confirmar_movimientos",
-	 
-	    // especifica si será una petición POST o GET
-	    type : "POST",
-
-	    // envia los valores del form
-	    data : { movs : id_movimientos },
-
-	    //especifica el tipo de dato que espera recibir
-	    dataType: 'html',
-
-	    // código a ejecutar si la petición es satisfactoria;
-	    // la respuesta es pasada como argumento a la función
-	    success : function(confirmacion_ventas) {
-	    	var confirmacion = jQuery.parseJSON(confirmacion_ventas);
-	    	bootbox.alert(confirmacion.mensaje, function() {
-				if(confirmacion.resp == 't'){
-					location.href = "index";
-				}
-			});
-	    },
-	 
-	    // código a ejecutar si la petición falla;
-	    // son pasados como argumentos a la función
-	    // el objeto de la petición en crudo y código de estatus de la petición
-	    error : function(xhr, status) {
-	        bootbox.alert('Disculpe, existió un problema');
-	    }
-	});
 }
 
 function add_quantity(tr_current, quantity){
@@ -814,14 +809,25 @@ function obtener_cantidad_max(respuesta_modelo){
 }
 
 function tbody_clean(){
-	tbody_v = $("#tabla_cambios").find("tbody");
-	tr_current = $(tbody_v).find("tr");
-	tr_count = $(tr_current).length;
+	var tbody_c = $("#tabla_cambios").find("tbody");
+	tr_current_c = $(tbody_c).find("tr");
+	tr_count_c = $(tr_current_c).length;
 
-	for (i = 0 ; i < tr_count - 1 ; i++) {
-		$(tr_current).eq(i).remove();
+	for (i = 0 ; i < tr_count_c - 1 ; i++) {
+		$(tr_current_c).eq(i).remove();
 	}
 
-	$("#total_v").text("0");
-	$("#total_p").text("0");	
+	$("#total_vc").text("0");
+	$("#total_pc").text("0");
+
+	var tbody_v = $("#tabla_folios").find("tbody");
+	tr_current_v = $(tbody_v).find("tr");
+	tr_count_v = $(tr_current_v).length;
+
+	for (i = 0 ; i < tr_count_v - 1 ; i++) {
+		$(tr_current_v).eq(i).remove();
+	}
+
+	$("#total_vv").text("0");
+	$("#total_pv").text("0");
 }
