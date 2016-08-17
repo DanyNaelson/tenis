@@ -38,12 +38,16 @@ $(document).ready(function(){
 
 				    			for (i = 0; i < respuesta_producto.length ; i++) {
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
-				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
+				    					if(respuesta_producto[i].confirmacion == 1){
+				    						cantidad_max += parseInt(respuesta_producto[i].cantidad);
+				    					}
 				    				}else{
 				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion == -1){
 				    						cantidad_max -= 0;
 				    					}else{
-				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    						if(respuesta_producto[i].confirmacion == 1){
+				    							cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    						}
 				    					}
 				    				}
 				    			}
@@ -877,12 +881,16 @@ function obtener_cantidad_max(respuesta_modelo){
 	
 	for(var i = 0 ; i < respuesta_modelo.length ; i++){
 		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
-			cant_max += parseInt(respuesta_modelo[i].cantidad);
+			if(respuesta_modelo[i].confirmacion == '1'){
+				cant_max += parseInt(respuesta_modelo[i].cantidad);
+			}
 		}else{
 			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion == '-1'){
 				cant_max -= 0;
 			}else{
-				cant_max -= parseInt(respuesta_modelo[i].cantidad);
+				if(respuesta_modelo[i].confirmacion == '1'){
+					cant_max -= parseInt(respuesta_modelo[i].cantidad);
+				}
 			}
 		}
 	}

@@ -154,7 +154,8 @@ class Cambios extends CI_Controller {
 		$cambio_c = $this->input->post("changec");
 		$cambio_detalle_c = $this->input->post("changecdetail");
 		$id_almacen = $this->input->post("almacen");
-		$respuesta_cambio = $this->cambios_m->registrar_cambio($cambio_v, $cambio_detalle_v, $cambio_c, $cambio_detalle_c, $id_almacen);
+		$id_movimiento_venta = $this->input->post("movimiento_venta");
+		$respuesta_cambio = $this->cambios_m->registrar_cambio($cambio_v, $cambio_detalle_v, $cambio_c, $cambio_detalle_c, $id_almacen, $id_movimiento_venta);
 		echo json_encode($respuesta_cambio);
 	}
 }

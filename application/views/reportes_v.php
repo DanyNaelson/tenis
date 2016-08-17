@@ -182,11 +182,13 @@
 				<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Regresar
 			</a>
 		</div>
+	<? if($id_usuario == '1'): ?>
 		<div class="col-xs-12 col-sm-4 text-center">
 			<button type="button" class="btn btn-primary btn-lg" id="excel">
 				Excel <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span>
 			</button>
 		</div>
+	<? endif; ?>
 		<!--div class="col-xs-12 col-sm-4 text-right">
 			<button type="button" class="btn btn-info btn-lg" id="pdf">
 				PDF <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>

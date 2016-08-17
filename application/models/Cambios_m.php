@@ -89,27 +89,42 @@ class Cambios_m extends CI_Model{
 
 	function obtener_producto_folio($folio = null, $id_almacen = null){
 
-		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad,dm.precio');
-		$this->db->from('producto_talla pt');
-		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
-		$this->db->join('marca m', 'm.id_marca = p.id_marca');
-		$this->db->join('talla t', 't.id_talla = pt.id_talla');
-		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
-		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
+		$this->db->select('mc.id_movimiento_confirmacion');
+		$this->db->from('movimientos mv');
+		$this->db->join('movimiento_confirmacion mc', 'mc.id_movimiento_sal = mv.id_movimiento');
+		$this->db->where('mv.folio', $folio);
+		$this->db->where('mv.id_almacen', $id_almacen);
 
-		if (!is_null($folio)){
-			$this->db->where('mv.folio', $folio);
-			//$this->db->where('dm.cantidad > 0');
-		}
 		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
 
 		$row = $query->result();
 
-		if (empty($row)) {
+		if (!empty($row)) {
 			$result = null;
 		} else {
-			$result = $row;
+			$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_movimiento,mv.id_tipo_movimiento,dm.cantidad,dm.precio');
+			$this->db->from('producto_talla pt');
+			$this->db->join('productos p', 'p.id_producto = pt.id_producto');
+			$this->db->join('marca m', 'm.id_marca = p.id_marca');
+			$this->db->join('talla t', 't.id_talla = pt.id_talla');
+			$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
+			$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
+
+			if (!is_null($folio)){
+				$this->db->where('mv.folio', $folio);
+			}
+
+			//echo $this->db->get_compiled_select();die;
+			$query = $this->db->get();
+
+			$row = $query->result();
+
+			if (empty($row)) {
+				$result = null;
+			} else {
+				$result = $row;
+			}
 		}
 		
 		return $result;
@@ -235,7 +250,7 @@ class Cambios_m extends CI_Model{
 
 	}
 
-	function registrar_cambio($cambio_v, $cambio_detalle_v, $cambio_c, $cambio_detalle_c, $id_almacen){
+	function registrar_cambio($cambio_v, $cambio_detalle_v, $cambio_c, $cambio_detalle_c, $id_almacen, $id_movimiento_venta){
 
 		$fecha_cambio = date("Y-m-d H:m:s");
 		$insert = "";
@@ -279,6 +294,17 @@ class Cambios_m extends CI_Model{
 			}
 
 			$id_ultimo_e = $this->db->insert_id();
+
+			$data_e = array(
+		        'id_movimiento' => $id_ultimo_e,
+				'id_movimiento_sal' => $id_movimiento_venta
+			);
+
+			$str = $this->db->insert('movimiento_confirmacion', $data_e);
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
 
 			if ($str == 1)
 			{
@@ -432,6 +458,17 @@ class Cambios_m extends CI_Model{
 
 			$id_ultimo_s = $this->db->insert_id();
 
+			$data_s = array(
+		        'id_movimiento' => $id_ultimo_s,
+				'id_movimiento_sal' => $id_movimiento_venta
+			);
+
+			$str = $this->db->insert('movimiento_confirmacion', $data_s);
+
+			if ($this->db->trans_status() === FALSE){
+			    $this->db->trans_rollback();
+			}
+
 			if ($str == 1)
 			{
 				
@@ -543,6 +580,8 @@ class Cambios_m extends CI_Model{
 			$respuesta["mensaje"] = "Error al consultar los movimientos de cambio de salida, inténtelo nuevamente.";
 			$respuesta["resp"] = "f";
 		}
+
+
 
 		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro el cambio con id: " . $id_ultimo_e . ", " . $id_ultimo_s);
 		$this->db->trans_commit();

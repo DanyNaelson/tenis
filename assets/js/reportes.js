@@ -93,7 +93,7 @@ function crear_tr_mov(movimientos, inicio){
 		}
 
 		var disabled = "";
-		if(movimientos[i].id_tipo_movimiento == "3" || movimientos[i].id_tipo_movimiento == "7"){
+		if(movimientos[i].id_tipo_movimiento == "1" || movimientos[i].id_tipo_movimiento == "3" || movimientos[i].id_tipo_movimiento == "7" || movimientos[i].id_tipo_movimiento == "8" || movimientos[i].id_tipo_movimiento == "9"){
 			disabled = "disabled";
 		}
 

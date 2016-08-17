@@ -25,7 +25,7 @@ $(document).ready(function(){
 				    // la respuesta es pasada como argumento a la función
 				    success : function(respuesta_producto) {
 				    	if (respuesta_producto == null) {
-				    		bootbox.alert('La venta no se realizó en el almacén seleccionado o el folio no existe en ventas, favor de ingresarlo correctamente.');
+				    		bootbox.alert('La venta no se realizó en el almacén seleccionado o ya se realizó un cambio con esa venta o el folio no existe en ventas, favor de ingresarlo correctamente.');
 				    	}else{
 				    		tr_current = $("." + folio_v);
 				    		tr_count = $(tr_current).length;
@@ -90,12 +90,16 @@ $(document).ready(function(){
 
 				    			for (i = 0; i < respuesta_producto.length ; i++) {
 				    				if(respuesta_producto[i].id_tipo_movimiento == 1 || respuesta_producto[i].id_tipo_movimiento == 7 || respuesta_producto[i].id_tipo_movimiento == 8 || respuesta_producto[i].id_tipo_movimiento == 9){
-				    					cantidad_max += parseInt(respuesta_producto[i].cantidad);
+				    					if(respuesta_producto[i].confirmacion == 1){
+				    						cantidad_max += parseInt(respuesta_producto[i].cantidad);
+				    					}
 				    				}else{
 				    					if(respuesta_producto[i].id_tipo_movimiento == 3 && respuesta_producto[i].confirmacion == -1){
 				    						cantidad_max -= 0;
 				    					}else{
-				    						cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    						if(respuesta_producto[i].confirmacion == 1){
+				    							cantidad_max -= parseInt(respuesta_producto[i].cantidad);
+				    						}
 				    					}
 				    				}
 				    			}
@@ -308,6 +312,9 @@ $(document).ready(function(){
 	$("#realizar").on("click", function(){
 		var id_almacen = $("#almacen").val();
 		var tbody_v = $("#tabla_folios").find("tbody");
+		var movimiento_class = $(tbody_v).find("tr").eq(0).attr("class").split(" ");
+		var movimiento_n = movimiento_class[3].split("_");
+		var movimiento = movimiento_n[1];
 		var count_tr_v = $(tbody_v).find("tr").length;
 		var tbody_c = $("#tabla_cambios").find("tbody");
 		var count_tr_c = $(tbody_c).find("tr").length;
@@ -318,7 +325,7 @@ $(document).ready(function(){
 				if(diferencia >= 0 && !isNaN(diferencia)){
 					bootbox.confirm("Estás seguro de finalizar el cambio?", function(result) {
 						if(result){
-							get_values_change(tbody_v, tbody_c, id_almacen);
+							get_values_change(tbody_v, tbody_c, id_almacen, movimiento);
 						}
 					});
 				}else{
@@ -355,7 +362,7 @@ $(document).ready(function(){
 	});
 });
 
-function get_values_change(tbody_v, tbody_c, id_almacen){
+function get_values_change(tbody_v, tbody_c, id_almacen, movimiento){
 	var count_tr_v = $(tbody_v).find("tr").length;
 
 	var change_v = new Object;
@@ -414,10 +421,10 @@ function get_values_change(tbody_v, tbody_c, id_almacen){
 		change_c_detail[i].precio = precio_c;
 	}
 
-	send_values_change(change_v, change_v_detail, change_c, change_c_detail, id_almacen);
+	send_values_change(change_v, change_v_detail, change_c, change_c_detail, id_almacen, movimiento);
 }
 
-function send_values_change(change_v, change_v_detail, change_c, change_c_detail, id_almacen){
+function send_values_change(change_v, change_v_detail, change_c, change_c_detail, id_almacen, movimiento){
 	$.ajax({
 	    // la URL para la petición
 	    url : "registrar_cambio",
@@ -430,7 +437,8 @@ function send_values_change(change_v, change_v_detail, change_c, change_c_detail
 	    		changevdetail : change_v_detail,
 	    		changec : change_c,
 	    		changecdetail : change_c_detail,
-	    		almacen : id_almacen },
+	    		almacen : id_almacen,
+	    		movimiento_venta : movimiento },
 
 	    //especifica el tipo de dato que espera recibir
 	    dataType: 'json',
@@ -497,7 +505,7 @@ function crea_tr_venta(producto, folio){
 	html_tr = "";
 
 	for(var i = 0 ; i < producto.length ; i++){
-		html_tr += "<tr class='text-center product_" + producto[i].id_producto + " " + folio + "'>";
+		html_tr += "<tr class='text-center product_" + producto[i].id_producto + " " + folio + " movimiento_" + producto[i].id_movimiento + "'>";
 		html_tr += 	"<td style='border: hidden; background-color: white;'></td>";
 		html_tr += 	"<td class='cantidad_c'>" + producto[i].cantidad + "</td>";
 		html_tr += 	"<td class='marca_c'>" + producto[i].marca + "</td>";
@@ -795,12 +803,16 @@ function obtener_cantidad_max(respuesta_modelo){
 	
 	for(var i = 0 ; i < respuesta_modelo.length ; i++){
 		if(respuesta_modelo[i].id_tipo_movimiento == '1' || respuesta_modelo[i].id_tipo_movimiento == '7' || respuesta_modelo[i].id_tipo_movimiento == '8' || respuesta_modelo[i].id_tipo_movimiento == '9'){
-			cant_max += parseInt(respuesta_modelo[i].cantidad);
+			if(respuesta_modelo[i].confirmacion == '1'){
+				cant_max += parseInt(respuesta_modelo[i].cantidad);
+			}
 		}else{
 			if(respuesta_modelo[i].id_tipo_movimiento == '3' && respuesta_modelo[i].confirmacion == '-1'){
 				cant_max -= 0;
 			}else{
-				cant_max -= parseInt(respuesta_modelo[i].cantidad);
+				if(respuesta_modelo[i].confirmacion == '1'){
+					cant_max -= parseInt(respuesta_modelo[i].cantidad);
+				}
 			}
 		}
 	}
