@@ -7,10 +7,12 @@
 	<title><?= $titulo ?></title>
 	<link rel="stylesheet" href="/inventarios/assets/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/inventarios/assets/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="/inventarios/assets/css/jquery-ui.css">
 	<link rel="stylesheet" href="/inventarios/assets/css/inventarios.css">
 	<script src="/inventarios/assets/js/jquery-2.2.3.min.js"></script>
 	<script src="/inventarios/assets/js/bootstrap.min.js"></script>
 	<script src="/inventarios/assets/js/bootbox.min.js"></script>
+	<script src="/inventarios/assets/js/jquery-ui.js"></script>
 	<script src="/inventarios/assets/js/funciones.js"></script>
 	<script src="/inventarios/assets/js/<?= $archivo_js ?>"></script>
 </head>
