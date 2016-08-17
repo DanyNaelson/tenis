@@ -221,7 +221,7 @@ function cancelar(obj_button, id_movimiento){
 			    	bootbox.alert(cancelacion_movimiento.mensaje);
 			    	if(cancelacion_movimiento.resp == "t"){
 			    		$(obj_button).prop("disabled", true);
-			    		tr_current.find(".estatus").css("color", "c12e2a").text("Cancelado");
+			    		tr_current.find(".estatus").css("color", "#c12e2a").text("Cancelado");
 			    	}
 			    },
 			 
