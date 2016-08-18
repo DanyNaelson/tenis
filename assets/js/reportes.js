@@ -66,6 +66,31 @@ $(document).ready(function(){
 			bootbox.alert("Debes seleccionar un almacén para realizar la búsqueda de movimientos.");
 		}
 	});
+
+	$("#excel").on("click", function(e){
+		var id_almacen = $("#almacen").val();
+		var limit_m = $("#registros").val();
+		var offset_m = 0;
+		var tipo_m = $("#tipo_m").val();
+		var folio_m = $("#folio").val().trim();
+		if(folio_m == ""){
+			folio_m = 0;
+		}
+		var fecha_i = $("#fecha_inicio").val().trim();
+		if(fecha_i == ""){
+			fecha_i = 0;
+		}
+		var fecha_f = $("#fecha_fin").val().trim();
+		if(fecha_f == ""){
+			fecha_f = 0;
+		}
+
+		if(id_almacen > 0){
+			window.open("/inventarios/reportes/reporte_excel/" + id_almacen + "/" + tipo_m + "/" + folio_m + "/" + fecha_i + "/" + fecha_f + "/");
+		}else{
+			bootbox.alert("Debes seleccionar un almacén para realizar la búsqueda de movimientos.");
+		}
+	});	
 });
 
 function crear_tr_mov(movimientos, inicio){
@@ -82,7 +107,7 @@ function crear_tr_mov(movimientos, inicio){
 		        break;
 		    case "1":
 		        confirmacion = "Confirmado";
-		        color_status = "#419641"
+		        color_status = "#419641";
 		        break;
 		    case "-1":
 		        confirmacion = "Cancelado";

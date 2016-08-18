@@ -86,4 +86,124 @@ class Reportes extends CI_Controller {
 		$cancelacion_movimiento = $this->reportes_m->cancelar_movimiento($id_movimiento);
 		echo json_encode($cancelacion_movimiento);
 	}
+
+	public function reporte_excel($id_almacen, $tipo, $folio, $fecha_i, $fecha_f){
+		header('Content-type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment; filename=reporte_excel.xls');
+		header('Pragma: no-cache');
+		header('Expires: 0');
+		if($folio == "0"){
+			$folio = null;
+		}
+
+		if($fecha_i == "0"){
+			$fecha_i = null;
+		}
+
+		if($fecha_f == "0"){
+			$fecha_f = null;
+		}
+
+		$this->load->model('reportes_m');
+		$movimientos = $this->reportes_m->obtener_movimientos($id_almacen, null, null, $folio, $tipo, $fecha_i, $fecha_f);
+
+		$excel_body = "";
+
+		foreach ($movimientos as $movimiento) {
+			$detalles = $this->reportes_m->obtener_detalles_movimiento($movimiento->id_movimiento);
+			$excel_body .= $this->excel_body_movements($movimiento, $detalles);
+		}
+
+		echo "<table border=1>";
+		echo 	"<tr> ";
+		echo 		"<th>Tipo Movimiento</th>";
+		echo 		"<th>Folio</th>";
+		echo 		"<th>Almacen</th>";
+		echo 		"<th>Fecha/Hora</th>";
+		echo 		"<th>Cantidad</th>";
+		echo 		"<th>Precio</th>";
+		echo 		"<th>Estatus</th>";
+		echo 	"</tr> ";
+		echo $excel_body;
+		echo "</table>";
+	}
+
+	private function excel_body_movements($movimiento, $detalles){
+		switch($movimiento->confirmacion){
+			case "0":
+		        $confirmacion = "Sin confirmar";
+		        break;
+		    case "1":
+		        $confirmacion = "Confirmado";
+		        break;
+		    case "-1":
+		        $confirmacion = "Cancelado";
+		        break;
+		    default:
+		        $confirmacion = "Sin status";
+		}
+
+		$table_excel = "";
+
+		$table_excel .= "<tr>";
+		$table_excel .= 	"<td>" . $movimiento->tipo_movimiento . "</td>";
+		$table_excel .= 	"<td>" . $movimiento->folio . "</td>";
+		$table_excel .= 	"<td>" . $movimiento->almacen . "</td>";
+		$table_excel .= 	"<td>" . $movimiento->fecha . "</td>";
+		$table_excel .= 	"<td>" . $movimiento->cantidad . "</td>";
+		$table_excel .= 	"<td>" . $movimiento->precio . "</td>";
+		$table_excel .= 	"<td>" . $confirmacion . "</td>";
+		$table_excel .= "</tr> ";
+		$table_excel .= "<tr>";
+		$table_excel .= 	"<td colspan='1'></td>";
+		$table_excel .= 	"<td colspan='5'>";
+		$table_excel .= 		"<table border=1>";
+		$table_excel .= 			"<tr> ";
+		$table_excel .= 				"<th>Cantidad</th>";
+		$table_excel .= 				"<th>Marca</th>";
+		$table_excel .= 				"<th>Modelo</th>";
+		$table_excel .= 				"<th>Descripcion</th>";
+		$table_excel .= 				"<th>Talla</th>";
+		$table_excel .= 				"<th>Precio</th>";
+		$table_excel .= 			"</tr> ";
+
+		foreach ($detalles as $detalle) {
+			$table_excel .= 			"<tr>";
+			$table_excel .= 				"<td>" . $detalle->cantidad . "</td>";
+			$table_excel .= 				"<td>" . $detalle->marca . "</td>";
+			$table_excel .= 				"<td>" . $detalle->modelo . "</td>";
+			$table_excel .= 				"<td>" . $detalle->descripcion . "</td>";
+			$table_excel .= 				"<td>" . $detalle->talla . "</td>";
+			$table_excel .= 				"<td>" . $detalle->precio . "</td>";
+			$table_excel .= 			"</tr> ";
+		}
+
+		$table_excel .= 		"</table>";
+		$table_excel .= 	"<td colspan='1'></td>";
+		$table_excel .= 	"</td>";
+		$table_excel .= "</tr> ";
+
+		return $table_excel;
+	}
+
+	private function excel_body_details($detalles){
+		$details_excel = "";
+
+		$details_excel .= "<table border=1> ";
+		$details_excel .= "<tr> ";
+		$details_excel .= "<th>Nombre</th> ";
+		$details_excel .= "<th>Email</th> ";
+		$details_excel .= "</tr> ";
+		$details_excel .= "<tr> ";
+		$details_excel .= "<td><font color=green>Manuel Gomez</font></td> ";
+		$details_excel .= "<td>manuel@gomez.com</td> ";
+		$details_excel .= "</tr> ";
+		$details_excel .= "<tr> ";
+		$details_excel .= "<td><font color=blue>Pago gomez</font></td> ";
+		$details_excel .= "<td>paco@gomez.com</td> ";
+		$details_excel .= "</tr> ";
+		$details_excel .= "</table> ";
+
+		return $details_excel;
+	}
 }

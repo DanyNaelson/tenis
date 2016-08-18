@@ -47,7 +47,7 @@ class Reportes_m extends CI_Model{
 
 	}
 
-	function obtener_movimientos($id_almacen, $limit = 10, $offset = 0, $folio = null, $tipo_movimiento = null, $fecha_inicio = null, $fecha_fin = null){
+	function obtener_movimientos($id_almacen, $limit = null, $offset = null, $folio = null, $tipo_movimiento = null, $fecha_inicio = null, $fecha_fin = null){
 
 		$this->db->select('m.id_movimiento,tm.id_tipo_movimiento,tm.tipo_movimiento,m.folio,a.almacen,m.fecha,m.cantidad,m.precio,m.confirmacion');
 		$this->db->from('movimientos m');
@@ -59,7 +59,7 @@ class Reportes_m extends CI_Model{
 			$this->db->where('m.folio', $folio);
 		}
 
-		if (!is_null($tipo_movimiento)){
+		if (!is_null($tipo_movimiento) && $tipo_movimiento != "0"){
 			$this->db->where('tm.id_tipo_movimiento', $tipo_movimiento);
 		}
 
@@ -72,7 +72,9 @@ class Reportes_m extends CI_Model{
 			$this->db->where('m.fecha <= CAST(\'' . $fecha_fin . ' 23:59:59\' AS DATETIME)');
 		}
 
-		$this->db->limit($limit, $offset);
+		if(!is_null($limit)){
+			$this->db->limit($limit, $offset);
+		}
 		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
 
