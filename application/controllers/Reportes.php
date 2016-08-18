@@ -88,10 +88,7 @@ class Reportes extends CI_Controller {
 	}
 
 	public function reporte_excel($id_almacen, $tipo, $folio, $fecha_i, $fecha_f){
-		header('Content-type: application/vnd.ms-excel');
-		header('Content-Disposition: attachment; filename=reporte_excel.xls');
-		header('Pragma: no-cache');
-		header('Expires: 0');
+		
 		if($folio == "0"){
 			$folio = null;
 		}
@@ -114,6 +111,13 @@ class Reportes extends CI_Controller {
 			$excel_body .= $this->excel_body_movements($movimiento, $detalles);
 		}
 
+		$data["excel_body"] = $excel_body;
+		$this->load->view("reporte_excel_v", $data);
+		/*echo "<html>";
+		echo "<head>";
+		echo 	"<meta http-equiv=”Content-Type” content=”text/html; charset=utf-8″ />";
+		echo "</head>";
+		echo "<body>";
 		echo "<table border=1>";
 		echo 	"<tr> ";
 		echo 		"<th>Tipo Movimiento</th>";
@@ -126,6 +130,8 @@ class Reportes extends CI_Controller {
 		echo 	"</tr> ";
 		echo $excel_body;
 		echo "</table>";
+		echo "</body>";
+		echo "</html>";*/
 	}
 
 	private function excel_body_movements($movimiento, $detalles){
@@ -154,7 +160,7 @@ class Reportes extends CI_Controller {
 		$table_excel .= 	"<td>" . $movimiento->precio . "</td>";
 		$table_excel .= 	"<td>" . $confirmacion . "</td>";
 		$table_excel .= "</tr> ";
-		$table_excel .= "<tr>";
+		/*$table_excel .= "<tr>";
 		$table_excel .= 	"<td colspan='1'></td>";
 		$table_excel .= 	"<td colspan='5'>";
 		$table_excel .= 		"<table border=1>";
@@ -181,29 +187,8 @@ class Reportes extends CI_Controller {
 		$table_excel .= 		"</table>";
 		$table_excel .= 	"<td colspan='1'></td>";
 		$table_excel .= 	"</td>";
-		$table_excel .= "</tr> ";
+		$table_excel .= "</tr> ";*/
 
 		return $table_excel;
-	}
-
-	private function excel_body_details($detalles){
-		$details_excel = "";
-
-		$details_excel .= "<table border=1> ";
-		$details_excel .= "<tr> ";
-		$details_excel .= "<th>Nombre</th> ";
-		$details_excel .= "<th>Email</th> ";
-		$details_excel .= "</tr> ";
-		$details_excel .= "<tr> ";
-		$details_excel .= "<td><font color=green>Manuel Gomez</font></td> ";
-		$details_excel .= "<td>manuel@gomez.com</td> ";
-		$details_excel .= "</tr> ";
-		$details_excel .= "<tr> ";
-		$details_excel .= "<td><font color=blue>Pago gomez</font></td> ";
-		$details_excel .= "<td>paco@gomez.com</td> ";
-		$details_excel .= "</tr> ";
-		$details_excel .= "</table> ";
-
-		return $details_excel;
 	}
 }

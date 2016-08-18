@@ -21,14 +21,14 @@ class Login extends CI_Controller {
 						);
 		$this->load->model('login_m');
 		$usuarios = $this->login_m->obtener_usuarios($usuario, $pass);
-		if($usuarios != null){
+		if(!empty($usuarios)){
 			if($pass != null){
 	        	array_push($usuario_datos, $usuarios);
 	        }
 
 	        echo json_encode($usuario_datos);
 		}else{
-			$usuario_datos["valida"] = null;
+			$usuario_datos[0]["valida"] = null;
 			echo json_encode($usuario_datos);
 		}
 	}

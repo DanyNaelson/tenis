@@ -15,7 +15,7 @@ class Cambios extends CI_Controller {
 		$data["titulo"] = "Sistema de incambiorios | Cambios";
 		$data["login"] = false;
 		$data["modulo"] = "Cambios";
-		$data["pagina_retorno"] = "/incambiorios/inicio/index/" . $_SESSION["id_usuario"];
+		$data["pagina_retorno"] = "/inventarios/inicio/index/" . $_SESSION["id_usuario"];
 		$data["archivo_js"] = "cambios.js";
 
 		$almacenes = $this->cambios_m->obtener_almacenes($data["id_usuario"]);
