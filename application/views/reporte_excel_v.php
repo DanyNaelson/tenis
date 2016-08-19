@@ -1,26 +1,20 @@
 <?php
 
-	header("Content-type: application/x-msdownload");
-	header("Content-Disposition: filename=ficheroExcel.xls");
-	header("Pragma: no-cache");
-	header("Expires: 0");
+	header("Cache-control: private");
+	header("Content-disposition: filename=ficheroExcel.xls");
+	header("Content-Type: application/msexcel; charset=iso-8859-1");
 
-	echo "<html>";
-	echo "<head>";
-	echo 	"<meta http-equiv=”Content-Type” content=”text/html; charset=utf-8″ />";
-	echo "</head>";
-	echo "<body>";
-	echo "<table border=1>";
-	echo 	"<tr> ";
-	echo 		"<th>Tipo Movimiento</th>";
-	echo 		"<th>Folio</th>";
-	echo 		"<th>Almacen</th>";
-	echo 		"<th>Fecha/Hora</th>";
-	echo 		"<th>Cantidad</th>";
-	echo 		"<th>Precio</th>";
-	echo 		"<th>Estatus</th>";
-	echo 	"</tr> ";
-	echo $excel_body;
-	echo "</table>";
-	echo "</body>";
-	echo "</html>";
+	$html = "<table border='1'>\n";
+	$html .= 	"<tr>\n";
+	$html .= 		"<th>Tipo Movimiento</th>";
+	$html .= 		"<th>Folio</th>";
+	$html .= 		"<th>Almacen</th>";
+	$html .= 		"<th>Fecha/Hora</th>";
+	$html .= 		"<th>Cantidad</th>";
+	$html .= 		"<th>Precio</th>";
+	$html .= 		"<th>Estatus</th>";
+	$html .= 	"</tr>\n";
+	//echo $excel_body;
+	$html .= "</table>\n";
+
+	echo $html;

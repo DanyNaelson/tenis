@@ -113,13 +113,9 @@ class Reportes extends CI_Controller {
 
 		$data["excel_body"] = $excel_body;
 		$this->load->view("reporte_excel_v", $data);
-		/*echo "<html>";
-		echo "<head>";
-		echo 	"<meta http-equiv=”Content-Type” content=”text/html; charset=utf-8″ />";
-		echo "</head>";
-		echo "<body>";
+		
 		echo "<table border=1>";
-		echo 	"<tr> ";
+		echo 	"<tr>";
 		echo 		"<th>Tipo Movimiento</th>";
 		echo 		"<th>Folio</th>";
 		echo 		"<th>Almacen</th>";
@@ -127,11 +123,9 @@ class Reportes extends CI_Controller {
 		echo 		"<th>Cantidad</th>";
 		echo 		"<th>Precio</th>";
 		echo 		"<th>Estatus</th>";
-		echo 	"</tr> ";
+		echo 	"</tr>";
 		echo $excel_body;
 		echo "</table>";
-		echo "</body>";
-		echo "</html>";*/
 	}
 
 	private function excel_body_movements($movimiento, $detalles){

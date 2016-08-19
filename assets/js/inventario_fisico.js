@@ -278,7 +278,7 @@ $(document).ready(function(){
 			if(count_tr > 1){
 				bootbox.confirm("Estás seguro de finalizar la salida?", function(result) {
 					if(result){
-						get_values_outlet(tbody);
+						//get_values_outlet(tbody);
 					}
 				});
 			}else{
