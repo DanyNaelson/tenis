@@ -1,3 +1,4 @@
+<script src=""></script>
 <div class="container">
 	<div class="row">
 		<div class="col-sm-12 text-center">
@@ -187,7 +188,6 @@
 			<button type="button" class="btn btn-primary btn-lg" id="excel">
 				Excel <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span>
 			</button>
-			<a href="/inventarios/documents/crea_excel_reportes.php">Excel</a>
 		</div>
 	<? endif; ?>
 		<!--div class="col-xs-12 col-sm-4 text-right">
