@@ -67,4 +67,11 @@
     <? endif ?>
   </div>
 <? endif ?>
+<? if(isset($permisos[10]->permiso)): ?>
+  <div class="row">
+      <div class="col-sm-12 btn_menu text-center">
+        <a class="btn btn-primary btn-lg" href="/inventarios/<?= $permisos[10]->permiso ?>/" role="button"><?= ucfirst($permisos[10]->permiso) ?></a>
+      </div>
+  </div>
+<? endif ?>
 </div>

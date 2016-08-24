@@ -53,6 +53,7 @@ $(document).ready(function(){
 			    success : function(movimientos) {
 			    	$("#tabla_movimientos").find("tbody").html("");
 			    	crear_tr_mov(movimientos, 0);
+			    	crear_paginacion(movimientos[movimientos.length - 1], parseInt(limit_m), 1);
 			    },
 			 
 			    // código a ejecutar si la petición falla;
@@ -67,37 +68,63 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#excel").on("click", function(e){
+	$("#excel").on("click", function(){
 		var id_almacen = $("#almacen").val();
-		var limit_m = $("#registros").val();
-		var offset_m = 0;
 		var tipo_m = $("#tipo_m").val();
-		var folio_m = $("#folio").val().trim();
-		if(folio_m == ""){
-			folio_m = 0;
-		}
-		var fecha_i = $("#fecha_inicio").val().trim();
-		if(fecha_i == ""){
-			fecha_i = 0;
-		}
-		var fecha_f = $("#fecha_fin").val().trim();
-		if(fecha_f == ""){
-			fecha_f = 0;
-		}
 
-		if(id_almacen > 0){
-			window.open("/inventarios/reportes/reporte_excel/" + id_almacen + "/" + tipo_m + "/" + folio_m + "/" + fecha_i + "/" + fecha_f + "/");
+		if(id_almacen != 0){
+			if(tipo_m != 0){
+				$.ajax({
+				    // la URL para la petición
+				    url : "crear_csv",
+				 
+				    // especifica si será una petición POST o GET
+				    type : "POST",
+
+				    //datos enviados mediante post
+				    data : {
+				    	almacen : id_almacen,
+				    	tipo_mov : tipo_m
+				    },
+
+				    //especifica el tipo de dato que espera recibir
+				    dataType: 'json',
+
+				    // código a ejecutar si la petición es satisfactoria;
+				    // la respuesta es pasada como argumento a la función
+				    success : function(respuesta_producto) {
+				    	if (respuesta_producto == false) {
+				    		$("#tabla_productos").find("tbody").html("");
+				    		bootbox.alert('No existen movimientos en este almacén.');
+				    	}else{
+				    		location.href = "/inventarios/assets/csv/reporte_movimiento_" + tipo_m + ".csv";
+				    	}
+				    },
+				 
+				    // código a ejecutar si la petición falla;
+				    // son pasados como argumentos a la función
+				    // el objeto de la petición en crudo y código de estatus de la petición
+				    error : function(xhr, status) {
+				        bootbox.alert('Disculpe, existió un problema');
+				    }
+				});
+			}else{
+				bootbox.alert("Debes seleccionar el tipo de movimiento para exportar a excel.");
+				$("#tipo_m").focus();
+			}
 		}else{
-			bootbox.alert("Debes seleccionar un almacén para realizar la búsqueda de movimientos.");
+			bootbox.alert("Debes seleccionar el almacén para exportar a excel.");
+			$("#almacen").focus();
 		}
-	});	
+	});
+
 });
 
 function crear_tr_mov(movimientos, inicio){
 	var tr_html = "";
 	var num = inicio;
 
-	for(var i = 0 ; i < movimientos.length ; i++){
+	for(var i = 0 ; i < movimientos.length - 1 ; i++){
 		var confirmacion = "";
 		var color_status = "#000";
 		var dis_confirmacion = "false";
@@ -259,4 +286,100 @@ function cancelar(obj_button, id_movimiento){
 			});
 		}
 	});
+}
+
+function crear_paginacion(movimientos, registros, pag){
+	paginas = 0;
+	html_pags = "";
+
+	if((movimientos % registros) == 0){
+		paginas = movimientos/registros;
+	}else{
+		paginas = Math.ceil(movimientos/registros);
+	}
+
+	html_pags += '<ul class="pagination">';
+	html_pags += 	'<li class="first">';
+	html_pags += 		'<a href="#" aria-label="Previous" onclick="obtener_movimientos(this, 1)">';
+	html_pags += 			'<span aria-hidden="true">&laquo;</span>';
+	html_pags += 		'</a>';
+	html_pags += 	'</li>';
+
+	for (var i = 1 ; i <= paginas ; i++) { 
+		html_pags += '<li class="';
+		if(i == pag){
+			html_pags += 'active ';
+		}
+		html_pags += 'pag_' + i + '">';
+		html_pags += 	'<a href="#" onclick="obtener_movimientos(this, ' + i + ')">' + i + '</a>';
+		html_pags += '</li>';
+	}
+
+	html_pags += 	'<li class="last">';
+	html_pags += 		'<a href="#" aria-label="Next" onclick="obtener_movimientos(this, ' + paginas + ')">';
+	html_pags += 			'<span aria-hidden="true">&raquo;</span>';
+	html_pags += 		'</a>';
+	html_pags += 	'</li>';
+	html_pags += '</ul>';
+
+	$("#pags").html(html_pags);
+}
+
+function obtener_movimientos(obj_a, pag){
+	var id_almacen = $("#almacen").val();
+	var limit_m = $("#registros").val();
+	var offset_m = (parseInt(limit_m) * parseInt(pag)) - parseInt(limit_m);
+	var tipo_m = $("#tipo_m").val();
+	var folio_m = $("#folio").val().trim();
+	var fecha_i = $("#fecha_inicio").val().trim();
+	var fecha_f = $("#fecha_fin").val().trim();
+
+	if(id_almacen > 0){
+		$.ajax({
+		    // la URL para la petición
+		    url : "obtener_movimientos",
+		 
+		    // especifica si será una petición POST o GET
+		    type : "POST",
+
+		    // envia los valores del form
+		    data : {
+		    	almacen : id_almacen,
+		    	limit : limit_m,
+		    	offset : offset_m,
+		    	tipo_movimiento : tipo_m,
+		    	folio : folio_m,
+		    	fecha_inicio : fecha_i,
+		    	fecha_fin : fecha_f
+		    },
+
+		    //especifica el tipo de dato que espera recibir
+		    dataType: 'json',
+
+		    beforeSend : function(xhr){
+		    	$("#tabla_movimientos").find("tbody").html('<tr><td colspan="9" align="center"><img src="/inventarios/assets/img/cargando.gif" /></td></tr>');
+		    },
+
+		    // código a ejecutar si la petición es satisfactoria;
+		    // la respuesta es pasada como argumento a la función
+		    success : function(movimientos) {
+		    	$("#tabla_movimientos").find("tbody").html("");
+		    	crear_tr_mov(movimientos, 0);
+		    	crear_paginacion(movimientos[movimientos.length - 1], parseInt(limit_m), 1);
+		    	
+				$(".pagination").find("li").removeClass("active");
+				pag_li = $(obj_a).parent();
+				$(".pag_" + pag).addClass("active");
+		    },
+		 
+		    // código a ejecutar si la petición falla;
+		    // son pasados como argumentos a la función
+		    // el objeto de la petición en crudo y código de estatus de la petición
+		    error : function(xhr, status) {
+		        bootbox.alert('Disculpe, existió un problema');
+		    }
+		});
+	}else{
+		bootbox.alert("Debes seleccionar un almacén para realizar la búsqueda de movimientos.");
+	}
 }

@@ -118,86 +118,73 @@ class Reportes_m extends CI_Model{
 
 	}
 
-	function cancelar_movimiento($id_movimiento){
+	function obtener_tallas(){
 
-		$fecha_cancelacion = date("Y-m-d H:m:s");
-		$insert = "";
-		$mensaje = "";
-		$str = 1;
-		$respuesta = array("mensaje" => "Se canceló el movimiento correctamente.", "resp" => "t");
+		$this->db->select('*');
+		$this->db->from('talla');
+		
+		$query = $this->db->get();
 
-		$this->db->trans_begin();
+		$row = $query->result();
 
-		$this->db->set('confirmacion', -1);
-		$this->db->where('id_movimiento', $id_movimiento);
-		$str = $this->db->update('movimientos');
-
-		if ($this->db->trans_status() === FALSE){
-		    $this->db->trans_rollback();
-		    $respuesta["mensaje"] = "Error al cancelar el movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-			$respuesta["resp"] = "f";
-		    return $respuesta;
-		}else{
-
-			$this->db->select('dm.id_producto,dm.id_talla,dm.cantidad,m.id_tipo_movimiento');
-			$this->db->from('movimientos m');
-			$this->db->join('detalle_movimiento dm', 'dm.id_movimiento = m.id_movimiento');
-			$this->db->where('m.id_movimiento', $id_movimiento);
-			$this->db->order_by('dm.id_producto,dm.id_talla', 'ASC');
-
-			//echo $this->db->get_compiled_select();die;
-			$query_m = $this->db->get();
-
-			$row_m = $query_m->result();
-			
-			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			    $respuesta["mensaje"] = "Error al consultar los detalles del movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-				$respuesta["resp"] = "f";
-			    return $respuesta;
-			}else{
-				foreach ($row_m as $detalle_m) {
-					$this->db->select('cantidad');
-					$this->db->from('producto_talla');
-					$this->db->where('id_producto', $detalle_m->id_producto);
-					$this->db->where('id_talla', $detalle_m->id_talla);
-
-					//echo $this->db->get_compiled_select();die;
-					$query_p = $this->db->get();
-
-					$row_p = $query_p->result();
-
-					if ($this->db->trans_status() === FALSE){
-					    $this->db->trans_rollback();
-					    $respuesta["mensaje"] = "Error al consultar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-						$respuesta["resp"] = "f";
-					    return $respuesta;
-					}else{
-						if($detalle_m->id_tipo_movimiento == 1 || $detalle_m->id_tipo_movimiento == 8 || $detalle_m->id_tipo_movimiento == 9){
-							$cantidad_new = $row_p[0]->cantidad - $detalle_m->cantidad;
-						}else{
-							$cantidad_new = $row_p[0]->cantidad + $detalle_m->cantidad;
-						}
-
-						$this->db->set('cantidad', $cantidad_new);
-						$this->db->where('id_producto', $detalle_m->id_producto);
-						$this->db->where('id_talla', $detalle_m->id_talla);
-						$str = $this->db->update('producto_talla');
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						    $respuesta["mensaje"] = "Error al consultar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-							$respuesta["resp"] = "f";
-						    return $respuesta;
-						}
-					}
-				}
-			}
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
 		}
+		
+		return $result;
 
-		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se canceló el movimiento con id: " . $id_movimiento . " en la fecha: " . $fecha_cancelacion);
-		$this->db->trans_commit();
-		return $respuesta;
+	}
+
+	function obtener_movimiento_producto($id_almacen,$id_tipo_movimiento){
+
+		$this->db->select('p.id_producto,m.marca,p.modelo,p.descripcion,mv.id_tipo_movimiento');
+		$this->db->from('producto_talla pt');
+		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
+		$this->db->join('marca m', 'm.id_marca = p.id_marca');
+		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
+		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen . ' AND mv.id_tipo_movimiento = ' . $id_tipo_movimiento);
+		$this->db->group_by('p.id_producto,m.marca,p.modelo,p.descripcion');
+		$this->db->order_by('m.marca,p.modelo', 'ASC');
+
+		//echo $this->db->get_compiled_select();die;
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
+
+	}
+
+	function obtener_talla_cantidad($id_almacen, $id_producto, $id_talla, $id_tipo_movimiento){
+
+		$this->db->select('pt.id_talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
+		$this->db->from('producto_talla pt');
+		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
+		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen . " AND mv.id_tipo_movimiento = " . $id_tipo_movimiento);
+		$this->db->where('pt.id_producto', $id_producto);
+		$this->db->where('pt.id_talla', $id_talla);
+		$this->db->order_by('id_talla', 'ASC');
+
+		//echo $this->db->get_compiled_select();die;
+		$query = $this->db->get();
+
+		$row = $query->result();
+
+		if (empty($row)) {
+			$result = null;
+		} else {
+			$result = $row;
+		}
+		
+		return $result;
 
 	}
 

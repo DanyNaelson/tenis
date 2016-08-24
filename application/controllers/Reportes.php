@@ -69,7 +69,9 @@ class Reportes extends CI_Controller {
 
 		$offset = $this->input->post("offset");
 
+		$movimientos_count = $this->reportes_m->obtener_movimientos($id_almacen, null, null, $folio, $tipo_movimiento, $fecha_inicio, $fecha_fin);
 		$movimientos = $this->reportes_m->obtener_movimientos($id_almacen, $limit, $offset, $folio, $tipo_movimiento, $fecha_inicio, $fecha_fin);
+		array_push($movimientos, count($movimientos_count));
 		echo json_encode($movimientos);
 	}
 
@@ -87,90 +89,87 @@ class Reportes extends CI_Controller {
 		echo json_encode($cancelacion_movimiento);
 	}
 
-	public function reporte_excel($id_almacen, $tipo, $folio, $fecha_i, $fecha_f){
-		
-		if($folio == "0"){
-			$folio = null;
+	public function obtener_cantidad($talla_cant){
+		$cantidad_real = 0;
+
+		foreach($talla_cant as $talla_c){
+			$cantidad_real += $talla_c->cantidad;
 		}
 
-		if($fecha_i == "0"){
-			$fecha_i = null;
-		}
-
-		if($fecha_f == "0"){
-			$fecha_f = null;
-		}
-
-		$this->load->model('reportes_m');
-		$movimientos = $this->reportes_m->obtener_movimientos($id_almacen, null, null, $folio, $tipo, $fecha_i, $fecha_f);
-
-		$excel_body = "";
-
-		foreach ($movimientos as $movimiento) {
-			$detalles = $this->reportes_m->obtener_detalles_movimiento($movimiento->id_movimiento);
-			$excel_body .= $this->excel_body_movements($movimiento, $detalles);
-		}
-
-		$data["excel_body"] = $excel_body;
-		$this->load->view("reporte_excel_v", $data);
-		
+		return $cantidad_real;
 	}
 
-	private function excel_body_movements($movimiento, $detalles){
-		switch($movimiento->confirmacion){
-			case "0":
-		        $confirmacion = "Sin confirmar";
-		        break;
-		    case "1":
-		        $confirmacion = "Confirmado";
-		        break;
-		    case "-1":
-		        $confirmacion = "Cancelado";
-		        break;
-		    default:
-		        $confirmacion = "Sin status";
+	public function crear_csv(){	
+		
+		$this->load->model('reportes_m');
+		$id_almacen = trim($this->input->post("almacen"));
+		$tipo_m = trim($this->input->post("tipo_mov"));
+		$producto = array();
+		$tr_html = "";
+		$respuesta = "false";
+
+		$producto = $this->reportes_m->obtener_movimiento_producto($id_almacen, $tipo_m);
+
+		if (empty($producto)) {
+			$producto = 'null';
+		} else {
+			
+			$count_tallas = count($this->reportes_m->obtener_tallas());
+			
+			foreach ($producto as $prod) {
+				$prod->cantidades = array();
+				$cantidad_t = 0;
+				$cant = 0;
+
+				for($j = 1 ; $j <= $count_tallas ; $j++){
+					$talla_cant = $this->reportes_m->obtener_talla_cantidad($id_almacen, $prod->id_producto, $j, $tipo_m);
+
+					if(empty($talla_cant)){
+						$cant = 0;
+					}else{
+						$cant = $this->obtener_cantidad($talla_cant);
+					}
+
+					$cantidad_t += $cant;
+					array_push($prod->cantidades, $cant);
+				}
+
+				array_push($prod->cantidades, $cantidad_t);
+			}
+
+			$html_productos = "";
+
+			$html_productos .= "Marca,Modelo,Descripcion,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,Total" . PHP_EOL;
+
+			for($i = 0; $i < count($producto) ; $i++){
+				$html_productos .= 	$producto[$i]->marca . ",";
+				$html_productos .= 	$producto[$i]->modelo . ",";
+				$html_productos .= 	$producto[$i]->descripcion . ",";
+
+				for ($j = 0; $j < count($producto[$i]->cantidades) ; $j++) {
+					if($producto[$i]->cantidades[$j] > 0){
+						$color_td = "greenyellow";
+					}else{
+						$color_td = "#FFF";
+					}
+
+					$html_productos .= $producto[$i]->cantidades[$j];
+					
+					if ($j < count($producto[$i]->cantidades) - 1) {
+						$html_productos .= ",";
+					}
+				}
+
+				$html_productos .= PHP_EOL;
+			}
+
+			$fp = fopen('../inventarios/assets/csv/reporte_movimiento_' . $tipo_m . '.csv', 'w+');
+			fwrite($fp, $html_productos);
+			fclose($fp);
+
+			$respuesta = "true";
 		}
 
-		$table_excel = "";
-
-		$table_excel .= "<tr>";
-		$table_excel .= 	"<td>" . $movimiento->tipo_movimiento . "</td>";
-		$table_excel .= 	"<td>" . $movimiento->folio . "</td>";
-		$table_excel .= 	"<td>" . $movimiento->almacen . "</td>";
-		$table_excel .= 	"<td>" . $movimiento->fecha . "</td>";
-		$table_excel .= 	"<td>" . $movimiento->cantidad . "</td>";
-		$table_excel .= 	"<td>" . $movimiento->precio . "</td>";
-		$table_excel .= 	"<td>" . $confirmacion . "</td>";
-		$table_excel .= "</tr> ";
-		$table_excel .= "<tr>";
-		$table_excel .= 	"<td colspan='1'></td>";
-		$table_excel .= 	"<td colspan='5'>";
-		$table_excel .= 		"<table border=1>";
-		$table_excel .= 			"<tr> ";
-		$table_excel .= 				"<th>Cantidad</th>";
-		$table_excel .= 				"<th>Marca</th>";
-		$table_excel .= 				"<th>Modelo</th>";
-		$table_excel .= 				"<th>Descripcion</th>";
-		$table_excel .= 				"<th>Talla</th>";
-		$table_excel .= 				"<th>Precio</th>";
-		$table_excel .= 			"</tr> ";
-
-		foreach ($detalles as $detalle) {
-			$table_excel .= 			"<tr>";
-			$table_excel .= 				"<td>" . $detalle->cantidad . "</td>";
-			$table_excel .= 				"<td>" . $detalle->marca . "</td>";
-			$table_excel .= 				"<td>" . $detalle->modelo . "</td>";
-			$table_excel .= 				"<td>" . $detalle->descripcion . "</td>";
-			$table_excel .= 				"<td>" . $detalle->talla . "</td>";
-			$table_excel .= 				"<td>" . $detalle->precio . "</td>";
-			$table_excel .= 			"</tr> ";
-		}
-
-		$table_excel .= 		"</table>";
-		$table_excel .= 	"<td colspan='1'></td>";
-		$table_excel .= 	"</td>";
-		$table_excel .= "</tr> ";
-
-		return $table_excel;
+		echo json_encode($respuesta);
 	}
 }

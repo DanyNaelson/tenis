@@ -342,7 +342,11 @@ function add_quantity_prod(id_prod, id_talla, quantity){
 	quantity_current = parseInt($(".prod_" + id_prod).find(".tallaid_" + id_talla).text());
 	
 	quantity_new = quantity_current - parseInt(quantity);
-	$(".prod_" + id_prod).find(".tallaid_" + id_talla).text(quantity_new).css("background-color", "greenyellow");
+	if(quantity_new > 0){ 
+		$(".prod_" + id_prod).find(".tallaid_" + id_talla).text(quantity_new).css("background-color", "greenyellow");
+	}else{
+		$(".prod_" + id_prod).find(".tallaid_" + id_talla).text(quantity_new).css("background-color", "#db8a8a");
+	}
 }
 
 function remove_quantity_prod(tr_current, quantity){
@@ -357,7 +361,7 @@ function remove_quantity_prod(tr_current, quantity){
 	if(quantity_new > 0){
 		$(".prod_" + id_prod[1]).find(".tallaid_" + id_talla[1]).text(quantity_new).css("background-color", "greenyellow");
 	}else{
-		$(".prod_" + id_prod[1]).find(".tallaid_" + id_talla[1]).text(quantity_new).css("background-color", "white");
+		$(".prod_" + id_prod[1]).find(".tallaid_" + id_talla[1]).text(quantity_new).css("background-color", "#db8a8a");
 	}
 
 	return id_prod[1];
