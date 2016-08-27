@@ -159,157 +159,64 @@ class Inventario_fisico_m extends CI_Model{
 
 	}
 
-	function registrar_fisico($fisico, $fisico_detalle){
+	function finalizar_fisico($fisico){
 
-		$fecha_salida = date("Y-m-d H:m:s");
-		$insert = "";
-		$mensaje = "";
-		$str = 1;
+		$fecha_fisico = date("Y-m-d H:m:s");
+		$respuesta = array("mensaje" => "Se finalizó correctamente el inventario físico, revisa el módulo de ajuste de inventario para realizar las operaciones pertinentes.", "resp" => "t");
 
 		$this->db->trans_begin();
 
-		$this->db->select('id_movimiento');
-		$this->db->from('movimientos');
-		$this->db->where('id_tipo_movimiento', 2);
+		$this->db->select('id_almacen');
+		$this->db->from('ajuste_fisico');
+		$this->db->where('id_almacen', $fisico[0]["id_almacen"]);
 
 		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
 
+		$row = $query->result();
+
 		if ($this->db->trans_status() === FALSE){
+		    $respuesta = array('mensaje' => 'No se pudieron consultar los datos de ajuste previo, inténtelo de nuevo y en caso de persistir el problema comuniquese con el administrador del sistema.', 'resp' => 'f');
 		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
 
-		$row = count($query->result());
-
-		if (is_int($row)) {
-
-			$folio = 'S' . ($row + 1);
-
-			$data = array(
-				'folio' => $folio,
-		        'id_tipo_movimiento' => 2,
-		        'cantidad' => $salida["cantidad"],
-		        'precio' => 0,
-		        'fecha' => $fecha_salida,
-		        'id_almacen' => $salida["id_almacen"],
-		        'confirmacion' => 1
-			);
-
-			$str = $this->db->insert('movimientos', $data);
+		if(!empty($row)){
+			$this->db->where('id_almacen', $fisico[0]["id_almacen"]);
+			$this->db->delete('ajuste_fisico');
 
 			if ($this->db->trans_status() === FALSE){
+			    $respuesta = array('mensaje' => 'No se pudieron borrar los datos de ajuste previo, inténtelo de nuevo y en caso de persistir el problema comuniquese con el administrador del sistema.', 'resp' => 'f');
 			    $this->db->trans_rollback();
+			    return $mensaje;
 			}
-
-			$id_ultimo_e = $this->db->insert_id();
-
-			if ($str == 1)
-			{
-				
-				for($i = 0; $i < count($salida_detalle) ; $i++){
-
-					$this->db->select('cantidad');
-					$this->db->from('producto_talla');
-					$this->db->where('id_producto', $salida_detalle[$i]["id_producto"]);
-					$this->db->where('id_talla', $salida_detalle[$i]["id_talla"]);
-
-					//echo $this->db->get_compiled_select();die;
-					$query = $this->db->get();
-
-					if ($this->db->trans_status() === FALSE){
-					    $this->db->trans_rollback();
-					}
-
-					$row = $query->result();
-
-					if (empty($row)) {
-						$data_pt = array(
-					        'id_producto' => $salida_detalle[$i]["id_producto"],
-					        'id_talla' => $salida_detalle[$i]["id_talla"],
-					        'codigo_barras' => '',
-					        'id_almacen' => NULL,
-					        'cantidad' => $salida_detalle[$i]["cantidad"]
-						);
-
-						$str = $this->db->insert('producto_talla', $data_pt);
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}
-					}else{
-						$cantidad = (int)$row[0]->cantidad - (int)$salida_detalle[$i]["cantidad"];
-
-						if($cantidad < 0){
-							$mensaje = "Error al actualizar la cantidad del producto ya que es menor que 0.";
-							$mensaje .= "|f";
-
-							if ($this->db->trans_status() === FALSE){
-							    $this->db->trans_rollback();
-							}
-						}
-
-						$this->db->set('cantidad', $cantidad);
-						$this->db->where('id_producto', $salida_detalle[$i]["id_producto"]);
-						$this->db->where('id_talla', $salida_detalle[$i]["id_talla"]);
-						$str = $this->db->update('producto_talla');
-					}
-
-					if($str == 1){
-
-						$data_det = array(
-					        'id_movimiento' => $id_ultimo_e,
-					        'id_producto' => $salida_detalle[$i]["id_producto"],
-					        'id_talla' => $salida_detalle[$i]["id_talla"],
-					        'cantidad' => $salida_detalle[$i]["cantidad"],
-					        'precio' => 0
-						);
-
-						$str = $this->db->insert('detalle_movimiento', $data_det);
-
-						if ($str == 1)
-						{
-							$insert .= "-1";
-						}
-						else
-						{
-							$insert = "0";
-						}
-
-						$tipo_m = explode("-", $insert);
-
-						if ($tipo_m[0] != '0') {
-							$mensaje = "Se ingresaron los detalles de salida correctamente.";
-							$mensaje .= "|t";
-						} else {
-							$mensaje = "Error al insertar el detalle_movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-							$mensaje .= "|f";
-						}
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}else{
-							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro la salida con id: " . $id_ultimo_e);
-						    $this->db->trans_commit();
-						}
-
-					}else{
-						$mensaje = "Error al actualizar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-						$mensaje .= "|f";
-					}
-				}
-			}
-			else
-			{
-				$mensaje = "Error al insertar el movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-				$mensaje .= "|f";
-			}
-
-		}else{
-			$mensaje = "Error al consultar los movimientos de salida, intentelo nuevamente.";
-			$mensaje .= "|f";
 		}
 
-		return $mensaje;
+		foreach($fisico as $fis){
+
+			if($fis["diferencia"] != 0){
+				$data = array(
+			        'id_producto' => $fis["id_producto"],
+			        'id_talla' => $fis["id_talla"],
+			        'id_almacen' => $fis["id_almacen"],
+			        'cantidad_sistema' => $fis["cantidad_sistema"],
+			        'cantidad_fisica' => $fis["cantidad"],
+			        'diferencia' => $fis["diferencia"]
+				);
+
+				$this->db->insert('ajuste_fisico', $data);
+
+				if ($this->db->trans_status() === FALSE){
+				    $respuesta = array('mensaje' => 'No se pudo ingresar el id_producto: ' . $fis->id_producto . ', id_talla: ' . $fis->id_talla . ', inténtelo de nuevo y en caso de persistir el problema comuniquese con el administrador del sistema.', 'resp' => 'f');
+				    $this->db->trans_rollback();
+				    return $mensaje;
+				}
+			}
+		}
+
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se realizó conteo de inventario físico en esta fecha: " . $fecha_fisico);
+		$this->db->trans_commit();
+		return $respuesta;
 
 	}
 

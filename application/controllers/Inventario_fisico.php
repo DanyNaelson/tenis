@@ -135,12 +135,11 @@ class Inventario_fisico extends CI_Controller {
 		return $talla_cantidad_def;
 	}
 
-	public function registrar_fisico(){
+	public function finalizar_fisico(){
 		$this->load->model('inventario_fisico_m');
 		$fisico = $this->input->post("obj_physical");
-		$fisico_detalle = $this->input->post("obj_physical_detail");
-		$respuesta_fisico = $this->inventario_fisico_m->registrar_fisico($fisico, $fisico_detalle);
-		echo $respuesta_fisico;
+		$respuesta_fisico = $this->inventario_fisico_m->finalizar_fisico($fisico);
+		echo json_encode($respuesta_fisico);
 	}
 
 }

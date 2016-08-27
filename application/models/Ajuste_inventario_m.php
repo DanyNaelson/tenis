@@ -67,104 +67,20 @@ class Ajuste_inventario_m extends CI_Model{
 
 	}
 
-	function obtener_marcas(){
+	function obtener_datos_ajuste($id_almacen, $id_tipo_movimiento){
 
-		$this->db->select('*');
-		$this->db->from('marca');
-		
-		$query = $this->db->get();
-
-		$row = $query->result();
-
-		if (empty($row)) {
-			$result = null;
-		} else {
-			$result = $row;
-		}
-		
-		return $result;
-
-	}
-
-	function obtener_producto($codigo_barras = null, $id_almacen = null){
-
-		$this->db->select('pt.id_producto_talla,p.id_producto,m.marca,p.modelo,p.descripcion,t.id_talla,t.talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
-		$this->db->from('producto_talla pt');
+		$this->db->select('af.id_producto,af.id_talla,m.marca,p.modelo,p.descripcion,t.talla,af.cantidad_sistema,af.cantidad_fisica,af.diferencia');
+		$this->db->from('ajuste_fisico af');
+		$this->db->join('producto_talla pt', 'pt.id_producto = af.id_producto AND pt.id_talla = af.id_talla');
 		$this->db->join('productos p', 'p.id_producto = pt.id_producto');
 		$this->db->join('marca m', 'm.id_marca = p.id_marca');
 		$this->db->join('talla t', 't.id_talla = pt.id_talla');
-		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
-		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
 
-		if (!is_null($codigo_barras)){
-			$this->db->where('pt.codigo_barras', $codigo_barras);
-			$this->db->where('dm.cantidad > 0');
+		if ($id_tipo_movimiento == 6){
+			$this->db->where('af.diferencia > 0');
+		}else{
+			$this->db->where('af.diferencia < 0');
 		}
-		//echo $this->db->get_compiled_select();die;
-		$query = $this->db->get();
-
-		$row = $query->result();
-
-		if (empty($row)) {
-			$result = null;
-		} else {
-			$result = $row;
-		}
-		
-		return $result;
-
-	}
-
-	function obtener_producto_modelo($marca = null, $modelo = null, $id_almacen = null){
-
-		$this->db->select('p.id_producto,m.marca,p.modelo,p.descripcion');
-		$this->db->from('productos p');
-		$this->db->join('marca m', 'm.id_marca = p.id_marca');
-		$this->db->join('detalle_movimiento dm', 'dm.id_producto = p.id_producto');
-		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento');
-
-		if ($marca != 0){
-			$this->db->where('p.id_marca', $marca);
-		}
-
-		if (!is_null($modelo) && ($modelo != "") && ($modelo != '0')){
-			$this->db->where('p.modelo', $modelo);
-		}
-
-		if (!is_null($id_almacen) && $id_almacen != ""){
-			$this->db->where('mv.id_almacen', $id_almacen);
-		}
-
-		$this->db->group_by('p.id_producto,m.marca,p.modelo,p.descripcion');
-		//echo $this->db->get_compiled_select();die;
-		$query = $this->db->get();
-
-		$row = $query->result();
-
-		if (empty($row)) {
-			$result = null;
-		} else {
-			$result = $row;
-		}
-		
-		return $result;
-
-	}
-
-	function obtener_talla_cantidad($id_producto, $id_almacen, $id_talla = null){
-
-		$this->db->select('pt.id_talla,mv.id_tipo_movimiento,dm.cantidad,mv.confirmacion');
-		$this->db->from('producto_talla pt');
-		$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
-		$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
-		$this->db->where('pt.id_producto', $id_producto);
-
-		if(!is_null($id_talla)){
-			$this->db->where('pt.id_talla', $id_talla);
-		}
-
-		$this->db->order_by('id_talla', 'ASC');
-
 		//echo $this->db->get_compiled_select();die;
 		$query = $this->db->get();
 

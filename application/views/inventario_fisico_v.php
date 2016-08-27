@@ -48,7 +48,9 @@
 						<th class="modelo text-center">Modelo</th>
 						<th class="descripcion text-center">Descripcion</th>
 						<th class="talla text-center">Talla</th>
-						<th class="cantidad text-center">Cantidad</th>
+						<th class="cantidad_sist text-center">Cantidad Sistema</th>
+						<th class="cantidad_f text-center">Cantidad Física</th>
+						<th class="diff_sist text-center">Diferencia</th>
 						<th class="text-center">Borrar</th>
 					</tr>
 				</thead>
@@ -58,7 +60,9 @@
 						<td style="border: hidden;"></td>
 						<td style="border: hidden;"></td>
 						<td class="total_salidas th-blue"><b>Total: </b></td>
+						<td id="total_sistema">0</td>
 						<td id="total_s">0</td>
+						<td style="border: hidden;"></td>
 						<td style="border: hidden;"></td>
 					</tr>
 				</tbody>
