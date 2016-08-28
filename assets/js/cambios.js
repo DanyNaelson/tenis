@@ -781,6 +781,7 @@ function obtener_cantidad_modelo(producto, tr_class, almacen, cantidad_sel, tall
 
 					update_quantity("s", cantidad_sel);
 					add_quantity($(td_current).parent(), cantidad_sel);
+					update_total_vv();
 		    	}else{
 		    		bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 		    	}
@@ -796,6 +797,19 @@ function obtener_cantidad_modelo(producto, tr_class, almacen, cantidad_sel, tall
 	        bootbox.alert('Disculpe, existió un problema');
 	    }
 	});
+}
+
+function update_total_vv(){
+	var tbody = $("#tabla_cambios").find("tbody");
+	var tr_class = tbody.find(".cantidad_v");
+	var total_cant = 0;
+
+	for(var i = 0 ; i < tr_class.length ; i++){
+		cantidad_class = parseInt(tr_class.eq(i).text());
+		total_cant += cantidad_class;
+	}
+
+	$("#total_vv").text(total_cant);
 }
 
 function obtener_cantidad_max(respuesta_modelo){
