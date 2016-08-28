@@ -5,14 +5,19 @@ $(document).ready(function(){
 		var tbody = $("#tabla_salidas").find("tbody");
 		var id_almacen = $("#almacen").val();
 		var tipo_m = $("#tipo_movimiento").val();
+		var selection = verificar_selection(tbody);
 
 		if(id_almacen != 0){
 			if(tipo_m != 0){
-				bootbox.confirm("Estás seguro de finalizar la salida?", function(result) {
-					if(result){
-						get_values_outlet(tbody);
-					}
-				});
+				if(selection > 0){
+					bootbox.confirm("Estás seguro de finalizar la salida?", function(result) {
+						if(result){
+							get_values_outlet(tbody);
+						}
+					});
+				}else{
+					bootbox.alert("Debes seleccionar al menos un producto para realizar un ajuste de inventario.");
+				}
 			}else{
 				bootbox.alert("Debes seleccionar el tipo de movimiento para realizar un ajuste de inventario.");
 				$("#tipo_movimiento").focus();
@@ -126,7 +131,7 @@ function crea_tr(producto){
 		html_tr += 	"<td class='cantidad_sistema'>" + producto[i].cantidad_sistema + "</td>";
 		html_tr += 	"<td class='cantidad'>" + producto[i].cantidad_fisica + "</td>";
 		html_tr += 	"<td class='diferencia' style='background-color:" + color_back + "'>" + producto[i].diferencia + "</td>";
-		html_tr += 	"<td><input class='selection' type='checkbox'></td>";
+		html_tr += 	"<td><input class='selection' type='checkbox' onchange='update_total_diff(this);'></td>";
 		html_tr += "</tr>";
 	}
 
@@ -136,23 +141,55 @@ function crea_tr(producto){
 function update_total_sistema(){
 	var tr_class = $(".cantidad_sistema");
 	var tr_class_cantidad = $(".cantidad");
-	var tr_class_diferencia = $(".diferencia");
 	var total_fisico = 0;
 	var total_sistema = 0;
-	var total_diferencia = 0;
 
 	for (var i = 0; i < tr_class.length; i++) {
 		cantidad = parseInt(tr_class_cantidad.eq(i).text());
 		cantidad_sistema = parseInt(tr_class.eq(i).text());
-		diferencia = parseInt(tr_class_diferencia.eq(i).text());
 		total_sistema += cantidad_sistema;
 		total_fisico += cantidad;
-		total_diferencia += diferencia;
 	}
 
 	$("#total_sistema").text(total_sistema);
 	$("#total_s").text(total_fisico);
-	$("#total_diferencia").text(total_diferencia);
+}
+
+function verificar_selection(tbody){
+	var tr_selection = tbody.find(".selection");
+	var selected = 0;
+
+	for (var i = 0; i < tr_selection.length; i++) {
+		if(tr_selection.eq(i).prop("checked") == true){
+			selected += 1;
+		}
+	}
+
+	return selected;
+}
+
+function update_total_diff(obj_check){
+	var tr_current = $(obj_check).parent().parent();
+	var cantidad_diff = parseInt(tr_current.find(".diferencia").text());
+	var total_diff_current = parseInt($("#total_diferencia").text());
+	var total_diff = 0;
+	var color_back = "";
+
+	if(tr_current.find(".selection").prop("checked") == true){
+		total_diff = total_diff_current + cantidad_diff;
+	}else{
+		total_diff = total_diff_current - cantidad_diff;
+	}
+
+	if(total_diff == 0){
+		color_back = "#FFF";
+	}else if(total_diff > 0){
+		color_back = "yellowgreen";
+	}else{
+		color_back = "#db8a8a";
+	}
+
+	$("#total_diferencia").text(total_diff).css("background-color", color_back);
 }
 
 function get_values_outlet(tbody_adjustment){
@@ -190,8 +227,8 @@ function get_values_outlet(tbody_adjustment){
 	send_values_outlet(adjustment, adjustment_detail);
 }
 
-function send_values_outlet(adjustment, adjustment_detail){console.log(adjustment);console.log(adjustment_detail);
-	/*$.ajax({
+function send_values_outlet(adjustment, adjustment_detail){
+	$.ajax({
 	    // la URL para la petición
 	    url : "registrar_ajuste",
 	 
@@ -221,7 +258,7 @@ function send_values_outlet(adjustment, adjustment_detail){console.log(adjustmen
 	    error : function(xhr, status) {
 	        bootbox.alert('Disculpe, existió un problema');
 	    }
-	});*/
+	});
 }
 
 function tbody_clean(){
@@ -234,6 +271,8 @@ function tbody_clean(){
 	}
 
 	$("#total_s").text("0");
+	$("#total_sistema").text("0");
+	$("#total_diferencia").text("0").css("background-color", "#FFF");
 
 	tbody_p = $("#tabla_productos").find("tbody");
 	tr_current_p = $(tbody_p).find("tr");

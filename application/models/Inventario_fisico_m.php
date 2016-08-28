@@ -178,7 +178,7 @@ class Inventario_fisico_m extends CI_Model{
 		if ($this->db->trans_status() === FALSE){
 		    $respuesta = array('mensaje' => 'No se pudieron consultar los datos de ajuste previo, inténtelo de nuevo y en caso de persistir el problema comuniquese con el administrador del sistema.', 'resp' => 'f');
 		    $this->db->trans_rollback();
-		    return $mensaje;
+		    return $respuesta;
 		}
 
 		if(!empty($row)){
@@ -188,7 +188,7 @@ class Inventario_fisico_m extends CI_Model{
 			if ($this->db->trans_status() === FALSE){
 			    $respuesta = array('mensaje' => 'No se pudieron borrar los datos de ajuste previo, inténtelo de nuevo y en caso de persistir el problema comuniquese con el administrador del sistema.', 'resp' => 'f');
 			    $this->db->trans_rollback();
-			    return $mensaje;
+			    return $respuesta;
 			}
 		}
 
@@ -209,7 +209,7 @@ class Inventario_fisico_m extends CI_Model{
 				if ($this->db->trans_status() === FALSE){
 				    $respuesta = array('mensaje' => 'No se pudo ingresar el id_producto: ' . $fis->id_producto . ', id_talla: ' . $fis->id_talla . ', inténtelo de nuevo y en caso de persistir el problema comuniquese con el administrador del sistema.', 'resp' => 'f');
 				    $this->db->trans_rollback();
-				    return $mensaje;
+				    return $respuesta;
 				}
 			}
 		}

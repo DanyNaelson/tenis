@@ -44,10 +44,10 @@ class Ajuste_inventario extends CI_Controller {
 
 	public function registrar_ajuste(){
 		$this->load->model('ajuste_inventario_m');
-		$ajuste = $this->input->post("obj_fit");
-		$ajuste_detalle = $this->input->post("obj_fit_detail");
+		$ajuste = $this->input->post("obj_adjustment");
+		$ajuste_detalle = $this->input->post("obj_adjustment_detail");
 		$respuesta_ajuste = $this->ajuste_inventario_m->registrar_ajuste($ajuste, $ajuste_detalle);
-		echo $respuesta_ajuste;
+		echo json_encode($respuesta_ajuste);
 	}
 
 }
