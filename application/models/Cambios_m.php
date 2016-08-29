@@ -110,6 +110,7 @@ class Cambios_m extends CI_Model{
 			$this->db->join('talla t', 't.id_talla = pt.id_talla');
 			$this->db->join('detalle_movimiento dm', 'dm.id_producto = pt.id_producto AND dm.id_talla = pt.id_talla');
 			$this->db->join('movimientos mv', 'mv.id_movimiento = dm.id_movimiento AND mv.id_almacen = ' . $id_almacen);
+			$this->db->where('mv.id_tipo_movimiento IN (4,5)');
 
 			if (!is_null($folio)){
 				$this->db->where('mv.folio', $folio);

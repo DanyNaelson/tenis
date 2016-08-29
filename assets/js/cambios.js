@@ -27,6 +27,7 @@ $(document).ready(function(){
 				    	if (respuesta_producto == null) {
 				    		bootbox.alert('La venta no se realizó en el almacén seleccionado o ya se realizó un cambio con esa venta o el folio no existe en ventas, favor de ingresarlo correctamente.');
 				    	}else{
+				    		tbody_clean();
 				    		tr_current = $("." + folio_v);
 				    		tr_count = $(tr_current).length;
 
