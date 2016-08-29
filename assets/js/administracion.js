@@ -83,7 +83,7 @@ $(document).ready(function(){
 		tr_html +=	"<td class='text-center'>";
 		tr_html +=	"	<input class='input_req' value='' type='text'>";
 		tr_html +=	"</td>";
-		for(i = 1; i <= 8; i++){
+		for(i = 1; i <= 11; i++){
 			tr_html +=	"<td class='text-center no-check'>";
 			tr_html +=		"<input class='input_req' onclick='presionar(this)' type='checkbox'>";
 			tr_html +=	"</td>";

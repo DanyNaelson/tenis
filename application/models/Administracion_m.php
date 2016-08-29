@@ -66,122 +66,86 @@ class Administracion_m extends CI_Model{
 
 	function actualizar_usuario($datos_usuario){
 		$d_usuario = explode("-", $datos_usuario);
-		$insert = "";
+		$mensaje = "Se actualizaron correctamente los datos del usuario";
 
 		$this->db->trans_begin();
 
 		$this->db->set('usuario', $d_usuario[1]);
 		$this->db->set('password', $d_usuario[2]);
 		$this->db->where('id_usuario', $d_usuario[0]);
-		$str = $this->db->update('usuarios');
+		$this->db->update('usuarios');
 
 		if ($this->db->trans_status() === FALSE){
+			$mensaje = "Error al actualizar datos de acceso del usuario.";
 		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
 
-		if ($str == 1)
-		{
-			$this->db->where('id_usuario', $d_usuario[0]);
-			$str = $this->db->delete('usuario_permisos');
+		$this->db->where('id_usuario', $d_usuario[0]);
+		$this->db->delete('usuario_permisos');
 
-			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			}
-
-			if ($str == 1)
-			{
-				for($i = 3; $i < count($d_usuario) ; $i++){
-					if($d_usuario[$i] == 1){
-						$data = array(
-					        'id_usuario' => $d_usuario[0],
-					        'id_permiso' => $i - 2
-						);
-
-						$str = $this->db->insert('usuario_permisos', $data);
-
-						if ($str == 1)
-						{
-							$insert .= "-1";
-						}
-						else
-						{
-							$insert = "0";
-						}
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}else{
-							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se actualizó el id_permiso: " . ($i - 2) . " del usuario: " . $d_usuario[1]);
-						    $this->db->trans_commit();
-						}
-					}
-
-					$tipo_m = explode("-", $insert);
-
-					if ($tipo_m[0] != '0') {
-						$mensaje = "Se actualizaron los datos del usuario correctamente.";
-					} else {
-						$mensaje = "Error al insertar permisos del usuario.";
-					}
-				}
-			}
-			else
-			{
-				$mensaje = "Error al borrar permisos del usuario.";
-			}
-		}
-		else
-		{
-			$mensaje = "Error al actualizar los datos de usuario.";
+		if ($this->db->trans_status() === FALSE){
+		    $mensaje = "Error al borrar el usuario.";
+		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
 
+		for($i = 3; $i < count($d_usuario) ; $i++){
+			if($d_usuario[$i] == 1){
+				$data = array(
+			        'id_usuario' => $d_usuario[0],
+			        'id_permiso' => $i - 2
+				);
+
+				$this->db->insert('usuario_permisos', $data);
+
+				if ($this->db->trans_status() === FALSE){
+				    $mensaje = "Error al insertar datos del usuario.";
+				    $this->db->trans_rollback();
+				    return $mensaje;
+				}	
+			}
+		}
+
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se actualizaron los permisos del usuario: " . $d_usuario[1]);
+		$this->db->trans_commit();
+		
 		return $mensaje;
 	}
 
 	function borrar_usuario($datos_usuario){
 		$id_usuario = $datos_usuario;
+		$mensaje = "Se eliminó correctamente el usuario";
 
 		$this->db->trans_begin();
 
 		$this->db->where('id_usuario', $id_usuario);
-		$str = $this->db->delete('usuarios');
+		$this->db->delete('usuarios');
 
 		if ($this->db->trans_status() === FALSE){
+		    $mensaje = "Error al eliminar el usuario.";
 		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
 
-		if ($str == 1)
-		{
-			$this->db->where('id_usuario', $id_usuario);
-			$str = $this->db->delete('usuario_permisos');
+		$this->db->where('id_usuario', $id_usuario);
+		$this->db->delete('usuario_permisos');
 
-			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			}else{
-				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se eliminó el id_usuario: " . $id_usuario);
-			    $this->db->trans_commit();
-			}
-
-			if ($str == 1)
-			{
-				$mensaje = "Se borraron los permisos del usuario correctamente.";
-			}
-			else
-			{
-				$mensaje = "Error al borrar permisos del usuario.";
-			}
+		if ($this->db->trans_status() === FALSE){
+		    $mensaje = "Error al eliminar los permisos del usuario.";
+		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
-		else
-		{
-			$mensaje = "Error al borrar los datos de usuario.";
-		}
+		
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se eliminó el id_usuario: " . $id_usuario);
+	    $this->db->trans_commit();
 
 		return $mensaje;
 	}
 
 	function insertar_usuario($datos_usuario){
 		$d_usuario = explode("-", $datos_usuario);
-		$insert = "";
+		$mensaje = "Se agregó correctamente al usuario.";
 
 		$this->db->trans_begin();
 
@@ -190,55 +154,35 @@ class Administracion_m extends CI_Model{
 	        'password' => $d_usuario[2]
 		);
 
-		$str = $this->db->insert('usuarios', $data);
+		$this->db->insert('usuarios', $data);
 
 		if ($this->db->trans_status() === FALSE){
+		    $mensaje = "Error al insertar el usuario.";
 		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
 
 		$id_ultimo = $this->db->insert_id();
 
-		if ($str == 1)
-		{
-			for($i = 3; $i < count($d_usuario) ; $i++){
-				if($d_usuario[$i] == 1){
-					$data = array(
-				        'id_usuario' => $id_ultimo,
-				        'id_permiso' => $i - 2
-					);
+		for($i = 3; $i < count($d_usuario) ; $i++){
+			if($d_usuario[$i] == 1){
+				$data = array(
+			        'id_usuario' => $id_ultimo,
+			        'id_permiso' => $i - 2
+				);
 
-					$str = $this->db->insert('usuario_permisos', $data);
-
-					if ($str == 1)
-					{
-						$insert .= "-1";
-					}
-					else
-					{
-						$insert = "0";
-					}
-				}
-
-				$tipo_m = explode("-", $insert);
-
-				if ($tipo_m[0] != '0') {
-					$mensaje = "Se ingresó el usuario correctamente.";
-				} else {
-					$mensaje = "Error al insertar permisos del usuario.";
-				}
+				$this->db->insert('usuario_permisos', $data);
 
 				if ($this->db->trans_status() === FALSE){
+				    $mensaje = "Error al crear el permiso del usuario.";
 				    $this->db->trans_rollback();
-				}else{
-					$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se ingreso el id_permiso: " . ($i - 2) . " del usuario: " . $d_usuario[1]);
-				    $this->db->trans_commit();
+				    return $mensaje;
 				}
 			}
 		}
-		else
-		{
-			$mensaje = "Error al actualizar los datos de usuario.";
-		}
+
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se ingresaron correctamente los datos y permisos del usuario: " . $d_usuario[1]);
+		$this->db->trans_commit();
 
 		return $mensaje;
 	}
