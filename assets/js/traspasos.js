@@ -514,32 +514,11 @@ function confirm_transfers(){
 	    // la respuesta es pasada como argumento a la función
 	    success : function(confirmacion_traspasos) {
 	    	json_p = $.parseJSON(confirmacion_traspasos);
-	    	bootbox.alert(json_p.mensaje);
 
 	    	if(json_p.resp == 't'){
-	    		table_id_movimiento.slideUp('fast');
-	    		var valor_salida_t = $("#t_salida").text().trim();
-	    		var valor_current = parseInt(valor_salida_t) - 1;
-
-	    		if (valor_current == 0){
-	    			$("#t_salida").remove();
-	    		}else{
-	    			$("#t_salida").text(valor_current);
-	    			$("#t_salida").append('<span class="glyphicon glyphicon-open" aria-hidden="true"></span>');
-	    		}
-
-	    		if($("#entry_" + id_movimiento).length > 0){
-	    			$("#entry_" + id_movimiento).slideUp('fast');
-	    			var valor_entrada_t = $("#t_entrada").text().trim();
-		    		var valor_current_e = parseInt(valor_entrada_t) - 1;
-
-		    		if (valor_current_e == 0){
-		    			$("#t_entrada").remove();
-		    		}else{
-		    			$("#t_entrada").text(valor_current_e);
-		    			$("#t_entrada").append('<span class="glyphicon glyphicon-save" aria-hidden="true"></span>');
-		    		}
-	    		}
+	    		bootbox.alert(json_p.mensaje, function() {
+				  location.href = "index";
+				});
 	    	}
 	    },
 	 
@@ -612,6 +591,7 @@ function final_transfer(id_movimiento, obj_button){
 
 function cancel_transfer(id_movimiento, obj_button){
 	var table_id_movimiento = $(obj_button).parent().parent().parent().parent();
+	var movimiento = id_movimiento.split('|');
 	$.ajax({
 	    // la URL para la petición
 	    url : "cancelar_movimientos",
@@ -643,8 +623,8 @@ function cancel_transfer(id_movimiento, obj_button){
 	    			$("#t_salida").append('<span class="glyphicon glyphicon-open" aria-hidden="true"></span>');
 	    		}
 
-	    		if($("#entry_" + id_movimiento).length > 0){
-	    			$("#entry_" + id_movimiento).slideUp('fast');
+	    		if($("#entry_" + movimiento[0]).length > 0){
+	    			$("#entry_" + movimiento[0]).slideUp('fast');
 	    			var valor_entrada_t = $("#t_entrada").text().trim();
 		    		var valor_current_e = parseInt(valor_entrada_t) - 1;
 

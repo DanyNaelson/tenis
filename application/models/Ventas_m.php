@@ -209,9 +209,6 @@ class Ventas_m extends CI_Model{
 	function registrar_venta($venta, $venta_detalle){
 
 		$fecha_venta = date("Y-m-d H:m:s");
-		$insert = "";
-		$mensaje = "";
-		$str = 1;
 
 		$this->db->trans_begin();
 
@@ -223,138 +220,104 @@ class Ventas_m extends CI_Model{
 		$query = $this->db->get();
 
 		if ($this->db->trans_status() === FALSE){
+			$mensaje = "Error al consultar los movimientos de venta, intentelo nuevamente.";
+			$mensaje .= "|f";
 		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
 
 		$row = count($query->result());
 
-		if (is_int($row)) {
+		$folio = 'V' . ($row + 1);
 
-			$folio = 'V' . ($row + 1);
+		$data = array(
+			'folio' => $folio,
+	        'id_tipo_movimiento' => 4,
+	        'cantidad' => $venta["cantidad"],
+	        'fecha' => $fecha_venta,
+	        'id_almacen' => $venta["id_almacen"],
+	        'precio' => $venta["precio"],
+	        'confirmacion' => 0
+		);
 
-			$data = array(
-				'folio' => $folio,
-		        'id_tipo_movimiento' => 4,
-		        'cantidad' => $venta["cantidad"],
-		        'fecha' => $fecha_venta,
-		        'id_almacen' => $venta["id_almacen"],
-		        'precio' => $venta["precio"],
-		        'confirmacion' => 0
-			);
+		$this->db->insert('movimientos', $data);
 
-			$str = $this->db->insert('movimientos', $data);
+		if ($this->db->trans_status() === FALSE){
+			$mensaje = "Error al insertar el movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
+			$mensaje .= "|f";
+		    $this->db->trans_rollback();
+		    return $mensaje;
+		}
+
+		$id_ultimo_e = $this->db->insert_id();
+
+		for($i = 0; $i < count($venta_detalle) ; $i++){
+
+			$this->db->select('cantidad');
+			$this->db->from('producto_talla');
+			$this->db->where('id_producto', $venta_detalle[$i]["id_producto"]);
+			$this->db->where('id_talla', $venta_detalle[$i]["id_talla"]);
+
+			//echo $this->db->get_compiled_select();die;
+			$query = $this->db->get();
 
 			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			}
-
-			$id_ultimo_e = $this->db->insert_id();
-
-			if ($str == 1)
-			{
-				
-				for($i = 0; $i < count($venta_detalle) ; $i++){
-
-					$this->db->select('cantidad');
-					$this->db->from('producto_talla');
-					$this->db->where('id_producto', $venta_detalle[$i]["id_producto"]);
-					$this->db->where('id_talla', $venta_detalle[$i]["id_talla"]);
-
-					//echo $this->db->get_compiled_select();die;
-					$query = $this->db->get();
-
-					if ($this->db->trans_status() === FALSE){
-					    $this->db->trans_rollback();
-					}
-
-					$row = $query->result();
-
-					if (empty($row)) {
-						$data_pt = array(
-					        'id_producto' => $venta_detalle[$i]["id_producto"],
-					        'id_talla' => $venta_detalle[$i]["id_talla"],
-					        'codigo_barras' => '',
-					        'id_almacen' => NULL,
-					        'cantidad' => $venta_detalle[$i]["cantidad"]
-						);
-
-						$str = $this->db->insert('producto_talla', $data_pt);
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}
-					}else{
-						$cantidad = (int)$row[0]->cantidad - (int)$venta_detalle[$i]["cantidad"];
-
-						if($cantidad < 0){
-							$mensaje = "Error al actualizar la cantidad del producto ya que es menor que 0.";
-							$mensaje .= "|f";
-
-							if ($this->db->trans_status() === FALSE){
-							    $this->db->trans_rollback();
-							}
-						}
-
-						$this->db->set('cantidad', $cantidad);
-						$this->db->where('id_producto', $venta_detalle[$i]["id_producto"]);
-						$this->db->where('id_talla', $venta_detalle[$i]["id_talla"]);
-						$str = $this->db->update('producto_talla');
-					}
-
-					if($str == 1){
-
-						$data_det = array(
-					        'id_movimiento' => $id_ultimo_e,
-					        'id_producto' => $venta_detalle[$i]["id_producto"],
-					        'id_talla' => $venta_detalle[$i]["id_talla"],
-					        'cantidad' => $venta_detalle[$i]["cantidad"],
-					        'precio' => $venta_detalle[$i]["precio"]
-						);
-
-						$str = $this->db->insert('detalle_movimiento', $data_det);
-
-						if ($str == 1)
-						{
-							$insert .= "-1";
-						}
-						else
-						{
-							$insert = "0";
-						}
-
-						$tipo_m = explode("-", $insert);
-
-						if ($tipo_m[0] != '0') {
-							$mensaje = "Se ingresaron los detalles de venta correctamente.";
-							$mensaje .= "|t";
-						} else {
-							$mensaje = "Error al insertar el detalle_movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-							$mensaje .= "|f";
-						}
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}else{
-							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro la venta con id: " . $id_ultimo_e);
-						    $this->db->trans_commit();
-						}
-
-					}else{
-						$mensaje = "Error al actualizar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
-						$mensaje .= "|f";
-					}
-				}
-			}
-			else
-			{
-				$mensaje = "Error al insertar el movimiento, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
+				$mensaje = "Error al consultar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
 				$mensaje .= "|f";
+			    $this->db->trans_rollback();
+			    return $mensaje;
 			}
 
-		}else{
-			$mensaje = "Error al consultar los movimientos de venta, intentelo nuevamente.";
-			$mensaje .= "|f";
+			$row = $query->result();
+
+			if (empty($row)) {
+				$data_pt = array(
+			        'id_producto' => $venta_detalle[$i]["id_producto"],
+			        'id_talla' => $venta_detalle[$i]["id_talla"],
+			        'codigo_barras' => '',
+			        'id_almacen' => NULL,
+			        'cantidad' => $venta_detalle[$i]["cantidad"]
+				);
+
+				$this->db->insert('producto_talla', $data_pt);
+			}else{
+				$cantidad = (int)$row[0]->cantidad - (int)$venta_detalle[$i]["cantidad"];
+
+				$this->db->set('cantidad', $cantidad);
+				$this->db->where('id_producto', $venta_detalle[$i]["id_producto"]);
+				$this->db->where('id_talla', $venta_detalle[$i]["id_talla"]);
+				$this->db->update('producto_talla');
+			}
+
+			if ($this->db->trans_status() === FALSE){
+				$mensaje = "Error al actualizar la cantidad del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
+				$mensaje .= "|f";
+			    $this->db->trans_rollback();
+			    return $mensaje;
+			}
+
+			$data_det = array(
+		        'id_movimiento' => $id_ultimo_e,
+		        'id_producto' => $venta_detalle[$i]["id_producto"],
+		        'id_talla' => $venta_detalle[$i]["id_talla"],
+		        'cantidad' => $venta_detalle[$i]["cantidad"],
+		        'precio' => $venta_detalle[$i]["precio"]
+			);
+
+			$this->db->insert('detalle_movimiento', $data_det);
+
+			if ($this->db->trans_status() === FALSE){
+				$mensaje = "Error al insertar los detalles del producto, inténtelo de nuevo y si persiste el problema consulte al administrador del sistema.";
+				$mensaje .= "|f";
+			    $this->db->trans_rollback();
+			    return $mensaje;
+			}
 		}
+
+		$mensaje = "Se realizó correctamente la venta.";
+		$mensaje .= "|t";
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se registro la venta con id: " . $id_ultimo_e);
+		$this->db->trans_commit();
 
 		return $mensaje;
 
@@ -388,9 +351,6 @@ class Ventas_m extends CI_Model{
 
 	function confirmar_ventas($id_movimientos){
 		$movimientos = explode(",", $id_movimientos);
-		$insert = "";
-		$mensaje = "";
-		$str = 1;
 		$respuesta = array('mensaje' => 'Se han confirmado correctamente los movimientos de venta.', 'resp' => 't');
 
 		$this->db->trans_begin();
