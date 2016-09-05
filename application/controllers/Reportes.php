@@ -71,7 +71,11 @@ class Reportes extends CI_Controller {
 
 		$movimientos_count = $this->reportes_m->obtener_movimientos($id_almacen, null, null, $folio, $tipo_movimiento, $fecha_inicio, $fecha_fin);
 		$movimientos = $this->reportes_m->obtener_movimientos($id_almacen, $limit, $offset, $folio, $tipo_movimiento, $fecha_inicio, $fecha_fin);
-		array_push($movimientos, count($movimientos_count));
+
+		if(!empty($movimientos)){
+			array_push($movimientos, count($movimientos_count));
+		}
+		
 		echo json_encode($movimientos);
 	}
 

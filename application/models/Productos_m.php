@@ -133,7 +133,8 @@ class Productos_m extends CI_Model{
 		$id_producto = str_replace("producto_", "", trim($d_producto[0]));
 		$posicion = strpos($d_producto[1], "select");
 		$update = "";
-		$mensaje = "No se ingresaron datos para actualizar el producto.";
+		$mensaje = "Se actualizaron los datos correctamente.";
+		$mensaje .= "|t";
 
 		$this->db->trans_begin();
 		
@@ -148,12 +149,9 @@ class Productos_m extends CI_Model{
 			if ($this->db->trans_status() === FALSE){
 			    $this->db->trans_rollback();
 			}
-		}
-		else
-		{
+		}else{
 			$producto_marca = str_replace("select", "", $d_producto[1]);
 			$id_ultimo_m = $producto_marca;
-			$str = 1;
 		}
 
 		$this->db->set('id_marca', $id_ultimo_m);
@@ -161,85 +159,63 @@ class Productos_m extends CI_Model{
 		$this->db->set('descripcion', $d_producto[3]);
 		$this->db->set('precio', trim($d_producto[count($d_producto) - 1]));
 		$this->db->where('id_producto', $id_producto);
-		$str = $this->db->update('productos');
+		$this->db->update('productos');
 
 		if ($this->db->trans_status() === FALSE){
+			$mensaje = "Hubo un problema al actualizar los datos.";
+			$mensaje .= "|f";
 		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
-
-		if ($str == 1)
-		{
 			
-			for($i = 4; $i < count($d_producto) - 1 ; $i++){
-				if(trim($d_producto[$i]) != "")
-				{
+		for($i = 4; $i < count($d_producto) - 1 ; $i++){
+			if(trim($d_producto[$i]) != ""){
 
-					$this->db->select('id_producto_talla');
-					$this->db->from('producto_talla');
-					$this->db->where('id_producto', $id_producto);
-					$this->db->where('id_talla', $i - 3);
-					$query = $this->db->get();
-					$rows = $query->result();
+				$this->db->select('id_producto_talla');
+				$this->db->from('producto_talla');
+				$this->db->where('id_producto', $id_producto);
+				$this->db->where('id_talla', $i - 3);
+				$query = $this->db->get();
+				$rows = $query->result();
 
-					if(!empty($rows)){
+				if(!empty($rows)){
 
-						$this->db->set('codigo_barras', trim($d_producto[$i]));
-						$this->db->where('id_producto', $rows[0]->id_producto_talla);
-						$str = $this->db->update('producto_talla');
+					$this->db->set('codigo_barras', trim($d_producto[$i]));
+					$this->db->where('id_producto_talla', $rows[0]->id_producto_talla);
+					$this->db->update('producto_talla');
 
-					}else{
+				}else{
 
-						$data = array(
-						        'id_producto' => $id_producto,
-						        'id_talla' => $i - 3,
-						        'codigo_barras' => trim($d_producto[$i]),
-						        'id_almacen' => NULL,
-						        'cantidad' => 0
-							);
-						
-						$str = $this->db->insert('producto_talla', $data);
+					$data = array(
+					        'id_producto' => $id_producto,
+					        'id_talla' => $i - 3,
+					        'codigo_barras' => trim($d_producto[$i]),
+					        'id_almacen' => NULL,
+					        'cantidad' => 0
+						);var_dump($data);die;
+					
+					$this->db->insert('producto_talla', $data);
 
-					}
+				}
 
-					if ($str == 1)
-					{
-						$update .= "-1";
-					}
-					else
-					{
-						$update = "0";
-					}
-
-					$tipo_m = explode("-", $update);
-
-					if ($tipo_m[0] != '0') {
-						$mensaje = "Se ingresaron los codigos de barra correctamente.";
-						$mensaje .= "|t";
-					} else {
-						$mensaje = "Error al insertar codigos de barra.";
-						$mensaje .= "|f";
-					}
-
-					if ($this->db->trans_status() === FALSE){
-					    $this->db->trans_rollback();
-					}else{
-						$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se actualizo el modelo: " . trim($d_producto[2]) . " y id_talla: " . ($i - 3));
-					    $this->db->trans_commit();
-					}
+				if ($this->db->trans_status() === FALSE){
+				    $mensaje = "Hubo un problema al actualizar los datos.";
+					$mensaje .= "|f";
+				    $this->db->trans_rollback();
+				    return $mensaje;
 				}
 			}
 		}
-		else
-		{
-			$mensaje = "Error al actualizar los datos del producto.";
-			$mensaje .= "|f";
-		}
+
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se actualizo el modelo: " . trim($d_producto[2]));
+		$this->db->trans_commit();
 
 		return $mensaje;
 	}
 
 	function borrar_producto($datos_producto){
 		$id_producto = $datos_producto;
+		$mensaje = "Se borró el producto correctamente.";
 
 		$this->db->trans_begin();
 
@@ -247,34 +223,22 @@ class Productos_m extends CI_Model{
 		$str = $this->db->delete('productos');
 
 		if ($this->db->trans_status() === FALSE){
-		    $this->db->trans_rollback();
-		}
-
-		if ($str == 1)
-		{
-			$this->db->where('id_producto', $id_producto);
-			$str = $this->db->delete('producto_talla');
-
-			if ($str == 1)
-			{
-				$mensaje = "Se borró el producto correctamente.";
-			}
-			else
-			{
-				$mensaje = "Error al borrar productos-talla.";
-			}
-			
-			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			}else{
-				$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se eliminó el id_producto: " . $id_producto);
-			    $this->db->trans_commit();
-			}
-		}
-		else
-		{
 			$mensaje = "Error al borrar los datos de producto.";
+		    $this->db->trans_rollback();
+		    return $mensaje;
 		}
+			
+		$this->db->where('id_producto', $id_producto);
+		$str = $this->db->delete('producto_talla');
+		
+		if ($this->db->trans_status() === FALSE){
+			$mensaje = "Error al borrar productos-talla.";
+		    $this->db->trans_rollback();
+		    return $mensaje;
+		}
+
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se eliminó el id_producto: " . $id_producto);
+		$this->db->trans_commit();
 
 		return $mensaje;
 	}
@@ -282,7 +246,6 @@ class Productos_m extends CI_Model{
 	function insertar_producto($datos_producto){
 		$d_producto = explode("|", $datos_producto);
 		$posicion = strpos($d_producto[0], "select");
-		$insert = "";
 		$mensaje = "Necesita ingresar por lo menos un código de barras.";
 
 		$this->db->trans_begin();
@@ -292,10 +255,13 @@ class Productos_m extends CI_Model{
 		        'marca' => trim($d_producto[0])
 			);
 
-			$str = $this->db->insert('marca', $data);
+			$this->db->insert('marca', $data);
 
 			if ($this->db->trans_status() === FALSE){
+				$mensaje = "Error al insertar marca.";
+				$mensaje .= "|f";
 			    $this->db->trans_rollback();
+			    return $mensaje;
 			}
 
 			$id_ultimo_m = $this->db->insert_id();
@@ -304,80 +270,52 @@ class Productos_m extends CI_Model{
 		{
 			$producto_marca = str_replace("select", "", $d_producto[0]);
 			$id_ultimo_m = $producto_marca;
-			$str = 1;
 		}
 
-		if ($str == 1)
-		{
-			$data = array(
-		        'modelo' => trim($d_producto[1]),
-		        'descripcion' => trim($d_producto[2]),
-		        'precio' => trim($d_producto[count($d_producto) - 1]),
-		        'id_marca' => trim($id_ultimo_m)
-			);
+		$data = array(
+	        'modelo' => trim($d_producto[1]),
+	        'descripcion' => trim($d_producto[2]),
+	        'precio' => trim($d_producto[count($d_producto) - 1]),
+	        'id_marca' => trim($id_ultimo_m)
+		);
 
-			$str = $this->db->insert('productos', $data);
+		$this->db->insert('productos', $data);
 
-			if ($this->db->trans_status() === FALSE){
-			    $this->db->trans_rollback();
-			}
+		if ($this->db->trans_status() === FALSE){
+		    $mensaje = "Error al insertar el producto.";
+			$mensaje .= "|f";
+		    $this->db->trans_rollback();
+		    return $mensaje;
+		}
 
-			$id_ultimo_p = $this->db->insert_id();
+		$id_ultimo_p = $this->db->insert_id();
 
-			if ($str == 1)
+		for($i = 3; $i < count($d_producto) - 1 ; $i++){
+			if(trim($d_producto[$i]) != "")
 			{
-				for($i = 3; $i < count($d_producto) - 1 ; $i++){
-					if(trim($d_producto[$i]) != "")
-					{
-						$data = array(
-					        'id_producto' => $id_ultimo_p,
-					        'id_talla' => $i - 2,
-					        'codigo_barras' => trim($d_producto[$i]),
-					        'id_almacen' => NULL,
-					        'cantidad' => 0
-						);
+				$data = array(
+			        'id_producto' => $id_ultimo_p,
+			        'id_talla' => $i - 2,
+			        'codigo_barras' => trim($d_producto[$i]),
+			        'id_almacen' => NULL,
+			        'cantidad' => 0
+				);
 
-						$str = $this->db->insert('producto_talla', $data);
+				$this->db->insert('producto_talla', $data);
 
-						if ($str == 1)
-						{
-							$insert .= "-1";
-						}
-						else
-						{
-							$insert = "0";
-						}
-
-						$tipo_m = explode("-", $insert);
-
-						if ($tipo_m[0] != '0') {
-							$mensaje = "Se ingresaron los codigos de barra correctamente.";
-							$mensaje .= "|t";
-						} else {
-							$mensaje = "Error al insertar codigos de barra.";
-							$mensaje .= "|f";
-						}
-
-						if ($this->db->trans_status() === FALSE){
-						    $this->db->trans_rollback();
-						}else{
-							$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se ingreso el producto con modelo: " . trim($d_producto[1]) . ", id_talla: " . ($i - 2) . " y con codigo de barras: " . trim($d_producto[$i]));
-						    $this->db->trans_commit();
-						}
-					}
+				if ($this->db->trans_status() === FALSE){
+					$mensaje = "Error al insertar codigos de barra.";
+					$mensaje .= "|f";
+				    $this->db->trans_rollback();
+				    return $mensaje;
 				}
 			}
-			else
-			{
-				$mensaje = "Error al insertar el producto.";
-				$mensaje .= "|f";
-			}
 		}
-		else
-		{
-			$mensaje = "Error al insertar la marca del producto.";
-			$mensaje .= "|f";
-		}
+
+		$mensaje = "Se agregó correctamente el producto.";
+		$mensaje .= "|t";
+		$this->acciones_m->set_user_action($_SESSION["id_usuario"], "Se ingreso el producto con modelo: " . trim($d_producto[1]) . ", id_talla: " . ($i - 2) . " y con codigo de barras: " . trim($d_producto[$i]));
+		$this->db->trans_commit();
 
 		return $mensaje;
 	}
