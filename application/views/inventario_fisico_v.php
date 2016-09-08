@@ -118,6 +118,7 @@
 					<? foreach ($tallas as $talla): ?>
 						<th class="text-center"><?= ucfirst($talla->talla) ?></th>
 					<? endforeach; ?>
+						<th class="text-center" class="total_modelo">Total Modelo</th>
 					</tr>
 				</thead>
 				<tbody>

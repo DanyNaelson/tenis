@@ -399,6 +399,8 @@ function remove_tr_prod(id_prod){
 		$(".producto_" + id_prod[1]).find(".talla_" + id_talla[1]).css("background-color", "white");
 		$(".prod_" + id_prod).remove();
 	}
+
+	update_totales();
 }
 
 function ask_quantity(quantity_current, tr_current){

@@ -258,6 +258,7 @@ $(document).ready(function(){
 						add_quantity_prod(productos[0].id_producto, productos[0].id_talla, cantidad_sel);
 						update_quantity("s", cantidad_sel);
 						add_quantity($(td_current).parent(), cantidad_sel);
+						update_totales();
 					}else{
 						bootbox.alert("La cantidad de salida no puede ser mayor a la cantidad en el inventario fisico del almacén.");
 					}
@@ -441,6 +442,8 @@ function remove_tr_prod(id_prod){
 		$(".producto_" + id_prod[1]).find(".talla_" + id_talla[1]).css("background-color", "white");
 		$(".prod_" + id_prod).remove();
 	}
+
+	update_totales();
 }
 
 function ask_quantity(quantity_current, tr_current){
