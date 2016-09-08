@@ -132,6 +132,8 @@ class Salidas extends CI_Controller {
 			}
 		}
 
+		$talla_cantidad_def[$i]["cantidad"] = "0";
+
 		return $talla_cantidad_def;
 	}
 

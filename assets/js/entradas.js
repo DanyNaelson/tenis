@@ -37,6 +37,7 @@ $(document).ready(function(){
 			    			}
 
 			    			add_quantity_prod(respuesta_producto[0].id_producto, respuesta_producto[0].id_talla, 1);
+			    			update_totales();
 			    		}else{
 			    			tr_new = crea_tr(respuesta_producto);
 			    			$("#tabla_entradas tbody").prepend(tr_new);
@@ -46,6 +47,7 @@ $(document).ready(function(){
 
 			    		update_quantity("s", 1);
 			    	}
+
 			    	$("#codigo_barras").val("");
 			    },
 			 
@@ -212,6 +214,7 @@ $(document).ready(function(){
 
 				add_quantity_prod(productos[0].id_producto, productos[0].id_talla, cantidad_sel);
 				update_quantity("s", cantidad_sel);
+				update_totales();
 			}
 		}
 
@@ -287,6 +290,34 @@ $(document).ready(function(){
 		}
 	});
 });
+
+function update_totales(){
+	var tbody = $("#tabla_productos").find("tbody");
+	var count_tr = tbody.find("tr").length - 1;
+	var tr_current = tbody.find("tr");
+
+	for (var i = 0 ; i < count_tr ; i++) {
+		var total_modelo = 0;
+
+		for(var j = 1 ; j <= 26 ; j++){
+			total_modelo += parseInt(tr_current.eq(i).find('.tallaid_' + j).text());
+		}
+
+		tr_current.eq(i).find('.tallaid_' + j).text(total_modelo);		
+	}
+
+	for(var k = 1 ; k < 26 ; k++){
+		var td_class = tbody.find('.tallaid_' + k);
+		var count_tr_class = td_class.length;
+		var total_tallas = 0;
+
+		for(var l = 0 ; l < count_tr_class ; l++){
+			total_tallas += parseInt(td_class.eq(l).text());
+		}
+
+		tbody.find(".idtalla_" + k).text(total_tallas);
+	}
+}
 
 function add_quantity(tr_current, quantity){
 	td_cantidad = $(tr_current).find(".cantidad");
@@ -471,6 +502,8 @@ function obtener_talla_cantidad(producto, cantidad){
 				new_q = parseInt(current_q) + cant;
 				$(".prod_" + producto[0].id_producto).find(".tallaid_" + producto[0].id_talla).text(new_q);
 			}
+
+			update_totales();
 	    },
 	 
 	    // código a ejecutar si la petición falla;
