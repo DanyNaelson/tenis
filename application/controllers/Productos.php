@@ -138,6 +138,12 @@ class Productos extends CI_Controller {
 		echo json_encode($respuesta);
 	}
 
+	public function comprobar_movimiento(){
+		$this->load->model('productos_m');
+		$respuesta = $this->productos_m->comprobar_movimiento($this->input->post("barcode"));
+		echo json_encode($respuesta);
+	}
+
 	public function validar_marca(){
 		$this->load->model('productos_m');
 		$respuesta = $this->productos_m->validar_marca($this->input->post("p_marca"));

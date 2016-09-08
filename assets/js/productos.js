@@ -565,7 +565,13 @@ function editar_p(obj_button){
 				html_marcas = obtener_m(marca_sel, td_table);
 			}else{
 				td_valor = td_table.html();
-				html_input = "<input type='text' size='10' class='input_req' onchange='validar(this)' value='" + td_valor + "' onkeypress='enter_tab(event, this)' />";
+				var focus = "";
+
+				if(i > 3 && i < 30){
+					focus = "onfocus='comprobar_mov(this)'";
+				}
+
+				html_input = "<input type='text' size='10' class='input_req' onchange='validar(this)' value='" + td_valor + "' onkeypress='enter_tab(event, this)' " + focus + " />";
 				td_table.html(html_input);
 			}
 		}
@@ -575,6 +581,39 @@ function editar_p(obj_button){
 	}else{
 		actualizar_producto($(obj_button));
 	}
+}
+
+function comprobar_mov(input){
+	var codigo = $(input).val().trim();
+
+	$.ajax({
+	    // la URL para la petición
+	    url : "comprobar_movimiento",
+	 
+	    // especifica si será una petición POST o GET
+	    type : "POST",
+
+	    //datos enviados
+	    data : { barcode : codigo },
+
+	    //especifica el tipo de dato que espera recibir
+	    dataType: 'json',
+
+	    // código a ejecutar si la petición es satisfactoria;
+	    // la respuesta es pasada como argumento a la función
+	    success : function(respuesta) {
+	    	if(respuesta[0].movimientos > 0){
+	    		$(input).addClass("form-control").prop("disabled", true).tooltip({title: "<p>Este codigo ya tiene por lo menos un movimiento de inventario, debido a esto no se puede actualizar.</p>", html: true, placement: "bottom", trigger: "focus"});
+	    	}
+	    },
+	 
+	    // código a ejecutar si la petición falla;
+	    // son pasados como argumentos a la función
+	    // el objeto de la petición en crudo y código de estatus de la petición
+	    error : function(xhr, status) {
+	        bootbox.alert('Disculpe, existió un problema');
+	    }
+	});
 }
 
 function borrar_p(obj_button){

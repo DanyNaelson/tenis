@@ -339,6 +339,24 @@ class Productos_m extends CI_Model{
       	}
 	}
 
+	function comprobar_movimiento($codigo){
+		$sql = "SELECT count(dm.id_movimiento) as movimientos
+				FROM producto_talla pt
+				INNER JOIN detalle_movimiento dm ON (dm.id_producto = pt.id_producto and dm.id_talla = pt.id_talla)
+				WHERE codigo_barras = '" . trim($codigo) . "'";
+
+		$query = $this->db->query($sql);
+        $rows = $query->result();
+
+		if (!empty($rows))
+		{
+		    return $rows;
+		}else
+		{
+      		return null;
+      	}
+	}
+
 	function validar_marca($marca){
 		$sql = "SELECT id_marca, marca
 				FROM marca
