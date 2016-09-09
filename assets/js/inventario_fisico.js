@@ -624,6 +624,44 @@ function get_values(tbody){
 		physical[i].diferencia = diferencia;
 	}
 
+	var tbody_p = $("#tabla_productos").find("tbody");
+	var tr_body_p = tbody_p.find("tr");
+	var count_p = tr_body_p.length;
+
+	for(var j = 0 ; j < (count_p - 1) ; j++){
+		var tr_current_p = tr_body_p.eq(j);
+		var tr_class_p = tr_current_p.attr("class").split(" ");
+		var tr_prod = tr_class_p[0].split("_");
+
+		for(var k = 3 ; k < 29 ; k++){
+			var td_current = tr_current_p.find("td").eq(k);
+			var value = parseInt(td_current.text());
+
+			if(value > 0){
+				class_td = td_current.attr("class");
+				id_talla_td = class_td.split("_");
+
+				count_class_t = $(tbody).find(".producto_" + tr_prod[1]).find('.talla_' + id_talla_td[1]).length;
+
+				if(count_class_t == 0){
+					ultimo_e = physical.length;
+					cantidad_p = parseInt(td_current.text());
+					physical[ultimo_e] = new Object();
+
+					physical[ultimo_e].id_producto = tr_prod[1];
+					physical[ultimo_e].id_talla = id_talla_td[1];
+					physical[ultimo_e].id_almacen = id_almacen;
+					physical[ultimo_e].cantidad_sistema = 0;
+					physical[ultimo_e].cantidad = cantidad_p;
+
+					diferencia_p = cantidad_p - 0;
+
+					physical[ultimo_e].diferencia = diferencia_p;
+				}
+			}
+		}
+	}
+
 	send_values(physical);
 }
 
