@@ -192,7 +192,7 @@ class Productos_m extends CI_Model{
 					        'codigo_barras' => trim($d_producto[$i]),
 					        'id_almacen' => NULL,
 					        'cantidad' => 0
-						);var_dump($data);die;
+						);
 					
 					$this->db->insert('producto_talla', $data);
 
