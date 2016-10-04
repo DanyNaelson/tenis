@@ -22,6 +22,7 @@ $(document).ready(function(){
 			    success : function(respuesta_producto) {
 			    	if (respuesta_producto == null) {
 			    		bootbox.alert('El código no existe favor de ingresarlo correctamente o seleccione la opción para elegir producto por modelo.');
+			    		$("#codigo_barras").focus();
 			    	}else{
 			    		tr_current = $(".producto_" + respuesta_producto[0].id_producto);
 			    		tr_count = $(".producto_" + respuesta_producto[0].id_producto).length;
